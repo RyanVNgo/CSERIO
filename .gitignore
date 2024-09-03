@@ -19,9 +19,7 @@ src/*.o
 
 # makefiles built from ./configure
 Makefile
-Makefile.in
 src/Makefile
-src/Makefile.in
 
 # EXCEPT for these makefiles which are needed
 # this exists to ensure they are always included
