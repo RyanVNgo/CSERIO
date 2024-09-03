@@ -5,7 +5,6 @@
 # autoconf
 autom4te.cache/
 config.h
-config.h.in
 config.status
 config.log
 configure~
@@ -25,5 +24,3 @@ src/Makefile
 # this exists to ensure they are always included
 !Makefile.am
 !src/Makefile.am
-!include/Makefile.am
-
