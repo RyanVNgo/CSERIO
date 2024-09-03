@@ -21,10 +21,14 @@ stamp-h1
 src/*.o
 
 # makefiles built from ./configure
-Makefile
+./Makefile
 src/Makefile
 
 # EXCEPT for these makefiles which are needed
 # this exists to ensure they are always included
 !Makefile.am
 !src/Makefile.am
+
+# tests
+tests/*.o
+tests/test-runner
