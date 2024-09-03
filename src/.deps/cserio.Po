@@ -1,3 +1,0 @@
-cserio.o: cserio.c /usr/include/stdc-predef.h cserio.h
-/usr/include/stdc-predef.h:
-cserio.h:

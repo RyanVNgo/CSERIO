@@ -2,6 +2,10 @@
 *.json
 .cache
 
+# default install directories
+include
+lib
+
 # autoconf
 autom4te.cache/
 config.h

@@ -612,6 +612,7 @@ PACKAGE_STRING='cserio 0.1.0'
 PACKAGE_BUGREPORT=''
 PACKAGE_URL=''
 
+ac_default_prefix=..
 ac_unique_file="src/cserio.c"
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
@@ -2246,6 +2247,7 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
 
 
 
