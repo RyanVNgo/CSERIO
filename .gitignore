@@ -1,2 +1,31 @@
-# development documentation
-*.pdf
+# bear
+*.json
+.cache
+
+# autoconf
+autom4te.cache/
+config.h
+config.h.in
+config.status
+config.log
+configure~
+stamp-h1
+
+# archives
+*.tar.gz
+
+# object files
+src/*.o
+
+# makefiles built from ./configure
+Makefile
+Makefile.in
+src/Makefile
+src/Makefile.in
+
+# EXCEPT for these makefiles which are needed
+# this exists to ensure they are always included
+!Makefile.am
+!src/Makefile.am
+!include/Makefile.am
+
