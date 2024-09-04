@@ -13,6 +13,8 @@
 #ifndef CSERIO_H
 #define CSERIO_H
 
+#include <stdio.h>
+
 /**
  * For now, ensure that the version defined here matches
  * that one defined in the `configure.ac` file.
@@ -46,7 +48,9 @@
 /*-------------------- SER Structure --------------------*/
 
 typedef struct SERfile {
-  char filename[256];
+  FILE* s_file;
+  char filename[FILENAME_MAX];
+  long size_in_bytes;
 } SERfile;
 
 

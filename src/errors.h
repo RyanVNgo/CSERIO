@@ -10,8 +10,14 @@
 
 #define NO_ERROR 0
 
-#define NULL_INPUT_PTR 101
-#define INVALID_FILENAME 102
-#define READ_ERROR 103
+#define MEM_ALLOC 101
+#define NULL_SPTR 102
+
+/*-------------------- File Access Errors --------------------*/
+
+#define NULL_FILENAME 201
+#define INVLID_FILENAME 202
+
+#define FILE_OPEN_ERROR 213
 
 #endif

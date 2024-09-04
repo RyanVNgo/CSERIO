@@ -11,6 +11,11 @@
  */
 
 #include "cserio.h"
+#include "errors.h"
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 /*-------------------- Core Routines --------------------*/
 
@@ -34,8 +39,11 @@ float cserio_version_number(float* version) {
         (float)CSERIO_MAJOR + 
         (float)(0.01 * CSERIO_MINOR) + 
         (float)(0.0001 * CSERIO_MICRO);
+
     return (*version);
 }
+
+/*-------------------- File Access Routines --------------------*/
 
 /** @brief  Opens SER file
  *  @param  sptr      (IO) - Pointer to a pointer of a serfile. The
@@ -47,6 +55,55 @@ float cserio_version_number(float* version) {
  *  @return Error status.
  */
 int ser_open_file(serfile** sptr, char* filename, int mode, int* status) {
+    if (!*sptr) {
+        *status = NULL_SPTR;
+        return (*status);
+    }
+
+    if (!filename) {
+        *status = NULL_FILENAME;
+        return (*status);
+    }
+
+    /**
+     * Behavior is set such that it will default to READONLY if not READWRITE,
+     * regardless of whether or not mode = READONLY or mode was invalid.
+     * Can alter behavior to throw an error for an invalid mode.
+     */
+    FILE* ser_file;
+    if (mode == READWRITE) {
+        ser_file = fopen(filename, "r");
+    } else {
+        ser_file = fopen(filename, "r+"); /* default behavior */
+    }
+
+    if (!ser_file) {
+        *status = FILE_OPEN_ERROR;
+        return (*status);
+    }
+
+    *sptr = (serfile*)malloc(sizeof(serfile));
+    if (!*sptr) {
+        *status = MEM_ALLOC;
+        return (*status);
+    }
+
+    (*sptr)->SER_file = (SERfile*)malloc(sizeof(SERfile));
+    if (!(*sptr)->SER_file) {
+        *status = MEM_ALLOC;
+        return (*status);
+    }
+
+    /**
+     * Fill structure data
+     */
+    (*sptr)->SER_file->s_file = ser_file;
+    strncpy((*sptr)->SER_file->filename, filename, FILENAME_MAX);
+
+    fseek((*sptr)->SER_file->s_file, 0, SEEK_END);
+    long size = ftell((*sptr)->SER_file->s_file);
+    fseek((*sptr)->SER_file->s_file, 0, SEEK_SET);
+    (*sptr)->SER_file->size_in_bytes = size;
 
 
     return (*status);
