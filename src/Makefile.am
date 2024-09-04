@@ -2,7 +2,7 @@
 lib_LIBRARIES = libcserio.a
 
 # Header files
-include_HEADERS = cserio.h
+include_HEADERS = cserio.h errors.h
 
 # Source files
 libcserio_a_SOURCES = cserio.c

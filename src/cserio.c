@@ -12,7 +12,7 @@
 
 #include "cserio.h"
 
-/*-------------------- core routines --------------------*/
+/*-------------------- Core Routines --------------------*/
 
 /** @brief  Assigns and returns the current version number
  *          of the CSERIO library.
@@ -36,3 +36,19 @@ float cserio_version_number(float* version) {
         (float)(0.0001 * CSERIO_MICRO);
     return (*version);
 }
+
+/** @brief  Opens SER file
+ *  @param  sptr      (IO) - Pointer to a pointer of a serfile. The
+ *                    memory for the structure is automatically
+ *                    allocated on file open and freed on file close.
+ *  @param  filename  (I) - root name of the SER file to open.
+ *  @param  mode      (I) - Access type, either READONLY or READWRITE.
+ *  @param  status    (IO) - Error status.
+ *  @return Error status.
+ */
+int ser_open_file(serfile** sptr, char* filename, int mode, int* status) {
+
+
+    return (*status);
+}
+
