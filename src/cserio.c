@@ -62,15 +62,26 @@ int ser_open_file(serfile** sptr, char* filename, int mode, int* status) {
 
     *sptr = NULL;
 
-    /* check if filename exists and has valid extension */
+    /* filename exists */
     if (!filename) {
         *status = NULL_FILENAME;
         return (*status);
     }
 
-    /* !!! */
+    /**
+     * Filename has valid extension.
+     * This is currently the only check that determined whether or not
+     * a file is valid. A metadata check shoud be implemented in
+     * the future.
+     */
+    char* ext = strrchr(filename, '.');
+    if (!ext || strncmp(ext, SER_EXT, SER_EXT_LEN)) {
+        *status = INVALID_FILENAME;
+        return (*status);
+    }
 
     /**
+     * Attempt to open file.
      * Behavior is set such that it will default to READONLY if not READWRITE,
      * regardless of whether or not mode = READONLY or mode was invalid.
      * Can alter behavior to throw an error for an invalid mode.
@@ -82,19 +93,26 @@ int ser_open_file(serfile** sptr, char* filename, int mode, int* status) {
         ser_file = fopen(filename, "r"); /* default behavior */
     }
 
+
+    /* check if open was successful */
     if (!ser_file) {
         *status = FILE_OPEN_ERROR;
         return (*status);
     }
 
+    /* allocate memory for serfile structure */
     *sptr = (serfile*)malloc(sizeof(serfile));
     if (!*sptr) {
+        fclose(ser_file);
         *status = MEM_ALLOC;
         return (*status);
     }
 
+    /* allocate memory for serfile data structure */
     (*sptr)->SER_file = (SERfile*)malloc(sizeof(SERfile));
     if (!(*sptr)->SER_file) {
+        fclose(ser_file);
+        free(*sptr);
         *status = MEM_ALLOC;
         return (*status);
     }

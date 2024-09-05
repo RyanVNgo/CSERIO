@@ -26,8 +26,8 @@
 
 /*-------------------- SER File Symbolic Constants --------------------*/
 
-#define FILE_EXTENSION ".ser"
-#define FILE_EXTENSION_LEN 4
+#define SER_EXT ".ser"
+#define SER_EXT_LEN 4
 
 /*-------------------- SER Header Symbolic Constants --------------------*/
 
