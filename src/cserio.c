@@ -55,15 +55,20 @@ float cserio_version_number(float* version) {
  *  @return Error status.
  */
 int ser_open_file(serfile** sptr, char* filename, int mode, int* status) {
-    if (!*sptr) {
+    if (!sptr) {
         *status = NULL_SPTR;
         return (*status);
     }
 
+    *sptr = NULL;
+
+    /* check if filename exists and has valid extension */
     if (!filename) {
         *status = NULL_FILENAME;
         return (*status);
     }
+
+    /* !!! */
 
     /**
      * Behavior is set such that it will default to READONLY if not READWRITE,
@@ -72,9 +77,9 @@ int ser_open_file(serfile** sptr, char* filename, int mode, int* status) {
      */
     FILE* ser_file;
     if (mode == READWRITE) {
-        ser_file = fopen(filename, "r");
+        ser_file = fopen(filename, "r+");
     } else {
-        ser_file = fopen(filename, "r+"); /* default behavior */
+        ser_file = fopen(filename, "r"); /* default behavior */
     }
 
     if (!ser_file) {
@@ -94,17 +99,46 @@ int ser_open_file(serfile** sptr, char* filename, int mode, int* status) {
         return (*status);
     }
 
-    /**
-     * Fill structure data
-     */
+    /* Fill structure data */
+    /* s_file */
     (*sptr)->SER_file->s_file = ser_file;
+
+    /* filename */
     strncpy((*sptr)->SER_file->filename, filename, FILENAME_MAX);
 
+    /* size_in_bytes */
     fseek((*sptr)->SER_file->s_file, 0, SEEK_END);
     long size = ftell((*sptr)->SER_file->s_file);
     fseek((*sptr)->SER_file->s_file, 0, SEEK_SET);
     (*sptr)->SER_file->size_in_bytes = size;
 
+    return (*status);
+}
+
+/** @brief  Close SER file
+ *
+ *  Closes the serfile and frees the structure. Parameter sptr will
+ *  be set to NULL.
+ *
+ *  @param  sptr      (IO) - Pointer to a serfile.
+ *  @param  status    (IO) - Error status.
+ *  @return Error status.
+ */
+int ser_close_file(serfile* sptr, int* status) {
+    if (!sptr) {
+        *status = NULL_SPTR;
+        return (*status);
+    }
+
+    /* Clear SER structre data */
+    if (!sptr->SER_file->s_file || fclose(sptr->SER_file->s_file)) {
+        *status = FILE_CLOSE_ERROR;
+    }
+
+    /* Free SER structure data and SER file structure */
+    free(sptr->SER_file);
+    free(sptr);
+    sptr = NULL;
 
     return (*status);
 }

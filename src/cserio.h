@@ -19,13 +19,17 @@
  * For now, ensure that the version defined here matches
  * that one defined in the `configure.ac` file.
  */
-#define CSERIO_VERSION 1.0.0
+#define CSERIO_VERSION 1.1.0
 #define CSERIO_MICRO 0
-#define CSERIO_MINOR 0
+#define CSERIO_MINOR 1
 #define CSERIO_MAJOR 1
 
-
 /*-------------------- SER File Symbolic Constants --------------------*/
+
+#define FILE_EXTENSION ".ser"
+#define FILE_EXTENSION_LEN 4
+
+/*-------------------- SER Header Symbolic Constants --------------------*/
 
 /**
  * These constants represent the byte length of each header component
@@ -72,21 +76,32 @@ float cserio_version_number(float* version);
 
 /*-------------------- File Access Routines --------------------*/
 
-/**
- * Flags for file access routines
- */
+/* Flags for file access routines */
 #define READONLY 0
 #define READWRITE 1
 
 /** @brief  Opens SER file
- *  @param  sptr      (IO) - Pointer to a pointer of a serfile. The
- *                    memory for the structure is automatically
- *                    allocated on file open and freed on file close.
+ *
+ *  The memory for the serfile structure is automatically allocated
+ *  on file open and freed on file close.
+ *
+ *  @param  sptr      (IO) - Pointer to a pointer of a serfile.
  *  @param  filename  (I) - root name of the SER file to open.
  *  @param  mode      (I) - Access type, either READONLY or READWRITE.
  *  @param  status    (IO) - Error status.
  *  @return Error status.
  */
 int ser_open_file(serfile** sptr, char* filename, int mode, int* status);
+
+/** @brief  Close SER file
+ *
+ *  Closes the serfile and frees the structure. Parameter sptr will
+ *  be set to NULL.
+ *
+ *  @param  sptr      (IO) - Pointer to a serfile.
+ *  @param  status    (IO) - Error status.
+ *  @return Error status.
+ */
+int ser_close_file(serfile* sptr, int* status);
 
 #endif

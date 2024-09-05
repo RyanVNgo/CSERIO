@@ -16,8 +16,9 @@
 /*-------------------- File Access Errors --------------------*/
 
 #define NULL_FILENAME 201
-#define INVLID_FILENAME 202
+#define INVALID_FILENAME 202
 
-#define FILE_OPEN_ERROR 213
+#define FILE_OPEN_ERROR 211
+#define FILE_CLOSE_ERROR 212
 
 #endif
