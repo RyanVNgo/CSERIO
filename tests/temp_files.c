@@ -94,8 +94,11 @@ int generate_tmp_file(char* full_path, FileHeader* file_header, void* pix_buff, 
  *  @return 1 on success, 0 on fail. 
  */
 int remove_tmp_file(char* full_path) {
-  remove(full_path);
-  return 1;
+  if(remove(full_path)) {
+    printf("ERROR REMOVING TMP FILE: %s\n", full_path);
+    return 1;
+  }
+  return 0;
 }
 
 
