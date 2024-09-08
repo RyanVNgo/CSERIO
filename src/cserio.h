@@ -15,6 +15,8 @@
 
 #include <stdio.h>
 
+#include "errors.h"
+
 /**
  * For now, ensure that the version defined here matches
  * that one defined in the `configure.ac` file.
