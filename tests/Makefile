@@ -17,7 +17,7 @@ $(TARGET) : $(OBJ)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 test:
-	./$(TARGET)
+	./$(TARGET) $(ARGS)
 
 clean:
 	rm -f $(OBJ) $(TARGET)
