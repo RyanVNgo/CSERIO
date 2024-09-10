@@ -15,41 +15,21 @@
 
 #include <stdio.h>
 
-#include "errors.h"
+/*-------------------- CSERIO Version --------------------*/
 
 /**
  * For now, ensure that the version defined here matches
  * that one defined in the `configure.ac` file.
  */
-#define CSERIO_VERSION 1.1.0
+#define CSERIO_VERSION 1.2.0
 #define CSERIO_MICRO 0
-#define CSERIO_MINOR 1
+#define CSERIO_MINOR 2
 #define CSERIO_MAJOR 1
 
 /*-------------------- SER File Symbolic Constants --------------------*/
 
 #define SER_EXT ".ser"
 #define SER_EXT_LEN 4
-
-/*-------------------- SER Header Symbolic Constants --------------------*/
-
-/**
- * These constants represent the byte length of each header component
- * for V3 SER files.
- */
-#define LEN_FILEID 14
-#define LEN_LUID 4
-#define LEN_COLORID 4 
-#define LEN_LITTLEENDIAN 4 
-#define LEN_IMAGEWIDTH 4 
-#define LEN_IMAGEHEIGHT 4 
-#define LEN_PIXELDEPTHPERPLANE 4 
-#define LEN_FRAMECOUNT 4 
-#define LEN_OBSERVER 40 
-#define LEN_INSTRUMENT 40 
-#define LEN_TELESCOPE 40 
-#define LEN_DATETIME 8 
-#define LEN_DATETIMEUTC 8 
 
 /*-------------------- SER Structure --------------------*/
 
@@ -63,7 +43,6 @@ typedef struct SERfile {
 typedef struct serfile {
   SERfile* SER_file;
 } serfile;
-
 
 /*-------------------- Core Routines --------------------*/
 
@@ -105,5 +84,10 @@ int ser_open_file(serfile** sptr, char* filename, int mode, int* status);
  *  @return Error status.
  */
 int ser_close_file(serfile* sptr, int* status);
+
+/*-------------------- Library Headers --------------------*/
+
+#include "errors.h"
+#include "header_routines.h"
 
 #endif
