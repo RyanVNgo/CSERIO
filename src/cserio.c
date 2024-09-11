@@ -45,9 +45,11 @@ float cserio_version_number(float* version) {
 /*-------------------- File Access Routines --------------------*/
 
 /** @brief  Opens SER file
- *  @param  sptr      (IO) - Pointer to a pointer of a serfile. The
- *                    memory for the structure is automatically
- *                    allocated on file open and freed on file close.
+ *
+ *  The memory for the serfile structure is automatically allocated
+ *  on file open and freed on file close.
+ *
+ *  @param  sptr      (IO) - Pointer to a pointer of a serfile.
  *  @param  filename  (I) - root name of the SER file to open.
  *  @param  mode      (I) - Access type, either READONLY or READWRITE.
  *  @param  status    (IO) - Error status.

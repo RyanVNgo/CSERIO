@@ -4,13 +4,27 @@
  *  @author Ryan V. Ngo
  */
 
-#include "header_routines.h"
-
-#include "errors.h"
+#include "cserio.h"
 
 /*-------------------- Header Routines --------------------*/
 
-/** @brief Return data at header idx 
+/** @brief  Returns number of records in the header
+ *
+ *  Assigns passed hdr_count integer with number of records
+ *  in the header. (Note that as of Version 3 SER files, the
+ *
+ *  @param  sptr        (I) - Pointer to serfile
+ *  @param  rec_count   (IO) - Number of records
+ *  @param  status      (IO) - Error status.
+ *  @return Error status.
+ */
+int ser_get_hdr_count(serfile* sptr, int* rec_count, int* status) {
+
+
+    return (*status);
+}
+
+/** @brief  Return data at header idx 
  *  
  *  Ensure that the dest buff to which the data will be written
  *  to has enough space to store the data. Refer to the defines in
@@ -18,16 +32,17 @@
  *
  *  @param  sptr    (I) - Pointer to serfile
  *  @param  dest    (IO) - Destination buffer for header data
- *  @param  idx     (I) - Header index of data to fetch (0 - 13)
+ *  @param  idx     (I) - Record index of data to fetch
  *  @param  status  (IO) - Error status.
  *  @return Error status.
  */
-int ser_read_hdr_idx(serfile* sptr, void* dest, int idx, int* status) {
+int ser_get_idx_record(serfile* sptr, void* dest, int idx, int* status) {
+
 
     return (*status);
 }
 
-/** @brief Return data at header key
+/** @brief  Return data at header key
  *
  *  Ensure that the dest buff to which the data will be written
  *  to has enough space to store the data. Refer to the defines in
@@ -35,11 +50,12 @@ int ser_read_hdr_idx(serfile* sptr, void* dest, int idx, int* status) {
  *
  *  @param  sptr    (I) - Pointer to serfile
  *  @param  dest    (IO) - Destination buffer for header data
- *  @param  key     (I) - Header key of data to fetch
+ *  @param  key     (I) - Record key of data to fetch
  *  @param  status  (IO) - Error status.
  *  @return Error status.
  */
-int ser_read_hdr_key(serfile* sptr, void* dest, HDR_KEY key, int* status) {
+int ser_get_key_record(serfile* sptr, void* dest, HDR_KEY key, int* status) {
+
 
     return (*status);
 }
