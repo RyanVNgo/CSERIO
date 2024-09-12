@@ -56,6 +56,7 @@ float cserio_version_number(float* version) {
  *  @return Error status.
  */
 int ser_open_file(serfile** sptr, char* filename, int mode, int* status) {
+    /* sptr exists */
     if (!sptr) {
         *status = NULL_SPTR;
         return (*status);
@@ -144,6 +145,7 @@ int ser_open_file(serfile** sptr, char* filename, int mode, int* status) {
  *  @return Error status.
  */
 int ser_close_file(serfile* sptr, int* status) {
+    /* sptr exists */
     if (!sptr) {
         *status = NULL_SPTR;
         return (*status);

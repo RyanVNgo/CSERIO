@@ -12,7 +12,11 @@
 
 #define MEM_ALLOC 101
 #define NULL_SPTR 102
-#define DEST_BUFF_NULL 103
+#define NULL_DEST_BUFF 103
+#define NULL_PARAM 104
+
+#define EOF_ERROR 110
+#define FREAD_ERROR 111
 
 /*-------------------- File Access Errors --------------------*/
 

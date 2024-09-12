@@ -4,7 +4,7 @@
  *  @author Ryan V. Ngo
  */
 
-#include "test_core_routines.h"
+#include "test_routines.h"
 
 #include <stdint.h>
 #include <string.h>

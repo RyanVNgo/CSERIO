@@ -33,6 +33,8 @@
 
 #include "errors.h"
 
+/*#################### DEFINES, STRUCTURES, AND TYPES ####################*/ 
+
 /*-------------------- SER File Symbolic Constants --------------------*/
 
 #define SER_EXT ".ser"
@@ -43,6 +45,12 @@
 #define READONLY 0
 #define READWRITE 1
 
+/*-------------------- Header Types --------------------*/
+
+typedef char* S_STRING;
+typedef int32_t S_INT32;
+typedef int64_t S_INT64;
+
 /*-------------------- Header Symbolic Constants --------------------*/
 
 #define HDR_UNIT_COUNT 14
@@ -50,46 +58,43 @@
 /**
  * These constants represent the byte length of each header component
  * for V3 SER files.
+ *
+ * Note that these values represent the byte length as they are in the
+ * SER file.
  */
-#define LEN_FILEID 14
-#define LEN_LUID 4
-#define LEN_COLORID 4 
-#define LEN_LITTLEENDIAN 4 
-#define LEN_IMAGEWIDTH 4 
-#define LEN_IMAGEHEIGHT 4 
-#define LEN_PIXELDEPTHPERPLANE 4 
-#define LEN_FRAMECOUNT 4 
-#define LEN_OBSERVER 40 
-#define LEN_INSTRUMENT 40 
-#define LEN_TELESCOPE 40 
-#define LEN_DATETIME 8 
-#define LEN_DATETIMEUTC 8 
+#define FILEID_LEN 14
+#define LUID_LEN 4
+#define COLORID_LEN 4 
+#define LITTLEENDIAN_LEN  4 
+#define IMAGEWIDTH_LEN  4 
+#define IMAGEHEIGHT_LEN  4 
+#define PIXELDEPTHPERPLANE_LEN  4 
+#define FRAMECOUNT_LEN  4 
+#define OBSERVER_LEN  40 
+#define INSTRUMENT_LEN  40 
+#define TELESCOPE_LEN  40 
+#define DATETIME_LEN  8 
+#define DATETIMEUTC_LEN  8 
 
-/*#################### DEFINED STRUCTURES AND TYPES ####################*/ 
+/*-------------------- Header Constant References --------------------*/
 
-/*-------------------- Header Types --------------------*/
-
-typedef char* S_STRING;
-typedef int32_t S_INT32;
-typedef int64_t S_INT64;
-
-/*-------------------- Header Enums --------------------*/
-
-typedef enum HDR_KEY {
-  KEY_FILEID = 0,
-  KEY_LUID = 14,
-  KEY_COLORID = 18,
-  KEY_LITTLEENDIAN = 22,
-  KEY_IMAGEWIDTH = 26,
-  KEY_IMAGEHEIGHT = 30,
-  KEY_PIXELDEPTHPERPLANE = 34,
-  KEY_FRAMECOUNT = 38,
-  KEY_OBSERVER = 42,
-  KEY_INSTRUMENT = 82,
-  KEY_TELESCOPE = 122,
-  KEY_DATETIME = 162,
-  KEY_DATETIMEUTC = 170
-} HDR_KEY;
+/**
+ * These functionally operate as the byte intex position within the
+ * SER file.
+ */
+#define FILEID_KEY 0
+#define LUID_KEY 14
+#define COLORID_KEY 18
+#define LITTLEENDIAN_KEY 22
+#define IMAGEWIDTH_KEY 26
+#define IMAGEHEIGHT_KEY 30
+#define PIXELDEPTHPERPLANE_KEY 34
+#define FRAMECOUNT_KEY 38
+#define OBSERVER_KEY 42
+#define INSTRUMENT_KEY 82
+#define TELESCOPE_KEY 122
+#define DATETIME_KEY 162
+#define DATETIMEUTC_KEY 170
 
 /*-------------------- SER Structure --------------------*/
 
@@ -119,6 +124,6 @@ int ser_close_file(serfile* sptr, int* status);
 
 int ser_get_hdr_count(serfile* sptr, int* rec_count, int* status);
 int ser_get_idx_record(serfile* sptr, void* dest, int idx, int* status);
-int ser_get_key_record(serfile* sptr, void* dest, HDR_KEY key, int* status);
+int ser_get_key_record(serfile* sptr, void* dest, int key, int* status);
 
 #endif
