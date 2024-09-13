@@ -53,7 +53,7 @@ typedef int64_t S_INT64;
 
 /*-------------------- Header Symbolic Constants --------------------*/
 
-#define HDR_UNIT_COUNT 14
+#define HDR_UNIT_COUNT 13
 
 /**
  * These constants represent the byte length of each header component

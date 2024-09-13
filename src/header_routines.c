@@ -70,7 +70,7 @@ int ser_get_idx_record(serfile* sptr, void* dest, int idx, int* status) {
     }
 
     /* check if idx is in bounds */
-    if (idx < 0 || idx > HDR_UNIT_COUNT) {
+    if (idx < 0 || idx >= HDR_UNIT_COUNT) {
         *status = INVALID_HDR_IDX;
         return (*status);
     }
