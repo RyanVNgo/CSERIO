@@ -14,42 +14,87 @@
 #define CSERIO_H
 
 #include <stdio.h>
+#include <stdint.h>
 
-#include "errors.h"
+/*#################### PUBLIC SYMBOLIC CONSTANTS ####################*/ 
+
+/*-------------------- CSERIO Version --------------------*/
 
 /**
  * For now, ensure that the version defined here matches
  * that one defined in the `configure.ac` file.
  */
-#define CSERIO_VERSION 1.1.0
+#define CSERIO_VERSION 1.2.0
 #define CSERIO_MICRO 0
-#define CSERIO_MINOR 1
+#define CSERIO_MINOR 2
 #define CSERIO_MAJOR 1
+
+/*-------------------- Error Include --------------------*/
+
+#include "errors.h"
+
+/*#################### DEFINES, STRUCTURES, AND TYPES ####################*/ 
 
 /*-------------------- SER File Symbolic Constants --------------------*/
 
 #define SER_EXT ".ser"
 #define SER_EXT_LEN 4
 
-/*-------------------- SER Header Symbolic Constants --------------------*/
+/*-------------------- SER File IO Modes --------------------*/
+
+#define READONLY 0
+#define READWRITE 1
+
+/*-------------------- Header Types --------------------*/
+
+typedef char* S_STRING;
+typedef int32_t S_INT32;
+typedef int64_t S_INT64;
+
+/*-------------------- Header Symbolic Constants --------------------*/
+
+#define HDR_UNIT_COUNT 13
 
 /**
  * These constants represent the byte length of each header component
  * for V3 SER files.
+ *
+ * Note that these values represent the byte length as they are in the
+ * SER file.
  */
-#define LEN_FILEID 14
-#define LEN_LUID 4
-#define LEN_COLORID 4 
-#define LEN_LITTLEENDIAN 4 
-#define LEN_IMAGEWIDTH 4 
-#define LEN_IMAGEHEIGHT 4 
-#define LEN_PIXELDEPTHPERPLANE 4 
-#define LEN_FRAMECOUNT 4 
-#define LEN_OBSERVER 40 
-#define LEN_INSTRUMENT 40 
-#define LEN_TELESCOPE 40 
-#define LEN_DATETIME 8 
-#define LEN_DATETIMEUTC 8 
+#define FILEID_LEN 14
+#define LUID_LEN 4
+#define COLORID_LEN 4 
+#define LITTLEENDIAN_LEN  4 
+#define IMAGEWIDTH_LEN  4 
+#define IMAGEHEIGHT_LEN  4 
+#define PIXELDEPTHPERPLANE_LEN  4 
+#define FRAMECOUNT_LEN  4 
+#define OBSERVER_LEN  40 
+#define INSTRUMENT_LEN  40 
+#define TELESCOPE_LEN  40 
+#define DATETIME_LEN  8 
+#define DATETIMEUTC_LEN  8 
+
+/*-------------------- Header Constant References --------------------*/
+
+/**
+ * These functionally operate as the byte intex position within the
+ * SER file.
+ */
+#define FILEID_KEY 0
+#define LUID_KEY 14
+#define COLORID_KEY 18
+#define LITTLEENDIAN_KEY 22
+#define IMAGEWIDTH_KEY 26
+#define IMAGEHEIGHT_KEY 30
+#define PIXELDEPTHPERPLANE_KEY 34
+#define FRAMECOUNT_KEY 38
+#define OBSERVER_KEY 42
+#define INSTRUMENT_KEY 82
+#define TELESCOPE_KEY 122
+#define DATETIME_KEY 162
+#define DATETIMEUTC_KEY 170
 
 /*-------------------- SER Structure --------------------*/
 
@@ -64,46 +109,21 @@ typedef struct serfile {
   SERfile* SER_file;
 } serfile;
 
+/*#################### PUBLIC FUNCTION PROTOTYPES ####################*/ 
 
 /*-------------------- Core Routines --------------------*/
 
-/** @brief  Assigns and returns the current version number
- *          of the CSERIO library.
- *  @param  version   (IO) - Address of float to assign 
- *                    the version number, address must be
- *                    valid or NULL.
- *  @return Version number.
- */
 float cserio_version_number(float* version);
 
 /*-------------------- File Access Routines --------------------*/
 
-/* Flags for file access routines */
-#define READONLY 0
-#define READWRITE 1
-
-/** @brief  Opens SER file
- *
- *  The memory for the serfile structure is automatically allocated
- *  on file open and freed on file close.
- *
- *  @param  sptr      (IO) - Pointer to a pointer of a serfile.
- *  @param  filename  (I) - root name of the SER file to open.
- *  @param  mode      (I) - Access type, either READONLY or READWRITE.
- *  @param  status    (IO) - Error status.
- *  @return Error status.
- */
 int ser_open_file(serfile** sptr, char* filename, int mode, int* status);
-
-/** @brief  Close SER file
- *
- *  Closes the serfile and frees the structure. Parameter sptr will
- *  be set to NULL.
- *
- *  @param  sptr      (IO) - Pointer to a serfile.
- *  @param  status    (IO) - Error status.
- *  @return Error status.
- */
 int ser_close_file(serfile* sptr, int* status);
+
+/*-------------------- Header Routines --------------------*/
+
+int ser_get_hdr_count(serfile* sptr, int* rec_count, int* status);
+int ser_get_idx_record(serfile* sptr, void* dest, int idx, int* status);
+int ser_get_key_record(serfile* sptr, void* dest, int key, int* status);
 
 #endif

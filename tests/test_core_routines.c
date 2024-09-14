@@ -4,7 +4,7 @@
  *  @author Ryan V. Ngo
  */
 
-#include "test_core_routines.h"
+#include "test_routines.h"
 
 #include <stdint.h>
 #include <string.h>
@@ -12,7 +12,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "errors.h"
 #include "test_utils.h"
 #include "temp_files.h"
 
@@ -144,6 +143,7 @@ void test_ser_file_close() {
 /*-------------------- Main Test Call --------------------*/
 
 void run_core_routines_suite() {
+  printf("!-- RUNNING CORE ROUTINES SUITE --!\n");
 
   test_ser_file_open();
   test_ser_file_close();

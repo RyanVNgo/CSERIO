@@ -1,5 +1,5 @@
-/** @file test_core_routines.h
- *  @brief Calls for testing core routines
+/** @file test_routines.h
+ *  @brief Calls for all testing routines
  *
  *  @author Ryan V. Ngo
  */
@@ -8,5 +8,6 @@
 #define TEST_CORE_ROUTINES_H
 
 void run_core_routines_suite();
+void run_header_routines_suite();
 
 #endif
