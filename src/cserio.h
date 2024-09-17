@@ -126,4 +126,10 @@ int ser_get_hdr_count(serfile* sptr, int* rec_count, int* status);
 int ser_get_idx_record(serfile* sptr, void* dest, int idx, int* status);
 int ser_get_key_record(serfile* sptr, void* dest, int key, int* status);
 
+/*-------------------- Image Routines --------------------*/
+
+int ser_get_frame_dim(serfile* sptr, int* ndim, int* status);
+int ser_get_frame_size(serfile* sptr, int* size, int dim, int* status);
+int ser_read_frame(serfile* sptr, void* dest, int idx, int* status);
+
 #endif
