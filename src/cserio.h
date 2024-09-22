@@ -76,11 +76,9 @@ typedef int64_t S_INT64;
 #define DATETIME_LEN  8 
 #define DATETIMEUTC_LEN  8 
 
-/*-------------------- Header Constant References --------------------*/
-
 /**
- * These functionally operate as the byte intex position within the
- * SER file.
+ * The following functionally operate as the byte intex position 
+ * within the SER file.
  */
 #define FILEID_KEY 0
 #define LUID_KEY 14
@@ -95,6 +93,13 @@ typedef int64_t S_INT64;
 #define TELESCOPE_KEY 122
 #define DATETIME_KEY 162
 #define DATETIMEUTC_KEY 170
+
+/*-------------------- Image Symbolic Constants --------------------*/
+
+typedef int DIM_TYPE;
+#define DIM_LAYER 0
+#define DIM_WIDTH 1
+#define DIM_HEIGHT 2
 
 /*-------------------- SER Structure --------------------*/
 
@@ -128,7 +133,7 @@ int ser_get_key_record(serfile* sptr, void* dest, int key, int* status);
 
 /*-------------------- Image Routines --------------------*/
 
-int ser_get_frame_dim(serfile* sptr, int* ndim, int* status);
+int ser_get_frame_count(serfile* sptr, int* frame_count, int* status);
 int ser_get_frame_size(serfile* sptr, int* size, int dim, int* status);
 int ser_read_frame(serfile* sptr, void* dest, int idx, int* status);
 

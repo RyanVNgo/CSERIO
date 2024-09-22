@@ -18,6 +18,8 @@
 #define EOF_ERROR 110
 #define FREAD_ERROR 111
 
+#define INTERN_CALL_ERROR 201
+
 /*-------------------- File Access Errors --------------------*/
 
 #define NULL_FILENAME 201
@@ -30,5 +32,10 @@
 
 #define INVALID_HDR_IDX 301
 #define INVALID_HDR_KEY 302
+
+/*-------------------- Image Routine Errors --------------------*/
+
+#define INVALID_DIM_IDX 401
+#define INVALID_FRAME_IDX 402
 
 #endif
