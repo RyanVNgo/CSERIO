@@ -9,5 +9,6 @@
 
 void run_core_routines_suite();
 void run_header_routines_suite();
+void run_img_routines_suite();
 
 #endif

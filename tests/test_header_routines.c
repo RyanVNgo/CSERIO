@@ -4,7 +4,6 @@
  *  @author Ryan V. Ngo
  */
 
-#include "errors.h"
 #include "test_routines.h"
 
 #include <stdio.h>

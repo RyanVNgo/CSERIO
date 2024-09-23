@@ -134,7 +134,11 @@ int ser_get_key_record(serfile* sptr, void* dest, int key, int* status);
 /*-------------------- Image Routines --------------------*/
 
 int ser_get_frame_count(serfile* sptr, int* frame_count, int* status);
-int ser_get_frame_size(serfile* sptr, int* size, int dim, int* status);
+int ser_get_frame_dim_size(serfile* sptr, int* size, int dim, int* status);
+
+int ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int* status); 
+int ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* status);
+
 int ser_read_frame(serfile* sptr, void* dest, int idx, int* status);
 
 #endif
