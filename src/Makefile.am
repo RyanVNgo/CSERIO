@@ -5,7 +5,7 @@ lib_LIBRARIES = libcserio.a
 include_HEADERS = cserio.h errors.h
 
 # Source files
-libcserio_a_SOURCES = cserio.c header_routines.c
+libcserio_a_SOURCES = cserio.c header_routines.c img_routines.c
 
 # Installation path for library and header files
 libcserio_a_INSTALL = $(libdir)

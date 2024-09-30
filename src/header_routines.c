@@ -13,6 +13,8 @@
  *
  *  Assigns passed hdr_count integer with number of records
  *  in the header. (Note that as of Version 3 SER files, the
+ *  number of records in a header is a constant 13 which makes
+ *  up the first 178 bytes of data)
  *
  *  @param  sptr        (I) - Pointer to serfile
  *  @param  rec_count   (IO) - Number of records
