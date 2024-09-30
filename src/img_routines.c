@@ -209,7 +209,7 @@ int ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* status
 
     /* get image height */
     int height = 0;
-    ser_get_key_record(sptr, &width, IMAGEHEIGHT_KEY, &intern_status);
+    ser_get_key_record(sptr, &height, IMAGEHEIGHT_KEY, &intern_status);
     if (intern_status) {
         *status = INTERN_CALL_ERROR;
         return (*status);

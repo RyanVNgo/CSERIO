@@ -69,7 +69,7 @@ int generate_tmp_file(char* full_path, FileHeader* file_header, void* pix_buff, 
 
   /* write pix_buff to file */
   if (pix_buff_size) {
-    fwrite(pix_buff, pix_buff_size, 1, temp_file);
+    fwrite(pix_buff, 1, pix_buff_size, temp_file);
   } else {
     int size_of_pixel = 0;
     if (file_header->pixel_depth_per_plane <= 8) size_of_pixel = 1;
@@ -81,8 +81,8 @@ int generate_tmp_file(char* full_path, FileHeader* file_header, void* pix_buff, 
 
     uint32_t width = file_header->image_width;
     uint32_t height = file_header->image_height;
-    pix_buff_size = width * height * num_of_planes * size_of_pixel;
-    fwrite(pix_buff, pix_buff_size, 1, temp_file);
+    pix_buff_size = width * height * num_of_planes * size_of_pixel * file_header->frame_count;
+    fwrite(pix_buff, 1, pix_buff_size, temp_file);
   }
 
   fclose(temp_file);

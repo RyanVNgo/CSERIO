@@ -77,3 +77,24 @@ void check_int_v(int result, int target, char* file, int line) {
   return;
 }
 
+/** @brief  Check if the result and target unsigned longs are equal
+ *
+ *  @param  result    (I) - Result unsigned long.
+ *  @param  target    (I) - Target unsigned long.
+ *  @param  file      (I) - source file of error.
+ *  @param  line      (I) - line number of error.
+ *  @return Void.
+ */
+void check_unsigned_long_v(unsigned long result, unsigned long target, char* file, int line) {
+  if (result == target) {
+    printf("!CHECK U-LONG SUCCESS! IN FILE %s ON LINE %4d: %4lu == %4lu\n", file, line, result, target);
+  } else {
+    printf("!CHECK ULONG FAILED!\n");
+    printf("  -> IN FILE %s ON LINE %d\n", file, line);
+    printf("    -> U_LONGS WERE NOT EQUAL: %4lu != %4lu\n", result, target);
+  }
+  return;
+}
+
+
+

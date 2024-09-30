@@ -54,5 +54,17 @@ void check_buff_v(void* result, void* target, unsigned long byte_len, char* file
 void check_int_v(int result, int target, char* file, int line);
 #define check_int(result, target) check_int_v(result, target, __FILE__, __LINE__)
 
+/** @brief  Check if the result and target unsigned longs are equal
+ *
+ *  @param  result    (I) - Result unsigned long.
+ *  @param  target    (I) - Target unsigned long.
+ *  @param  file      (I) - source file of error.
+ *  @param  line      (I) - line number of error.
+ *  @return Void.
+ */
+void check_unsigned_long_v(unsigned long result, unsigned long target, char* file, int line);
+#define check_unsigned_long(result, target) check_unsigned_long_v(result, target, __FILE__, __LINE__)
+
+
 
 #endif 

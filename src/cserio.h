@@ -94,6 +94,28 @@ typedef int64_t S_INT64;
 #define DATETIME_KEY 162
 #define DATETIMEUTC_KEY 170
 
+/**
+ * Color ID types
+ */
+#define MONO          0
+#define BAYER_RGGB    8
+#define BAYER_GRBG    9
+#define BAYER_GBRG    10
+#define BAYER_BGGR    11
+#define BAYER_CYYM    16
+#define BAYER_YCMY    17
+#define BAYER_YMCY    18
+#define BAYER_MYYC    19
+#define RGB           100
+#define BGR           101
+
+/**
+ * Little Endian types
+ */
+#define LITTLEENDIAN_TRUE   1
+#define LITTLEENDIAN_FALSE  0
+
+
 /*-------------------- Image Symbolic Constants --------------------*/
 
 typedef int DIM_TYPE;
