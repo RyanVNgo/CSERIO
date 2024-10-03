@@ -25,8 +25,8 @@
  *  @param  line      (I) - line number of error.
  *  @return Void.
  */
-void check_error_v(int status, int target, char* file, int line);
-#define check_error(status, target) check_error_v(status, target, __FILE__, __LINE__)
+void check_error_v(int status, int target, char* file, int line, int is_verbose);
+#define check_error(status, target) check_error_v(status, target, __FILE__, __LINE__, IS_VERBOSE)
 
 /** @brief  Check if the result and target buffers are equal
  *
@@ -40,8 +40,8 @@ void check_error_v(int status, int target, char* file, int line);
  *  @param  line      (I) - line number of error.
  *  @return Void.
  */
-void check_buff_v(void* result, void* target, unsigned long byte_len, char* file, int line);
-#define check_buff(result, target, byte_len) check_buff_v(result, target, byte_len, __FILE__, __LINE__)
+void check_buff_v(void* result, void* target, unsigned long byte_len, char* file, int line, int is_verbose);
+#define check_buff(result, target, byte_len) check_buff_v(result, target, byte_len, __FILE__, __LINE__, IS_VERBOSE)
 
 /** @brief  Check if the result and target integers are equal
  *
@@ -51,8 +51,8 @@ void check_buff_v(void* result, void* target, unsigned long byte_len, char* file
  *  @param  line      (I) - line number of error.
  *  @return Void.
  */
-void check_int_v(int result, int target, char* file, int line);
-#define check_int(result, target) check_int_v(result, target, __FILE__, __LINE__)
+void check_int_v(int result, int target, char* file, int line, int is_verbose);
+#define check_int(result, target) check_int_v(result, target, __FILE__, __LINE__, IS_VERBOSE)
 
 /** @brief  Check if the result and target unsigned longs are equal
  *
@@ -62,8 +62,8 @@ void check_int_v(int result, int target, char* file, int line);
  *  @param  line      (I) - line number of error.
  *  @return Void.
  */
-void check_unsigned_long_v(unsigned long result, unsigned long target, char* file, int line);
-#define check_unsigned_long(result, target) check_unsigned_long_v(result, target, __FILE__, __LINE__)
+void check_unsigned_long_v(unsigned long result, unsigned long target, char* file, int line, int is_verbose);
+#define check_unsigned_long(result, target) check_unsigned_long_v(result, target, __FILE__, __LINE__, IS_VERBOSE)
 
 
 

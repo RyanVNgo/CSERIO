@@ -142,8 +142,9 @@ void test_ser_file_close() {
 
 /*-------------------- Main Test Call --------------------*/
 
-void run_core_routines_suite() {
+void run_core_routines_suite(int is_verbose) {
   printf("!-- RUNNING CORE ROUTINES SUITE --!\n");
+  IS_VERBOSE = is_verbose;
 
   test_ser_file_open();
   test_ser_file_close();
