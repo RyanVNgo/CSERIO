@@ -392,7 +392,7 @@ void run_img_routines_suite(int is_verbose) {
   /* 16-bit color image testing */
   char* temp_16C_file_path = "/tmp/tmp_16C_file.ser";
   uint16_t temp_16C_buff[81];
-  test_16_bit_color_data(&temp_header, temp_16M_buff);
+  test_16_bit_color_data(&temp_header, temp_16C_buff);
 
   generate_tmp_file(temp_16C_file_path, &temp_header, temp_16C_buff, 0);
   serfile* ser_16C;
