@@ -27,8 +27,9 @@
  *  @param  line      (I) - line number of error
  *  @return Void.
  */
-void check_error_v(int status, int target, char* file, int line) {
+void check_error_v(int status, int target, char* file, int line, int is_verbose) {
   if (status == target) {
+    if (!is_verbose) return;
     printf("!CHECK STATUS SUCCESS! IN FILE %s ON LINE %4d: %4d == %4d\n", file, line, status, target);
   } else {
     printf("!CHECK STATUS FAILED!\n");
@@ -47,8 +48,9 @@ void check_error_v(int status, int target, char* file, int line) {
  *  @param  line      (I) - line number of error
  *  @return Void.
  */
-void check_buff_v(void* result, void* target, unsigned long byte_len, char* file, int line) {
+void check_buff_v(void* result, void* target, unsigned long byte_len, char* file, int line, int is_verbose) {
   if (!memcmp(result, target, byte_len)) {
+    if (!is_verbose) return;
     printf("!CHECK BUFFERS SUCCESS! IN FILE %s ON LINE %4d\n", file, line);
   } else {
     printf("!CHECK BUFF FAILED!\n");
@@ -66,8 +68,9 @@ void check_buff_v(void* result, void* target, unsigned long byte_len, char* file
  *  @param  line      (I) - line number of error.
  *  @return Void.
  */
-void check_int_v(int result, int target, char* file, int line) {
+void check_int_v(int result, int target, char* file, int line, int is_verbose) {
   if (result == target) {
+    if (!is_verbose) return;
     printf("!CHECK INTEGERS SUCCESS! IN FILE %s ON LINE %4d: %4d == %4d\n", file, line, result, target);
   } else {
     printf("!CHECK INTEGERS FAILED!\n");
@@ -85,8 +88,9 @@ void check_int_v(int result, int target, char* file, int line) {
  *  @param  line      (I) - line number of error.
  *  @return Void.
  */
-void check_unsigned_long_v(unsigned long result, unsigned long target, char* file, int line) {
+void check_unsigned_long_v(unsigned long result, unsigned long target, char* file, int line, int is_verbose) {
   if (result == target) {
+    if (!is_verbose) return;
     printf("!CHECK U-LONG SUCCESS! IN FILE %s ON LINE %4d: %4lu == %4lu\n", file, line, result, target);
   } else {
     printf("!CHECK ULONG FAILED!\n");

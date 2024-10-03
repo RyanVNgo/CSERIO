@@ -323,9 +323,10 @@ void test_ser_read_frame(serfile* sptr, FileHeader* file_header, void* pix_buff)
 
 /*-------------------- Main Test Call --------------------*/
 
-void run_img_routines_suite() {
+void run_img_routines_suite(int is_verbose) {
   printf("!-- RUNNING IMAGE ROUTINES SUITE --!\n");
-  
+  IS_VERBOSE = is_verbose;
+
   /* sequentially shared data */
   FileHeader temp_header;
   int status = 0;

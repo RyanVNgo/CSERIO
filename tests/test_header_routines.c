@@ -328,8 +328,9 @@ void test_ser_get_key_record() {
 
 /*-------------------- Main Test Call --------------------*/
 
-void run_header_routines_suite() {
+void run_header_routines_suite(int is_verbose) {
   printf("!-- RUNNING HEADER ROUTINES SUITE --!\n");
+  IS_VERBOSE = is_verbose;
 
   test_ser_get_hdr_count();
   test_ser_get_idx_record();
