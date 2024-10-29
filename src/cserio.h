@@ -24,9 +24,9 @@
  * For now, ensure that the version defined here matches
  * that one defined in the `configure.ac` file.
  */
-#define CSERIO_VERSION 1.3.2
-#define CSERIO_MICRO 2
-#define CSERIO_MINOR 3
+#define CSERIO_VERSION 1.4.0
+#define CSERIO_MICRO 0
+#define CSERIO_MINOR 4
 #define CSERIO_MAJOR 1
 
 /*-------------------- Error Include --------------------*/
