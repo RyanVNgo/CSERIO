@@ -24,10 +24,10 @@
  * For now, ensure that the version defined here matches
  * that one defined in the `configure.ac` file.
  */
-#define CSERIO_VERSION 1.4.0
-#define CSERIO_MICRO 0
-#define CSERIO_MINOR 4
-#define CSERIO_MAJOR 1
+#define CSERIO_VERSION  1.4.0
+#define CSERIO_MICRO        0
+#define CSERIO_MINOR      4
+#define CSERIO_MAJOR    1
 
 /*-------------------- Error Include --------------------*/
 
@@ -62,37 +62,37 @@ typedef int64_t S_INT64;
  * Note that these values represent the byte length as they are in the
  * SER file.
  */
-#define FILEID_LEN 14
-#define LUID_LEN 4
-#define COLORID_LEN 4 
-#define LITTLEENDIAN_LEN  4 
-#define IMAGEWIDTH_LEN  4 
-#define IMAGEHEIGHT_LEN  4 
+#define FILEID_LEN              14
+#define LUID_LEN                4
+#define COLORID_LEN             4
+#define LITTLEENDIAN_LEN        4 
+#define IMAGEWIDTH_LEN          4 
+#define IMAGEHEIGHT_LEN         4 
 #define PIXELDEPTHPERPLANE_LEN  4 
-#define FRAMECOUNT_LEN  4 
-#define OBSERVER_LEN  40 
-#define INSTRUMENT_LEN  40 
-#define TELESCOPE_LEN  40 
-#define DATETIME_LEN  8 
-#define DATETIMEUTC_LEN  8 
+#define FRAMECOUNT_LEN          4 
+#define OBSERVER_LEN            40 
+#define INSTRUMENT_LEN          40 
+#define TELESCOPE_LEN           40 
+#define DATETIME_LEN            8 
+#define DATETIMEUTC_LEN         8 
 
 /**
  * The following functionally operate as the byte intex position 
  * within the SER file.
  */
-#define FILEID_KEY 0
-#define LUID_KEY 14
-#define COLORID_KEY 18
-#define LITTLEENDIAN_KEY 22
-#define IMAGEWIDTH_KEY 26
-#define IMAGEHEIGHT_KEY 30
-#define PIXELDEPTHPERPLANE_KEY 34
-#define FRAMECOUNT_KEY 38
-#define OBSERVER_KEY 42
-#define INSTRUMENT_KEY 82
-#define TELESCOPE_KEY 122
-#define DATETIME_KEY 162
-#define DATETIMEUTC_KEY 170
+#define FILEID_KEY              0
+#define LUID_KEY                14
+#define COLORID_KEY             18
+#define LITTLEENDIAN_KEY        22
+#define IMAGEWIDTH_KEY          26
+#define IMAGEHEIGHT_KEY         30
+#define PIXELDEPTHPERPLANE_KEY  34
+#define FRAMECOUNT_KEY          38
+#define OBSERVER_KEY            42
+#define INSTRUMENT_KEY          82
+#define TELESCOPE_KEY           122
+#define DATETIME_KEY            162
+#define DATETIMEUTC_KEY         170
 
 /**
  * Color ID types
@@ -119,9 +119,9 @@ typedef int64_t S_INT64;
 /*-------------------- Image Symbolic Constants --------------------*/
 
 typedef int DIM_TYPE;
-#define DIM_LAYER 0
-#define DIM_WIDTH 1
-#define DIM_HEIGHT 2
+#define DIM_LAYER   0
+#define DIM_WIDTH   1
+#define DIM_HEIGHT  2
 
 /*-------------------- SER Structure --------------------*/
 
@@ -152,6 +152,9 @@ int ser_close_file(serfile* sptr, int* status);
 int ser_get_hdr_count(serfile* sptr, int* rec_count, int* status);
 int ser_get_idx_record(serfile* sptr, void* dest, int idx, int* status);
 int ser_get_key_record(serfile* sptr, void* dest, int key, int* status);
+
+int ser_write_idx_record(serfile* sptr, void* data, int idx, size_t size, int* status);
+int ser_write_key_record(serfile* sptr, void* data, int key, size_t size, int* status);
 
 /*-------------------- Image Routines --------------------*/
 
