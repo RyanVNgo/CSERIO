@@ -1,5 +1,5 @@
 # Initialize autoconf
-AC_INIT([cserio], [1.4.0])
+AC_INIT([cserio], [1.4.1])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_PREFIX_DEFAULT([..])
 AM_INIT_AUTOMAKE([foreign -Wall -Werror])
