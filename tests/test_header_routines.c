@@ -45,6 +45,8 @@ void test_data(FileHeader* file_header, void* pix_buff) {
   return;
 }
 
+
+
 /*-------------------- Unit Tests --------------------*/
 
 void test_ser_get_hdr_count() {
@@ -326,6 +328,140 @@ void test_ser_get_key_record() {
   return;
 }
 
+void test_ser_write_key_record() {
+  const unsigned long byte_len = 40;
+  char* empty_buff[40] = {0}; /* used to check is dest buffer was written to on fail */
+  char write_buff[] = "TeSt";
+  char read_buff[40] = {0};
+  int status = 0;
+
+  /* create and open temporary file */
+  uint8_t file_data[9];
+  FileHeader file_header;
+  test_data(&file_header, file_data);
+  char* file_path = "/tmp/tmp_file_for_header_routines.ser";
+  generate_tmp_file(file_path, &file_header, file_data, 0);
+  serfile* tmp_ser;
+  ser_open_file(&tmp_ser, file_path, READWRITE, &status);
+
+  /* NULL sptr */
+  status = 0;
+  ser_write_key_record(NULL, write_buff, FILEID_KEY, sizeof(write_buff), &status);
+  check_error(status, NULL_SPTR);
+  ser_get_key_record(tmp_ser, read_buff, FILEID_KEY, &status);
+  check_buff(read_buff, file_header.file_ID, sizeof(write_buff));
+
+  /* NULL data pointer */
+  status = 0;
+  ser_write_key_record(tmp_ser, NULL , FILEID_KEY, sizeof(write_buff), &status);
+  check_error(status, NULL_PARAM);
+  ser_get_key_record(tmp_ser, read_buff, FILEID_KEY, &status);
+  check_buff(read_buff, file_header.file_ID, sizeof(write_buff));
+
+  /* invalid key */
+  status = 0;
+  ser_write_key_record(tmp_ser, write_buff, -1, sizeof(write_buff), &status);
+  check_error(status, INVALID_HDR_KEY);
+  ser_get_key_record(tmp_ser, read_buff, FILEID_KEY, &status);
+  check_buff(read_buff, file_header.file_ID, sizeof(write_buff));
+
+  /* check some valid keys */
+  status = 0;
+  ser_write_key_record(tmp_ser, write_buff, FILEID_KEY, sizeof(write_buff), &status);
+  check_error(status, NO_ERROR);
+  ser_get_key_record(tmp_ser, read_buff, FILEID_KEY, &status);
+  check_buff(read_buff, write_buff, sizeof(write_buff));
+
+  status = 0;
+  ser_write_key_record(tmp_ser, write_buff, COLORID_KEY, sizeof(write_buff), &status);
+  check_error(status, NO_ERROR);
+  ser_get_key_record(tmp_ser, read_buff, COLORID_KEY, &status);
+  check_buff(read_buff, write_buff, sizeof(write_buff));
+
+  status = 0;
+  ser_write_key_record(tmp_ser, write_buff, INSTRUMENT_KEY, sizeof(write_buff), &status);
+  check_error(status, NO_ERROR);
+  ser_get_key_record(tmp_ser, read_buff, INSTRUMENT_KEY, &status);
+  check_buff(read_buff, write_buff, sizeof(write_buff));
+
+  status = 0;
+  ser_write_key_record(tmp_ser, write_buff, DATETIME_KEY, sizeof(write_buff), &status);
+  check_error(status, NO_ERROR);
+  ser_get_key_record(tmp_ser, read_buff, DATETIME_KEY, &status);
+  check_buff(read_buff, write_buff, sizeof(write_buff));
+
+  ser_close_file(tmp_ser, &status);
+  remove_tmp_file(file_path);
+  return;
+}
+
+void test_ser_write_idx_record() {
+  const unsigned long byte_len = 40;
+  char* empty_buff[40] = {0}; /* used to check is dest buffer was written to on fail */
+  char write_buff[] = "TeSt";
+  char read_buff[40] = {0};
+  int status = 0;
+
+  /* create and open temporary file */
+  uint8_t file_data[9];
+  FileHeader file_header;
+  test_data(&file_header, file_data);
+  char* file_path = "/tmp/tmp_file_for_header_routines.ser";
+  generate_tmp_file(file_path, &file_header, file_data, 0);
+  serfile* tmp_ser;
+  ser_open_file(&tmp_ser, file_path, READWRITE, &status);
+
+  /* NULL sptr */
+  status = 0;
+  ser_write_idx_record(NULL, write_buff, 0, sizeof(write_buff), &status);
+  check_error(status, NULL_SPTR);
+  ser_get_idx_record(tmp_ser, read_buff, 0, &status);
+  check_buff(read_buff, file_header.file_ID, sizeof(write_buff));
+
+  /* NULL data pointer */
+  status = 0;
+  ser_write_idx_record(tmp_ser, NULL , 0, sizeof(write_buff), &status);
+  check_error(status, NULL_PARAM);
+  ser_get_idx_record(tmp_ser, read_buff, 0, &status);
+  check_buff(read_buff, file_header.file_ID, sizeof(write_buff));
+
+  /* invalid index */
+  status = 0;
+  ser_write_idx_record(tmp_ser, write_buff, -1, sizeof(write_buff), &status);
+  check_error(status, INVALID_HDR_IDX);
+  ser_get_idx_record(tmp_ser, read_buff, 0, &status);
+  check_buff(read_buff, file_header.file_ID, sizeof(write_buff));
+
+  /* check some valid keys */
+  status = 0;
+  ser_write_idx_record(tmp_ser, write_buff, 0, sizeof(write_buff), &status);
+  check_error(status, NO_ERROR);
+  ser_get_idx_record(tmp_ser, read_buff, 0, &status);
+  check_buff(read_buff, write_buff, sizeof(write_buff));
+
+  status = 0;
+  ser_write_idx_record(tmp_ser, write_buff, 2, sizeof(write_buff), &status);
+  check_error(status, NO_ERROR);
+  ser_get_idx_record(tmp_ser, read_buff, 2, &status);
+  check_buff(read_buff, write_buff, sizeof(write_buff));
+
+  status = 0;
+  ser_write_idx_record(tmp_ser, write_buff, 9, sizeof(write_buff), &status);
+  check_error(status, NO_ERROR);
+  ser_get_idx_record(tmp_ser, read_buff, 9, &status);
+  check_buff(read_buff, write_buff, sizeof(write_buff));
+
+  status = 0;
+  ser_write_idx_record(tmp_ser, write_buff, 11, sizeof(write_buff), &status);
+  check_error(status, NO_ERROR);
+  ser_get_idx_record(tmp_ser, read_buff, 11, &status);
+  check_buff(read_buff, write_buff, sizeof(write_buff));
+
+  ser_close_file(tmp_ser, &status);
+  remove_tmp_file(file_path);
+  return;
+}
+
 /*-------------------- Main Test Call --------------------*/
 
 void run_header_routines_suite(int is_verbose) {
@@ -335,6 +471,9 @@ void run_header_routines_suite(int is_verbose) {
   test_ser_get_hdr_count();
   test_ser_get_idx_record();
   test_ser_get_key_record();
+
+  test_ser_write_key_record();
+  test_ser_write_idx_record();
 
   return;
 }

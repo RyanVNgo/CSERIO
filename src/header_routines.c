@@ -252,4 +252,206 @@ int ser_get_key_record(serfile* sptr, void* dest, int key, int* status) {
     return (*status);
 }
 
+/** @brief  Write data to header idx 
+ *  
+ *  This write routine is capped such that it will write less
+ *  than or up to the maximum size of the header record space.
+ *
+ *  @param  sptr    (I)     - Pointer to serfile
+ *  @param  data    (IO)    - Pointer to data to write 
+ *  @param  idx     (I)     - Header record index
+ *  @param  size    (I)     - Size of data in bytes
+ *  @param  status  (IO)    - Error status.
+ *  @return Error status.
+ */
+int ser_write_idx_record(serfile* sptr, void* data, int idx, size_t size, int* status) {
+    /* sptr exists */
+    if (!sptr) {
+        *status = NULL_SPTR;
+        return (*status);
+    }
 
+    /* check if data buffer exists */
+    if (!data) {
+        *status = NULL_PARAM;
+        return (*status);
+    }
+
+    /* check if idx is in bounds */
+    if (idx < 0 || idx >= HDR_UNIT_COUNT) {
+        *status = INVALID_HDR_IDX;
+        return (*status);
+    }
+
+    /* check if file is writable */
+    if (sptr->SER_file->access_mode != READWRITE) {
+        *status = WRITE_ON_READONLY;
+        return (*status);
+    }
+
+    /* get byte length of record */
+    size_t max_byte_len = 0;
+    int fpos = 0;
+    switch (idx) {
+        case 0:
+            max_byte_len = FILEID_LEN;
+            fpos = FILEID_KEY;
+            break;
+        case 1:
+            max_byte_len = LUID_LEN;
+            fpos = LUID_KEY;
+            break;
+        case 2:
+            max_byte_len = COLORID_LEN;
+            fpos = COLORID_KEY;
+            break;
+        case 3:
+            max_byte_len = LITTLEENDIAN_LEN;
+            fpos = LITTLEENDIAN_KEY;
+            break;
+        case 4:
+            max_byte_len = IMAGEWIDTH_LEN;
+            fpos = IMAGEWIDTH_KEY;
+            break;
+        case 5:
+            max_byte_len = IMAGEHEIGHT_LEN;
+            fpos = IMAGEHEIGHT_KEY;
+            break;
+        case 6:
+            max_byte_len = PIXELDEPTHPERPLANE_LEN;
+            fpos = PIXELDEPTHPERPLANE_KEY;
+            break;
+        case 7:
+            max_byte_len = FRAMECOUNT_LEN;
+            fpos = FRAMECOUNT_KEY;
+            break;
+        case 8:
+            max_byte_len = OBSERVER_LEN;
+            fpos = OBSERVER_KEY;
+            break;
+        case 9:
+            max_byte_len = INSTRUMENT_LEN;
+            fpos = INSTRUMENT_KEY;
+            break;
+        case 10:
+            max_byte_len = TELESCOPE_LEN;
+            fpos = TELESCOPE_KEY;
+            break;
+        case 11:
+            max_byte_len = DATETIME_LEN;
+            fpos = DATETIME_KEY;
+            break;
+        case 12:
+            max_byte_len = DATETIMEUTC_LEN;
+            fpos = DATETIMEUTC_KEY;
+            break;
+    }
+
+    /* set number of bytes to write */
+    if (size > max_byte_len) size = max_byte_len;
+
+    /* write data to record */
+    fseek(sptr->SER_file->s_file, fpos, SEEK_SET);
+    if(fwrite(data, 1, size, sptr->SER_file->s_file) != size) {
+        *status = HDR_WRITE_WARN;
+    }
+
+    return (*status);
+}
+
+
+/** @brief  Write data to header key
+ *  
+ *  This write routine is capped such that it will write less
+ *  than or up to the maximum size of the header record space.
+ *
+ *  @param  sptr    (I)     - Pointer to serfile
+ *  @param  data    (IO)    - Pointer to data to write 
+ *  @param  key     (I)     - Record key
+ *  @param  size    (I)     - Size of data in bytes
+ *  @param  status  (IO)    - Error status.
+ *  @return Error status.
+ */
+int ser_write_key_record(serfile* sptr, void* data, int key, size_t size, int* status) {
+    /* sptr exists */
+    if (!sptr) {
+        *status = NULL_SPTR;
+        return (*status);
+    }
+
+    /* check if data buffer exists */
+    if (!data) {
+        *status = NULL_PARAM;
+        return (*status);
+    }
+    
+    /* check if file is writable */
+    if (sptr->SER_file->access_mode != READWRITE) {
+        *status = WRITE_ON_READONLY;
+        return (*status);
+    }
+
+
+    /* get byte length of record */
+    int max_byte_len = 0;
+    switch (key) {
+        case FILEID_KEY:
+            max_byte_len = FILEID_LEN;
+            break;
+        case LUID_KEY:
+            max_byte_len = LUID_LEN;
+            break;
+        case COLORID_KEY:
+            max_byte_len = COLORID_LEN;
+            break;
+        case LITTLEENDIAN_KEY:
+            max_byte_len = LITTLEENDIAN_LEN;
+            break;
+        case IMAGEWIDTH_KEY:
+            max_byte_len = IMAGEWIDTH_LEN;
+            break;
+        case IMAGEHEIGHT_KEY:
+            max_byte_len = IMAGEHEIGHT_LEN;
+            break;
+        case PIXELDEPTHPERPLANE_KEY:
+            max_byte_len = PIXELDEPTHPERPLANE_LEN;
+            break;
+        case FRAMECOUNT_KEY:
+            max_byte_len = FRAMECOUNT_LEN;
+            break;
+        case OBSERVER_KEY:
+            max_byte_len = OBSERVER_LEN;
+            break;
+        case INSTRUMENT_KEY:
+            max_byte_len = INSTRUMENT_LEN;
+            break;
+        case TELESCOPE_KEY:
+            max_byte_len = TELESCOPE_LEN;
+            break;
+        case DATETIME_KEY:
+            max_byte_len = DATETIME_LEN;
+            break;
+        case DATETIMEUTC_KEY:
+            max_byte_len = DATETIMEUTC_LEN;
+            break;
+        default:
+            max_byte_len = 0;
+    }
+    
+    /* check that if byte_len was 0, then the key was invalid */
+    if (max_byte_len == 0) {
+        *status = INVALID_HDR_KEY;
+        return (*status);
+    }
+
+    /* set number of bytes to write */
+    if (size > max_byte_len) size = max_byte_len;
+
+    /* write data to record */
+    fseek(sptr->SER_file->s_file, key, SEEK_SET);
+    if(fwrite(data, 1, size, sptr->SER_file->s_file) != size) {
+        *status = HDR_WRITE_WARN;
+    }
+
+    return (*status);
+}
