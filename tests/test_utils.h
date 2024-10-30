@@ -7,7 +7,7 @@
 #ifndef TEST_UTILS_H
 #define TEST_UTILS_H
 
-/*-------------------- Test Utils --------------------*/
+/*-------------------- Error Utils --------------------*/
 
 /** @brief Check if status values are equal
  *  
