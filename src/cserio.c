@@ -132,6 +132,9 @@ int ser_open_file(serfile** sptr, char* filename, int mode, int* status) {
     fseek((*sptr)->SER_file->s_file, 0, SEEK_SET);
     (*sptr)->SER_file->size_in_bytes = size;
 
+    /* track access mode */
+    (*sptr)->SER_file->access_mode = mode;
+
     return (*status);
 }
 

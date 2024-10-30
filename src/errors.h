@@ -18,7 +18,9 @@
 #define EOF_ERROR           110
 #define FREAD_ERROR         111
 
-#define INTERN_CALL_ERROR   201
+#define INTERN_CALL_ERROR   121
+
+#define WRITE_ON_READONLY   131
 
 /*-------------------- File Access Errors --------------------*/
 

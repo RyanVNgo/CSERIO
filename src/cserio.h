@@ -129,6 +129,7 @@ typedef struct SERfile {
   FILE* s_file;
   char filename[FILENAME_MAX];
   long size_in_bytes;
+  int access_mode;
 } SERfile;
 
 

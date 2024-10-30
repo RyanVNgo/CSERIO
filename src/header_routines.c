@@ -6,7 +6,6 @@
 
 #include "cserio.h"
 #include "errors.h"
-#include <stdio.h>
 
 /*-------------------- Header Routines --------------------*/
 
@@ -284,6 +283,12 @@ int ser_write_idx_record(serfile* sptr, void* data, int idx, size_t size, int* s
         return (*status);
     }
 
+    /* check if file is writable */
+    if (sptr->SER_file->access_mode != READWRITE) {
+        *status = WRITE_ON_READONLY;
+        return (*status);
+    }
+
     /* get byte length of record */
     size_t max_byte_len = 0;
     int fpos = 0;
@@ -379,6 +384,13 @@ int ser_write_key_record(serfile* sptr, void* data, int key, size_t size, int* s
         *status = NULL_PARAM;
         return (*status);
     }
+    
+    /* check if file is writable */
+    if (sptr->SER_file->access_mode != READWRITE) {
+        *status = WRITE_ON_READONLY;
+        return (*status);
+    }
+
 
     /* get byte length of record */
     int max_byte_len = 0;
