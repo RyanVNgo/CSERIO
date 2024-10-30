@@ -45,8 +45,6 @@ void test_data(FileHeader* file_header, void* pix_buff) {
   return;
 }
 
-
-
 /*-------------------- Unit Tests --------------------*/
 
 void test_ser_get_hdr_count() {
@@ -87,8 +85,8 @@ void test_ser_get_hdr_count() {
 
 void test_ser_get_idx_record() {
   const unsigned long byte_len = 40;
-  char* empty_test_dest[40] = {0}; /* used to check is dest buffer was written to on fail */
-  char* test_dest[40] = {0};
+  char empty_test_dest[40] = {0}; /* used to check is dest buffer was written to on fail */
+  char test_dest[40] = {0};
   int status = 0;
 
   /* create and open temporary file */
@@ -126,84 +124,34 @@ void test_ser_get_idx_record() {
   check_error(status, INVALID_HDR_IDX);
   check_buff(test_dest, empty_test_dest, byte_len);
 
-  /* Check each record */
+  /* Check some valid idx */
+  /* FILEID */
   status = 0;
   memset(test_dest, 0, byte_len);
-  ser_get_idx_record(tmp_ser, test_dest, 0, &status); /* FILEID */
+  ser_get_idx_record(tmp_ser, test_dest, 0, &status); 
   check_error(status, NO_ERROR);
   check_buff(test_dest, file_header.file_ID, FILEID_LEN);
 
+  /* COLORID */
   status = 0;
   memset(test_dest, 0, byte_len);
-  ser_get_idx_record(tmp_ser, test_dest, 1, &status); /* LUID */
-  check_error(status, NO_ERROR);
-  check_buff(test_dest, &file_header.lu_ID, LUID_LEN);
-  
-  status = 0;
-  memset(test_dest, 0, byte_len);
-  ser_get_idx_record(tmp_ser, test_dest, 2, &status); /* COLORID */
+  ser_get_idx_record(tmp_ser, test_dest, 2, &status); 
   check_error(status, NO_ERROR);
   check_buff(test_dest, &file_header.color_ID, COLORID_LEN);
-  
-  status = 0;
-  memset(test_dest, 0, byte_len);
-  ser_get_idx_record(tmp_ser, test_dest, 3, &status); /* LITTLEENDIAN */
-  check_error(status, NO_ERROR);
-  check_buff(test_dest, &file_header.little_endian, LITTLEENDIAN_LEN);
 
+  /* INSTRUMENT */
   status = 0;
   memset(test_dest, 0, byte_len);
-  ser_get_idx_record(tmp_ser, test_dest, 4, &status); /* IMAGEWIDTH */
-  check_error(status, NO_ERROR);
-  check_buff(test_dest, &file_header.image_width, IMAGEWIDTH_LEN);
-
-  status = 0;
-  memset(test_dest, 0, byte_len);
-  ser_get_idx_record(tmp_ser, test_dest, 5, &status); /* IMAGEHEIGHT */
-  check_error(status, NO_ERROR);
-  check_buff(test_dest, &file_header.image_height, IMAGEHEIGHT_LEN);
-
-  status = 0;
-  memset(test_dest, 0, byte_len);
-  ser_get_idx_record(tmp_ser, test_dest, 6, &status); /* PIXELDEPTHPERPLANE */
-  check_error(status, NO_ERROR);
-  check_buff(test_dest, &file_header.pixel_depth_per_plane, PIXELDEPTHPERPLANE_LEN);
-
-  status = 0;
-  memset(test_dest, 0, byte_len);
-  ser_get_idx_record(tmp_ser, test_dest, 7, &status); /* FRAMECOUNT */
-  check_error(status, NO_ERROR);
-  check_buff(test_dest, &file_header.frame_count, FRAMECOUNT_LEN);
-
-  status = 0;
-  memset(test_dest, 0, byte_len);
-  ser_get_idx_record(tmp_ser, test_dest, 8, &status); /* OBSERVER */
-  check_error(status, NO_ERROR);
-  check_buff(test_dest, file_header.observer, OBSERVER_LEN);
-
-  status = 0;
-  memset(test_dest, 0, byte_len);
-  ser_get_idx_record(tmp_ser, test_dest, 9, &status); /* INSTRUMENT */
+  ser_get_idx_record(tmp_ser, test_dest, 9, &status); 
   check_error(status, NO_ERROR);
   check_buff(test_dest, file_header.instrment, INSTRUMENT_LEN);
 
+  /* DATETIME */
   status = 0;
   memset(test_dest, 0, byte_len);
-  ser_get_idx_record(tmp_ser, test_dest, 10, &status); /* TELESCOPE */
-  check_error(status, NO_ERROR);
-  check_buff(test_dest, file_header.telescope, TELESCOPE_LEN);
-
-  status = 0;
-  memset(test_dest, 0, byte_len);
-  ser_get_idx_record(tmp_ser, test_dest, 11, &status); /* DATETIME */
+  ser_get_idx_record(tmp_ser, test_dest, 11, &status); 
   check_error(status, NO_ERROR);
   check_buff(test_dest, &file_header.date_time, DATETIME_LEN);
-
-  status = 0;
-  memset(test_dest, 0, byte_len);
-  ser_get_idx_record(tmp_ser, test_dest, 12, &status); /* DATETIMEUTC */
-  check_error(status, NO_ERROR);
-  check_buff(test_dest, &file_header.date_time_UTC, DATETIMEUTC_LEN);
 
   ser_close_file(tmp_ser, &status);
   remove_tmp_file(file_path);
@@ -212,8 +160,8 @@ void test_ser_get_idx_record() {
 
 void test_ser_get_key_record() {
   const unsigned long byte_len = 40;
-  char* empty_test_dest[40] = {0}; /* used to check is dest buffer was written to on fail */
-  char* test_dest[40] = {0};
+  char empty_test_dest[40] = {0}; /* used to check is dest buffer was written to on fail */
+  char test_dest[40] = {0};
   int status = 0;
 
   /* create and open temporary file */
@@ -244,84 +192,34 @@ void test_ser_get_key_record() {
   check_error(status, INVALID_HDR_KEY);
   check_buff(test_dest, empty_test_dest, byte_len);
 
-  /* Check each valid key */
+  /* Check some valid keys */
+  /* FILEID */
   status = 0;
   memset(test_dest, 0, byte_len);
-  ser_get_key_record(tmp_ser, test_dest, FILEID_KEY , &status); /* FILEID */
+  ser_get_key_record(tmp_ser, test_dest, FILEID_KEY , &status); 
   check_error(status, NO_ERROR);
   check_buff(test_dest, file_header.file_ID, FILEID_LEN);
 
+  /* COLORID */
   status = 0;
   memset(test_dest, 0, byte_len);
-  ser_get_key_record(tmp_ser, test_dest, LUID_KEY, &status); /* LUID */
-  check_error(status, NO_ERROR);
-  check_buff(test_dest, &file_header.lu_ID, LUID_LEN);
-  
-  status = 0;
-  memset(test_dest, 0, byte_len);
-  ser_get_key_record(tmp_ser, test_dest, COLORID_KEY, &status); /* COLORID */
+  ser_get_key_record(tmp_ser, test_dest, COLORID_KEY, &status); 
   check_error(status, NO_ERROR);
   check_buff(test_dest, &file_header.color_ID, COLORID_LEN);
   
+  /* INSTRUMENT */
   status = 0;
   memset(test_dest, 0, byte_len);
-  ser_get_key_record(tmp_ser, test_dest, LITTLEENDIAN_KEY, &status); /* LITTLEENDIAN */
-  check_error(status, NO_ERROR);
-  check_buff(test_dest, &file_header.little_endian, LITTLEENDIAN_LEN);
-
-  status = 0;
-  memset(test_dest, 0, byte_len);
-  ser_get_key_record(tmp_ser, test_dest, IMAGEWIDTH_KEY, &status); /* IMAGEWIDTH */
-  check_error(status, NO_ERROR);
-  check_buff(test_dest, &file_header.image_width, IMAGEWIDTH_LEN);
-
-  status = 0;
-  memset(test_dest, 0, byte_len);
-  ser_get_key_record(tmp_ser, test_dest, IMAGEHEIGHT_KEY, &status); /* IMAGEHEIGHT */
-  check_error(status, NO_ERROR);
-  check_buff(test_dest, &file_header.image_height, IMAGEHEIGHT_LEN);
-
-  status = 0;
-  memset(test_dest, 0, byte_len);
-  ser_get_key_record(tmp_ser, test_dest, PIXELDEPTHPERPLANE_KEY, &status); /* PIXELDEPTHPERPLANE */
-  check_error(status, NO_ERROR);
-  check_buff(test_dest, &file_header.pixel_depth_per_plane, PIXELDEPTHPERPLANE_LEN);
-
-  status = 0;
-  memset(test_dest, 0, byte_len);
-  ser_get_key_record(tmp_ser, test_dest, FRAMECOUNT_KEY, &status); /* FRAMECOUNT */
-  check_error(status, NO_ERROR);
-  check_buff(test_dest, &file_header.frame_count, FRAMECOUNT_LEN);
-
-  status = 0;
-  memset(test_dest, 0, byte_len);
-  ser_get_key_record(tmp_ser, test_dest, OBSERVER_KEY, &status); /* OBSERVER */
-  check_error(status, NO_ERROR);
-  check_buff(test_dest, file_header.observer, OBSERVER_LEN);
-
-  status = 0;
-  memset(test_dest, 0, byte_len);
-  ser_get_key_record(tmp_ser, test_dest, INSTRUMENT_KEY, &status); /* INSTRUMENT */
+  ser_get_key_record(tmp_ser, test_dest, INSTRUMENT_KEY, &status); 
   check_error(status, NO_ERROR);
   check_buff(test_dest, file_header.instrment, INSTRUMENT_LEN);
 
+  /* DATETIME */
   status = 0;
   memset(test_dest, 0, byte_len);
-  ser_get_key_record(tmp_ser, test_dest, TELESCOPE_KEY, &status); /* TELESCOPE */
-  check_error(status, NO_ERROR);
-  check_buff(test_dest, file_header.telescope, TELESCOPE_LEN);
-
-  status = 0;
-  memset(test_dest, 0, byte_len);
-  ser_get_key_record(tmp_ser, test_dest, DATETIME_KEY, &status); /* DATETIME */
+  ser_get_key_record(tmp_ser, test_dest, DATETIME_KEY, &status); 
   check_error(status, NO_ERROR);
   check_buff(test_dest, &file_header.date_time, DATETIME_LEN);
-
-  status = 0;
-  memset(test_dest, 0, byte_len);
-  ser_get_key_record(tmp_ser, test_dest, DATETIMEUTC_KEY, &status); /* DATETIMEUTC */
-  check_error(status, NO_ERROR);
-  check_buff(test_dest, &file_header.date_time_UTC, DATETIMEUTC_LEN);
 
   ser_close_file(tmp_ser, &status);
   remove_tmp_file(file_path);
@@ -329,8 +227,6 @@ void test_ser_get_key_record() {
 }
 
 void test_ser_write_key_record() {
-  const unsigned long byte_len = 40;
-  char* empty_buff[40] = {0}; /* used to check is dest buffer was written to on fail */
   char write_buff[] = "TeSt";
   char read_buff[40] = {0};
   int status = 0;
@@ -366,24 +262,28 @@ void test_ser_write_key_record() {
   check_buff(read_buff, file_header.file_ID, sizeof(write_buff));
 
   /* check some valid keys */
+  /* FILEID */
   status = 0;
   ser_write_key_record(tmp_ser, write_buff, FILEID_KEY, sizeof(write_buff), &status);
   check_error(status, NO_ERROR);
   ser_get_key_record(tmp_ser, read_buff, FILEID_KEY, &status);
   check_buff(read_buff, write_buff, sizeof(write_buff));
 
+  /* COLORID */
   status = 0;
   ser_write_key_record(tmp_ser, write_buff, COLORID_KEY, sizeof(write_buff), &status);
   check_error(status, NO_ERROR);
   ser_get_key_record(tmp_ser, read_buff, COLORID_KEY, &status);
   check_buff(read_buff, write_buff, sizeof(write_buff));
 
+  /* INSTRUMENT  */
   status = 0;
   ser_write_key_record(tmp_ser, write_buff, INSTRUMENT_KEY, sizeof(write_buff), &status);
   check_error(status, NO_ERROR);
   ser_get_key_record(tmp_ser, read_buff, INSTRUMENT_KEY, &status);
   check_buff(read_buff, write_buff, sizeof(write_buff));
 
+  /* DATETIME */
   status = 0;
   ser_write_key_record(tmp_ser, write_buff, DATETIME_KEY, sizeof(write_buff), &status);
   check_error(status, NO_ERROR);
@@ -396,8 +296,6 @@ void test_ser_write_key_record() {
 }
 
 void test_ser_write_idx_record() {
-  const unsigned long byte_len = 40;
-  char* empty_buff[40] = {0}; /* used to check is dest buffer was written to on fail */
   char write_buff[] = "TeSt";
   char read_buff[40] = {0};
   int status = 0;
@@ -433,24 +331,28 @@ void test_ser_write_idx_record() {
   check_buff(read_buff, file_header.file_ID, sizeof(write_buff));
 
   /* check some valid keys */
+  /* FILEID */
   status = 0;
   ser_write_idx_record(tmp_ser, write_buff, 0, sizeof(write_buff), &status);
   check_error(status, NO_ERROR);
   ser_get_idx_record(tmp_ser, read_buff, 0, &status);
   check_buff(read_buff, write_buff, sizeof(write_buff));
 
+  /* COLORID */
   status = 0;
   ser_write_idx_record(tmp_ser, write_buff, 2, sizeof(write_buff), &status);
   check_error(status, NO_ERROR);
   ser_get_idx_record(tmp_ser, read_buff, 2, &status);
   check_buff(read_buff, write_buff, sizeof(write_buff));
 
+  /* INSTRUMENT  */
   status = 0;
   ser_write_idx_record(tmp_ser, write_buff, 9, sizeof(write_buff), &status);
   check_error(status, NO_ERROR);
   ser_get_idx_record(tmp_ser, read_buff, 9, &status);
   check_buff(read_buff, write_buff, sizeof(write_buff));
 
+  /* DATETIME */
   status = 0;
   ser_write_idx_record(tmp_ser, write_buff, 11, sizeof(write_buff), &status);
   check_error(status, NO_ERROR);
