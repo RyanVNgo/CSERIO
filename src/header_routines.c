@@ -5,7 +5,6 @@
  */
 
 #include "cserio.h"
-#include "errors.h"
 
 /*-------------------- Header Routines --------------------*/
 

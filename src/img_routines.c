@@ -5,7 +5,7 @@
  */
 
 #include "cserio.h"
-#include "errors.h"
+
 #include <stdio.h>
 
 /*-------------------- Hidden Image Symbolic Constants --------------------*/
