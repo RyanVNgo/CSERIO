@@ -7,14 +7,15 @@ An interface to SER format image captures for C programmers.
 ```sh
 > git clone https://github.com/RyanVNgo/CSERIO
 > cd CSERIO
-> ./configure [--prefix=/target/install/path]
 > make
-> make install
+> make install prefix={target/directory}
 ```
-The `--prefix` argument specifies the path to the directory that CSERIO will install the include and library files. When installed, two new directories (if not already present) will be created in the target directory: `/include` and `/lib`.
 
-If the configuration were run as:
-```sh
-> ./configure --prefix=/target/dir
-```
-Then `make install` will copy the `libcserio` library file into `/target/dir/lib` and the necessary include files to `target/dir/include`. If the `--prefix` argument is not specified, the library will install into the project directory.
+Runnning `make` will create a `bin` directory in the project home with two subdirectories,
+`/include` and `/lib`. The `cserio.h` header will be placed in the `/include` directory and
+the `libcserio.a` library file will be placed in the `/lib` directory.
+
+The `prefix` argument for `make install` specifies the path to the directory that CSERIO will
+install the include and library files. When installed, two new directories (if not already present)
+will be created in the target directory: `/include` and `/lib`. If `prefix` is not defined, then
+`make install` will not do anything.
