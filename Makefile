@@ -18,13 +18,13 @@ prefix = $(LIB_DIR)
 
 TARGET = libcserio.a
 
-.PHONY: all clean 
+.PHONY: all clean install
 
 # compile 
-all: $(LIB_DIR)/$(TARGET)
+all: $(TARGET)
 
-$(LIB_DIR)/$(TARGET) : $(OBJ_FILES) | $(LIB_DIR) $(INC_DIR)
-	$(AR) rcs $@ $<
+$(TARGET) : $(OBJ_FILES) | $(LIB_DIR) $(INC_DIR)
+	$(AR) rcs $(LIB_DIR)/$@ $<
 	cp $(SRC_DIR)/$(HDR_FILE) $(INC_DIR)/$(HDR_FILE)
 
 $(OBJ_FILES) : $(SRC_FILES) | $(OBJ_DIR)
@@ -43,13 +43,11 @@ $(BIN_DIR) :
 	mkdir -p $(BIN_DIR)
 
 # install 
-install: $(LIB_DIR)/$(TARGET)
+install: $(TARGET)
 ifneq ($(prefix), $(LIB_DIR))
 	mkdir -p $(prefix)/lib
 	mkdir -p $(prefix)/include
 	cp -r $(BIN_DIR)/* $(prefix)
-else
-	echo "INSTALL_PATH not defined"
 endif
 
 # clean 
