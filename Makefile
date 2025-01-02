@@ -14,6 +14,8 @@ BIN_DIR = bin
 LIB_DIR = $(BIN_DIR)/lib
 INC_DIR = $(BIN_DIR)/include
 
+TEST_DIR = tests
+
 prefix = $(LIB_DIR)
 
 TARGET = libcserio.a
@@ -50,8 +52,24 @@ ifneq ($(prefix), $(LIB_DIR))
 	cp -r $(BIN_DIR)/* $(prefix)
 endif
 
+# testing 
+tests: $(TARGET)
+	mkdir -p $(TEST_DIR)/lib
+	mkdir -p $(TEST_DIR)/include
+	cp -r $(BIN_DIR)/* $(TEST_DIR) 
+	$(MAKE) -C $(TEST_DIR)
+
+tests-run: 
+	$(MAKE) run -C $(TEST_DIR)
+
+tests-clean: 
+	rm -r $(TEST_DIR)/lib
+	rm -r $(TEST_DIR)/include
+	$(MAKE) clean -C $(TEST_DIR)
+
 # clean 
 clean:
 	rm -v -f $(OBJ_FILES)
 	rm -v -d -f $(OBJ_DIR)
 	rm -v -r -f $(BIN_DIR)
+
