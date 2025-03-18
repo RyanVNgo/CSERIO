@@ -9,3 +9,6 @@ obj/*.o
 # tests
 tests/*.o
 tests/test-runner
+
+# extra
+*.json
