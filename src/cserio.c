@@ -1,5 +1,5 @@
-/** @file cserio.c
- *  @brief Function definitions for `cserio.h` prototypes.
+/*  @file   cserio.c
+ *  @brief  Function definitions for `cserio.h` prototypes.
  *
  *  Provides function definitions for all functions prototyped
  *  in `cserio.h`. This file also serves as the designated
@@ -16,78 +16,47 @@
 #include <stdio.h>
 #include <string.h>
 
+
 /*-------------------- Core Routines --------------------*/
 
-/** @brief  Assigns and returns the current version number
- *          of the CSERIO library.
- *  @param  version     (IO) - Address of float to assign 
- *                      the version number. Address must be
- *                      valid or NULL.
- *  @return Version number.
+/*  @brief  Provides the Major, Minor, and Micro numbers for
+ *          the current version of CSERIO.
+ *  @param  major     (IO)  - Pointer to Major int.
+ *  @param  minor     (IO)  - Pointer to Minor int.
+ *  @param  micro     (IO)  - Pointer to Micro int.
+ *  @return Void.
  */
-float cserio_version_number(float* version) {
-    /* @param Version - NULL condition */
-    if (!version) {
-        return 
-            (float)CSERIO_MAJOR + 
-            (float)(0.01 * CSERIO_MINOR) + 
-            (float)(0.0001 * CSERIO_MICRO);
-    }
-
-    *version = 
-        (float)CSERIO_MAJOR + 
-        (float)(0.01 * CSERIO_MINOR) + 
-        (float)(0.0001 * CSERIO_MICRO);
-
-    return (*version);
+void cserio_version_number(int* major, int* minor, int* micro) {
+    if (major) { *major = CSERIO_MAJOR; }
+    if (minor) { *minor = CSERIO_MINOR; }
+    if (micro) { *micro = CSERIO_MICRO; }
+    return;
 }
 
 /*-------------------- File Access Routines --------------------*/
 
-/** @brief  Opens SER file
+/*  @brief  Opens SER file
  *
  *  The memory for the serfile structure is automatically allocated
  *  on file open and freed on file close.
  *
- *  @param  sptr      (IO) - Pointer to a pointer of a serfile.
- *  @param  filename  (I) - root name of the SER file to open.
- *  @param  mode      (I) - Access type, either READONLY or READWRITE.
- *  @param  status    (IO) - Error status.
- *  @return Error status.
+ *  @param  sptr      (IO)  - Pointer to a pointer of a serfile.
+ *  @param  filename  (I)   - root name of the SER file to open.
+ *  @param  mode      (I)   - Access type, either READONLY or READWRITE.
+ *  @param  status    (IO)  - Error status.
+ *  @return Void.
  */
-int ser_open_file(serfile** sptr, char* filename, int mode, int* status) {
-    /* sptr exists */
-    if (!sptr) {
-        *status = NULL_SPTR;
-        return (*status);
-    }
-
+void ser_open_file(serfile** sptr, char* filename, int mode, int* status) {
+    if (!sptr) { return (void)(*status = NULL_SPTR); }
     *sptr = NULL;
 
-    /* filename exists */
-    if (!filename) {
-        *status = NULL_FILENAME;
-        return (*status);
-    }
+    if (!filename) { return (void)(*status = NULL_FILENAME); }
 
-    /**
-     * Filename has valid extension.
-     * This is currently the only check that determined whether or not
-     * a file is valid. A metadata check shoud be implemented in
-     * the future.
-     */
     char* ext = strrchr(filename, '.');
     if (!ext || strncmp(ext, SER_EXT, SER_EXT_LEN)) {
-        *status = INVALID_FILENAME;
-        return (*status);
+        return (void)(*status = INVALID_FILENAME);
     }
 
-    /**
-     * Attempt to open file.
-     * Behavior is set such that it will default to READONLY if not READWRITE,
-     * regardless of whether or not mode = READONLY or mode was invalid.
-     * Can alter behavior to throw an error for an invalid mode.
-     */
     FILE* ser_file;
     if (mode == READWRITE) {
         ser_file = fopen(filename, "r+");
@@ -95,75 +64,56 @@ int ser_open_file(serfile** sptr, char* filename, int mode, int* status) {
         ser_file = fopen(filename, "r"); /* default behavior */
     }
 
-
-    /* check if open was successful */
     if (!ser_file) {
-        *status = FILE_OPEN_ERROR;
-        return (*status);
+        return (void)(*status = FILE_OPEN_ERROR);
     }
 
-    /* allocate memory for serfile structure */
     *sptr = (serfile*)malloc(sizeof(serfile));
     if (!*sptr) {
         fclose(ser_file);
-        *status = MEM_ALLOC;
-        return (*status);
+        return (void)(*status = MEM_ALLOC);
     }
 
-    /* allocate memory for serfile data structure */
     (*sptr)->SER_file = (SERfile*)malloc(sizeof(SERfile));
     if (!(*sptr)->SER_file) {
         fclose(ser_file);
         free(*sptr);
-        *status = MEM_ALLOC;
-        return (*status);
+        return (void)(*status = MEM_ALLOC);
     }
 
-    /* Fill structure data */
-    /* s_file */
     (*sptr)->SER_file->s_file = ser_file;
-
-    /* filename */
     strncpy((*sptr)->SER_file->filename, filename, FILENAME_MAX);
 
-    /* size_in_bytes */
     fseek((*sptr)->SER_file->s_file, 0, SEEK_END);
     long size = ftell((*sptr)->SER_file->s_file);
     fseek((*sptr)->SER_file->s_file, 0, SEEK_SET);
     (*sptr)->SER_file->size_in_bytes = size;
 
-    /* track access mode */
     (*sptr)->SER_file->access_mode = mode;
 
-    return (*status);
+    return;
 }
 
-/** @brief  Close SER file
+/*  @brief  Close SER file
  *
  *  Closes the serfile and frees the structure. Parameter sptr will
  *  be set to NULL.
  *
- *  @param  sptr      (IO) - Pointer to a serfile.
- *  @param  status    (IO) - Error status.
- *  @return Error status.
+ *  @param  sptr      (IO)  - Pointer to a serfile.
+ *  @param  status    (IO)  - Error status.
+ *  @return Void.
  */
-int ser_close_file(serfile* sptr, int* status) {
-    /* sptr exists */
-    if (!sptr) {
-        *status = NULL_SPTR;
-        return (*status);
-    }
+void ser_close_file(serfile* sptr, int* status) {
+    if (!sptr) { return (void)(*status = NULL_SPTR); }
 
-    /* Clear SER structre data */
     if (!sptr->SER_file->s_file || fclose(sptr->SER_file->s_file)) {
         *status = FILE_CLOSE_ERROR;
     }
 
-    /* Free SER structure data and SER file structure */
     free(sptr->SER_file);
     free(sptr);
     sptr = NULL;
 
-    return (*status);
+    return;
 }
 

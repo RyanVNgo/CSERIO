@@ -2,8 +2,15 @@
 
 #include "include/cserio.h"
 
-int main(int argc, char** argv) {
-  float version_num = cserio_version_number(NULL);
-  printf("CSERIO Version - %f\n", version_num);
+
+int main() {
+
+  int major = 0;
+  int minor = 0;
+  int micro = 0;
+  cserio_version_number(&major, &minor, &micro);
+  printf("CSERIO Version: %d.%d.%d\n", major, minor, micro);
+
   return 0;
 }
+

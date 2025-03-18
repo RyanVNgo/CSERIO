@@ -1,82 +1,51 @@
 /** @file header_routines.c
  *  @brief Definitions for header routines
- *
  *  @author Ryan V. Ngo
  */
 
 #include "cserio.h"
 
+
 /*-------------------- Header Routines --------------------*/
 
-/** @brief  Returns number of records in the header
+/*  @brief  Returns number of records in the header
  *
  *  Assigns passed hdr_count integer with number of records
  *  in the header. (Note that as of Version 3 SER files, the
  *  number of records in a header is a constant 13 which makes
  *  up the first 178 bytes of data)
  *
- *  @param  sptr        (I) - Pointer to serfile
- *  @param  rec_count   (IO) - Number of records
- *  @param  status      (IO) - Error status.
- *  @return Error status.
+ *  @param  sptr        (I)   - Pointer to serfile
+ *  @param  rec_count   (IO)  - Number of records
+ *  @param  status      (IO)  - Error status.
+ *  @return Void.
  */
-int ser_get_hdr_count(serfile* sptr, int* rec_count, int* status) {
-    /* sptr exists */
-    if (!sptr) {
-        *status = NULL_SPTR;
-        return (*status);
-    }
-
-    /* rec_count pointer exists */
-    if (!rec_count) {
-        *status = NULL_PARAM;
-        return (*status);
-    }
-
-    /* get number of header records */
-
-    /**
-     * As ov Version 3 SER files, the number of records in a header
-     * is a constant 13 that totals 178 bytes of data.
-     */
+void ser_get_hdr_count(serfile* sptr, int* rec_count, int* status) {
+    if (!sptr) { return (void)(*status = NULL_SPTR); }
+    if (!rec_count) { return (void)(*status = NULL_PARAM); }
     *rec_count = HDR_UNIT_COUNT;
-
-    return (*status);
+    return;
 }
 
-/** @brief  Return data at header idx 
+/*  @brief  Return data at header idx 
  *  
  *  Ensure that the dest buff to which the data will be written
  *  to has enough space to store the data. Refer to the defines in
  *  cserio.h or follow the LEN_(key) format. Note that this method
  *  does a raw data copy to the dest buffer, no conversion is done.
  *
- *  @param  sptr    (I) - Pointer to serfile
- *  @param  dest    (IO) - Destination buffer for header data
- *  @param  idx     (I) - Record index of data to fetch
- *  @param  status  (IO) - Error status.
- *  @return Error status.
+ *  @param  sptr    (I)   - Pointer to serfile
+ *  @param  dest    (IO)  - Destination buffer for header data
+ *  @param  idx     (I)   - Record index of data to fetch
+ *  @param  status  (IO)  - Error status.
+ *  @return Void.
  */
-int ser_get_idx_record(serfile* sptr, void* dest, int idx, int* status) {
-    /* sptr exists */
-    if (!sptr) {
-        *status = NULL_SPTR;
-        return (*status);
-    }
+void ser_get_idx_record(serfile* sptr, void* dest, int idx, int* status) {
+    if (!sptr) { return (void)(*status = NULL_SPTR); }
+    if (!dest) { return (void)(*status = NULL_DEST_BUFF); }
 
-    /* destination buffer exists */
-    if (!dest) {
-        *status = NULL_DEST_BUFF;
-        return (*status);
-    }
+    if (idx < 0 || idx >= HDR_UNIT_COUNT) { return (void)(*status = INVALID_HDR_IDX); }
 
-    /* check if idx is in bounds */
-    if (idx < 0 || idx >= HDR_UNIT_COUNT) {
-        *status = INVALID_HDR_IDX;
-        return (*status);
-    }
-
-    /* get byte length of record */
     int byte_len = 0;
     int fpos = 0;
     switch (idx) {
@@ -134,52 +103,34 @@ int ser_get_idx_record(serfile* sptr, void* dest, int idx, int* status) {
             break;
     }
     
-    /* seek file position of key */
     fseek(sptr->SER_file->s_file, fpos, SEEK_SET);
-
-    /* read out data */
-    int bytes_read = 0; /* to check number of bytes read */
+    int bytes_read = 0;
     bytes_read = fread(dest, 1, byte_len, sptr->SER_file->s_file);
 
-    /* check if an error occured during read */
     if (bytes_read < byte_len) {
-        if (feof(sptr->SER_file->s_file)) {
-            *status = EOF_ERROR;
-        }
-        if (ferror(sptr->SER_file->s_file)) {
-            *status = FREAD_ERROR;
-        }
+        if (feof(sptr->SER_file->s_file)) { *status = EOF_ERROR; }
+        if (ferror(sptr->SER_file->s_file)) { *status = FREAD_ERROR; }
     }
 
-    return (*status);
+    return;
 }
 
-/** @brief  Return data at header key
+/*  @brief  Return data at header key
  *
  *  Ensure that the dest buff to which the data will be written
  *  to has enough space to store the data. Refer to the defines in
  *  header_routines.h or follow the (key)_LEN format.
  *
- *  @param  sptr    (I) - Pointer to serfile
- *  @param  dest    (IO) - Destination buffer for header data
- *  @param  key     (I) - Record key of data to fetch
- *  @param  status  (IO) - Error status.
- *  @return Error status.
+ *  @param  sptr    (I)   - Pointer to serfile
+ *  @param  dest    (IO)  - Destination buffer for header data
+ *  @param  key     (I)   - Record key of data to fetch
+ *  @param  status  (IO)  - Error status.
+ *  @return Void.
  */
-int ser_get_key_record(serfile* sptr, void* dest, int key, int* status) {
-    /* sptr exists */
-    if (!sptr) {
-        *status = NULL_SPTR;
-        return (*status);
-    }
+void ser_get_key_record(serfile* sptr, void* dest, int key, int* status) {
+    if (!sptr) { return (void)(*status = NULL_SPTR); }
+    if (!dest) { return (void)(*status = NULL_DEST_BUFF); }
 
-    /* destination buffer exists */
-    if (!dest) {
-        *status = NULL_DEST_BUFF;
-        return (*status);
-    }
-
-    /* get byte length of record */
     int byte_len = 0;
     switch (key) {
         case FILEID_KEY:
@@ -225,30 +176,18 @@ int ser_get_key_record(serfile* sptr, void* dest, int key, int* status) {
             byte_len = 0;
     }
     
-    /* check that if byte_len was 0, then the key was invalid */
-    if (byte_len == 0) {
-        *status = INVALID_HDR_KEY;
-        return (*status);
-    }
+    if (byte_len == 0) { return (void)(*status = INVALID_HDR_KEY); }
 
-    /* seek file position of key */
     fseek(sptr->SER_file->s_file, key, SEEK_SET);
-
-    /* read out data */
-    int bytes_read = 0; /* to check number of bytes read */
+    int bytes_read = 0;
     bytes_read = fread(dest, 1, byte_len, sptr->SER_file->s_file);
 
-    /* check if an error occured during read */
     if (bytes_read < byte_len) {
-        if (feof(sptr->SER_file->s_file)) {
-            *status = EOF_ERROR;
-        }
-        if (ferror(sptr->SER_file->s_file)) {
-            *status = FREAD_ERROR;
-        }
+        if (feof(sptr->SER_file->s_file)) { *status = EOF_ERROR; }
+        if (ferror(sptr->SER_file->s_file)) { *status = FREAD_ERROR; }
     }
 
-    return (*status);
+    return;
 }
 
 /** @brief  Write data to header idx 
@@ -263,32 +202,12 @@ int ser_get_key_record(serfile* sptr, void* dest, int key, int* status) {
  *  @param  status  (IO)    - Error status.
  *  @return Error status.
  */
-int ser_write_idx_record(serfile* sptr, void* data, int idx, size_t size, int* status) {
-    /* sptr exists */
-    if (!sptr) {
-        *status = NULL_SPTR;
-        return (*status);
-    }
+void ser_write_idx_record(serfile* sptr, void* data, int idx, size_t size, int* status) {
+    if (!sptr) { return (void)(*status = NULL_SPTR); }
+    if (!data) { return (void)(*status = NULL_PARAM); }
+    if (idx < 0 || idx >= HDR_UNIT_COUNT) { return (void)(*status = INVALID_HDR_IDX); }
+    if (sptr->SER_file->access_mode != READWRITE) { return (void)(*status = WRITE_ON_READONLY); }
 
-    /* check if data buffer exists */
-    if (!data) {
-        *status = NULL_PARAM;
-        return (*status);
-    }
-
-    /* check if idx is in bounds */
-    if (idx < 0 || idx >= HDR_UNIT_COUNT) {
-        *status = INVALID_HDR_IDX;
-        return (*status);
-    }
-
-    /* check if file is writable */
-    if (sptr->SER_file->access_mode != READWRITE) {
-        *status = WRITE_ON_READONLY;
-        return (*status);
-    }
-
-    /* get byte length of record */
     size_t max_byte_len = 0;
     int fpos = 0;
     switch (idx) {
@@ -346,16 +265,11 @@ int ser_write_idx_record(serfile* sptr, void* data, int idx, size_t size, int* s
             break;
     }
 
-    /* set number of bytes to write */
     if (size > max_byte_len) size = max_byte_len;
-
-    /* write data to record */
     fseek(sptr->SER_file->s_file, fpos, SEEK_SET);
-    if(fwrite(data, 1, size, sptr->SER_file->s_file) != size) {
-        *status = HDR_WRITE_WARN;
-    }
+    if(fwrite(data, 1, size, sptr->SER_file->s_file) != size) { *status = HDR_WRITE_WARN; }
 
-    return (*status);
+    return;
 }
 
 
@@ -369,29 +283,13 @@ int ser_write_idx_record(serfile* sptr, void* data, int idx, size_t size, int* s
  *  @param  key     (I)     - Record key
  *  @param  size    (I)     - Size of data in bytes
  *  @param  status  (IO)    - Error status.
- *  @return Error status.
+ *  @return Void.
  */
-int ser_write_key_record(serfile* sptr, void* data, int key, size_t size, int* status) {
-    /* sptr exists */
-    if (!sptr) {
-        *status = NULL_SPTR;
-        return (*status);
-    }
+void ser_write_key_record(serfile* sptr, void* data, int key, size_t size, int* status) {
+    if (!sptr) { return (void)(*status = NULL_SPTR); }
+    if (!data) { return (void)(*status = NULL_PARAM); }
+    if (sptr->SER_file->access_mode != READWRITE) { return (void)(*status = WRITE_ON_READONLY); }
 
-    /* check if data buffer exists */
-    if (!data) {
-        *status = NULL_PARAM;
-        return (*status);
-    }
-    
-    /* check if file is writable */
-    if (sptr->SER_file->access_mode != READWRITE) {
-        *status = WRITE_ON_READONLY;
-        return (*status);
-    }
-
-
-    /* get byte length of record */
     int max_byte_len = 0;
     switch (key) {
         case FILEID_KEY:
@@ -437,20 +335,11 @@ int ser_write_key_record(serfile* sptr, void* data, int key, size_t size, int* s
             max_byte_len = 0;
     }
     
-    /* check that if byte_len was 0, then the key was invalid */
-    if (max_byte_len == 0) {
-        *status = INVALID_HDR_KEY;
-        return (*status);
-    }
-
-    /* set number of bytes to write */
+    if (max_byte_len == 0) { return (void)(*status = INVALID_HDR_KEY); }
     if (size > max_byte_len) size = max_byte_len;
 
-    /* write data to record */
     fseek(sptr->SER_file->s_file, key, SEEK_SET);
-    if(fwrite(data, 1, size, sptr->SER_file->s_file) != size) {
-        *status = HDR_WRITE_WARN;
-    }
+    if(fwrite(data, 1, size, sptr->SER_file->s_file) != size) { *status = HDR_WRITE_WARN; }
 
-    return (*status);
+    return;
 }

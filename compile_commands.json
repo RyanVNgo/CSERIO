@@ -1,0 +1,53 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-o",
+      "obj/cserio.o",
+      "src/cserio.c"
+    ],
+    "directory": "/home/ryanvngo/Documents/Coding_Projects/CProjects/CSERIO",
+    "file": "/home/ryanvngo/Documents/Coding_Projects/CProjects/CSERIO/src/cserio.c",
+    "output": "/home/ryanvngo/Documents/Coding_Projects/CProjects/CSERIO/obj/cserio.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-o",
+      "obj/header_routines.o",
+      "src/cserio.c"
+    ],
+    "directory": "/home/ryanvngo/Documents/Coding_Projects/CProjects/CSERIO",
+    "file": "/home/ryanvngo/Documents/Coding_Projects/CProjects/CSERIO/src/cserio.c",
+    "output": "/home/ryanvngo/Documents/Coding_Projects/CProjects/CSERIO/obj/header_routines.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-o",
+      "obj/img_routines.o",
+      "src/cserio.c"
+    ],
+    "directory": "/home/ryanvngo/Documents/Coding_Projects/CProjects/CSERIO",
+    "file": "/home/ryanvngo/Documents/Coding_Projects/CProjects/CSERIO/src/cserio.c",
+    "output": "/home/ryanvngo/Documents/Coding_Projects/CProjects/CSERIO/obj/img_routines.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-std=c99",
+      "-Wall",
+      "-Iinclude",
+      "-c",
+      "-o",
+      "obj/main.o",
+      "main.c"
+    ],
+    "directory": "/home/ryanvngo/Documents/Coding_Projects/CProjects/CSERIO/tests",
+    "file": "/home/ryanvngo/Documents/Coding_Projects/CProjects/CSERIO/tests/main.c",
+    "output": "/home/ryanvngo/Documents/Coding_Projects/CProjects/CSERIO/tests/obj/main.o"
+  }
+]

@@ -1,5 +1,5 @@
-/** @file cserio.h
- *  @brief Core definitions and function prototypes.
+/** @file   cserio.h
+ *  @brief  Core definitions and function prototypes.
  *
  *  This file contains all the core definitions and function 
  *  prototypes for the CSERIO library. This file also serves 
@@ -16,20 +16,12 @@
 #include <stdio.h>
 #include <stdint.h>
 
-/*#################### PUBLIC SYMBOLIC CONSTANTS ####################*/ 
 
 /*-------------------- CSERIO Version --------------------*/
 
-/**
- * For now, ensure that the version defined here matches
- * that one defined in the `configure.ac` file.
- */
-#define CSERIO_VERSION  1.5.0
-#define CSERIO_MAJOR    1
-#define CSERIO_MINOR      5
-#define CSERIO_MICRO        0
-
-/*#################### Errors ####################*/
+#define CSERIO_MAJOR    2
+#define CSERIO_MINOR    0
+#define CSERIO_MICRO    0
 
 /*-------------------- Core Errors --------------------*/
 
@@ -67,8 +59,6 @@
 #define INVALID_DIM_IDX     401
 #define INVALID_FRAME_IDX   402
 
-/*#################### DEFINES, STRUCTURES, AND TYPES ####################*/ 
-
 /*-------------------- SER File Symbolic Constants --------------------*/
 
 #define SER_EXT ".ser"
@@ -89,12 +79,11 @@ typedef int64_t S_INT64;
 
 #define HDR_UNIT_COUNT 13
 
-/**
- * These constants represent the byte length of each header component
- * for V3 SER files.
+/*  These constants represent the byte length of each header component
+ *  for V3 SER files.
  *
- * Note that these values represent the byte length as they are in the
- * SER file.
+ *  Note that these values represent the byte length as they are in the
+ *  SER file.
  */
 #define FILEID_LEN              14
 #define LUID_LEN                4
@@ -110,9 +99,8 @@ typedef int64_t S_INT64;
 #define DATETIME_LEN            8 
 #define DATETIMEUTC_LEN         8 
 
-/**
- * The following functionally operate as the byte intex position 
- * within the SER file.
+/*  The following functionally operate as the byte index position 
+ *  within the SER file.
  */
 #define FILEID_KEY              0
 #define LUID_KEY                14
@@ -128,9 +116,7 @@ typedef int64_t S_INT64;
 #define DATETIME_KEY            162
 #define DATETIMEUTC_KEY         170
 
-/**
- * Color ID types
- */
+/* Color ID types */
 #define MONO          0
 #define BAYER_RGGB    8
 #define BAYER_GRBG    9
@@ -143,9 +129,7 @@ typedef int64_t S_INT64;
 #define RGB           100
 #define BGR           101
 
-/**
- * Little Endian types
- */
+/* Little Endian types */
 #define LITTLEENDIAN_TRUE   1
 #define LITTLEENDIAN_FALSE  0
 
@@ -159,6 +143,10 @@ typedef int DIM_TYPE;
 
 /*-------------------- SER Structure --------------------*/
 
+/*  SERfile is the core data structure that permits the access and
+ *  modification of SER files. This structure should not be directly
+ *  utilized by the user.
+ */
 typedef struct SERfile {
   FILE* s_file;
   char filename[FILENAME_MAX];
@@ -167,38 +155,43 @@ typedef struct SERfile {
 } SERfile;
 
 
+/*  serfile is the primary data structure that users should utilize
+ *  to interact with SER files. This structure should only be utilized
+ *  and modified by methods provided in this library. Utilization and
+ *  modificaiton of this structure by the user should be considered
+ *  undefined behavior.
+ */
 typedef struct serfile {
   SERfile* SER_file;
 } serfile;
 
-/*#################### PUBLIC FUNCTION PROTOTYPES ####################*/ 
-
 /*-------------------- Core Routines --------------------*/
 
-float cserio_version_number(float* version);
+void cserio_version_number(int* major, int* minor, int* micro);
 
 /*-------------------- File Access Routines --------------------*/
 
-int ser_open_file(serfile** sptr, char* filename, int mode, int* status);
-int ser_close_file(serfile* sptr, int* status);
+void ser_open_file(serfile** sptr, char* filename, int mode, int* status);
+void ser_close_file(serfile* sptr, int* status);
 
 /*-------------------- Header Routines --------------------*/
 
-int ser_get_hdr_count(serfile* sptr, int* rec_count, int* status);
-int ser_get_idx_record(serfile* sptr, void* dest, int idx, int* status);
-int ser_get_key_record(serfile* sptr, void* dest, int key, int* status);
+void ser_get_hdr_count(serfile* sptr, int* rec_count, int* status);
+void ser_get_idx_record(serfile* sptr, void* dest, int idx, int* status);
+void ser_get_key_record(serfile* sptr, void* dest, int key, int* status);
 
-int ser_write_idx_record(serfile* sptr, void* data, int idx, size_t size, int* status);
-int ser_write_key_record(serfile* sptr, void* data, int key, size_t size, int* status);
+void ser_write_idx_record(serfile* sptr, void* data, int idx, size_t size, int* status);
+void ser_write_key_record(serfile* sptr, void* data, int key, size_t size, int* status);
 
 /*-------------------- Image Routines --------------------*/
 
-int ser_get_frame_count(serfile* sptr, int* frame_count, int* status);
-int ser_get_frame_dim_size(serfile* sptr, int* size, int dim, int* status);
+void ser_get_frame_count(serfile* sptr, int* frame_count, int* status);
+void ser_get_frame_dim_size(serfile* sptr, int* size, int dim, int* status);
 
-int ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int* status); 
-int ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* status);
+void ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int* status); 
+void ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* status);
 
-int ser_read_frame(serfile* sptr, void* dest, int idx, int* status);
+void ser_read_frame(serfile* sptr, void* dest, int idx, int* status);
 
 #endif
+
