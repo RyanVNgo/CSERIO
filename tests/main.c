@@ -1,7 +1,11 @@
+
 #include <stdio.h>
 
-#include "include/cserio.h"
+#if defined(UNITY_TEST)
+#define CSERIO_IMPLEMENTATION
+#endif
 
+#include "../cserio.h"
 
 int main() {
 

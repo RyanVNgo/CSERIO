@@ -1,31 +1,27 @@
 CC = gcc
-CFLAGS = -std=c99 -Wall -Iinclude
-LDFLAGS = -Llib -lcserio
+CFLAGS = -std=c99 -Wall
 
 SRC_FILES = $(wildcard *.c)
 
-OBJ_DIR	= obj
-OBJ_FILES = $(patsubst %.c, $(OBJ_DIR)/%.o, $(SRC_FILES))
+UNITY_TARGET = unity_test_base
+PRECOMP_TARGET = precomp_test_base
 
-TARGET = cserio_test
+all: $(UNITY_TARGET) $(PRECOMP_TARGET)
 
-all: $(TARGET)
+$(UNITY_TARGET):
+	$(CC) -DUNITY_TEST main.c -o $@
 
-$(TARGET) : $(OBJ_FILES)
-	$(CC) $^ -o $@ $(LDFLAGS)
+$(PRECOMP_TARGET):
+	$(CC) -DCSERIO_IMPLEMENTATION -x c -c ../cserio.h
+	$(CC) $(SRC_FILES) cserio.o -o $@
 
-$(OBJ_FILES) : $(SRC_FILES) | $(OBJ_DIR)
-	$(CC) $(CFLAGS) -c $(SRC_FILES) -o $@
-
-$(OBJ_DIR) :
-	mkdir -p $(OBJ_DIR)
-
-run: $(TARGET)
-	./$(TARGET)
+run:
+	./$(UNITY_TARGET)
+	./$(PRECOMP_TARGET)
 
 clean:
-	rm -v -f $(OBJ_FILES)
-	rm -v -d -f $(OBJ_DIR)
-	rm -v -f $(TARGET)
+	rm -v cserio.o
+	rm -v $(UNITY_TARGET) $(PRECOMP_TARGET)
 
 .PHONY: all run clean
+
