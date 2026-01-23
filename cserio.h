@@ -1,11 +1,8 @@
 /** @file   cserio.h
- *  @brief  Core definitions and function prototypes.
+ *  @brief  Library definitions and function implementations.
  *
- *  This file contains all the core definitions and function 
- *  prototypes for the CSERIO library. This file also serves 
- *  as the primary entry point for the library meaning
- *  including this file should be all that is necessary to
- *  utilize the entire CSERIO library.
+ *  This file contains all library definitions and function 
+ *  implementations for the CSERIO library.
  *
  *  @author Ryan V. Ngo
  */
@@ -150,9 +147,8 @@ typedef int DIM_TYPE;
  *  utilized by the user.
  */
 typedef struct SERfile {
-  FILE* s_file;
-  char filename[FILENAME_MAX];
-  long size_in_bytes;
+  void* io_context;
+  size_t (*reader)(void* io_context, void* buffer, size_t size, size_t offset);
   int access_mode;
 } SERfile;
 
@@ -167,6 +163,8 @@ typedef struct serfile {
   SERfile* SER_file;
 } serfile;
 
+
+
 /*------------------------------------------------------------------*/
 /* CSERIO Definitions */ 
 /*------------------------------------------------------------------*/
@@ -179,6 +177,11 @@ void cserio_version_number(int* major, int* minor, int* micro);
 
 void ser_open_file(serfile** sptr, char* filename, int mode, int* status);
 void ser_close_file(serfile* sptr, int* status);
+
+/*-------------------- Memory Access Routines --------------------*/
+
+void ser_open_memory(serfile** sptr, uint8_t* data, size_t size, int* status);
+void ser_close_memory(serfile* sptr, int* status);
 
 /*-------------------- Header Routines --------------------*/
 
@@ -201,11 +204,93 @@ void ser_read_frame(serfile* sptr, void* dest, int idx, int* status);
 
 
 /*------------------------------------------------------------------*/
+/* Testing Components */ 
+/*------------------------------------------------------------------*/
+
+/*
+#define SER_TESTING
+#define CSERIO_IMPLEMENTATION
+*/
+
+
+#if defined(SER_TESTING)
+
+typedef struct {
+  const uint8_t* data;
+  size_t size;
+} serMem;
+
+static size_t ser_memory_read(void* io_context, void* buffer, size_t size, size_t offset) {
+  serMem* memory_io = (serMem*)(io_context);
+
+  if (memory_io->size < offset) {
+    return 0;
+  }
+
+  if (memory_io->size < offset + size) {
+    size_t cut_size = memory_io->size - offset;
+    memcpy(buffer, memory_io->data + offset, cut_size);
+    return cut_size;
+  }
+
+  memcpy(buffer, memory_io->data + offset, size);
+  return size;
+}
+
+void ser_open_memory(serfile** sptr, uint8_t* data, size_t size, int* status) {
+    if (!sptr) {
+      return (void)(*status = NULL_SPTR);
+    }
+
+    *sptr = (serfile*)malloc(sizeof(serfile));
+    if (!*sptr) {
+        return (void)(*status = MEM_ALLOC);
+    }
+
+
+    (*sptr)->SER_file = (SERfile*)malloc(sizeof(SERfile));
+    if (!(*sptr)->SER_file) {
+        free(*sptr);
+        return (void)(*status = MEM_ALLOC);
+    }
+
+    serMem* ser_data = (serMem*)malloc(sizeof(serMem));
+    ser_data->data = data;
+    ser_data->size = size;
+
+    (*sptr)->SER_file->io_context = ser_data;
+    (*sptr)->SER_file->reader = ser_memory_read;
+    (*sptr)->SER_file->access_mode = READWRITE;
+    return;
+}
+
+void ser_close_memory(serfile* sptr, int* status) {
+    if (!sptr) { 
+      return (void)(*status = NULL_SPTR); 
+    }
+
+    free(sptr->SER_file);
+    free(sptr);
+    sptr = NULL;
+
+    return;
+}
+
+#endif
+
+/*------------------------------------------------------------------*/
 /* CSERIO Implementation */ 
 /*------------------------------------------------------------------*/
 
-// #define CSERIO_IMPLEMENTATION
 #if defined(CSERIO_IMPLEMENTATION)
+
+/*-------------------- Internal Helpers --------------------*/
+
+static size_t ser_file_read(void* io_context, void* buffer, size_t size, size_t offset) {
+  FILE* file_io = (FILE*)io_context;
+  fseek(file_io, offset, SEEK_SET);
+  return fread(buffer, 1, size, file_io);
+}
 
 /*-------------------- Core Routines --------------------*/
 
@@ -280,14 +365,8 @@ void ser_open_file(serfile** sptr, char* filename, int mode, int* status) {
         return (void)(*status = MEM_ALLOC);
     }
 
-    (*sptr)->SER_file->s_file = ser_file;
-    strncpy((*sptr)->SER_file->filename, filename, FILENAME_MAX);
-
-    fseek((*sptr)->SER_file->s_file, 0, SEEK_END);
-    long size = ftell((*sptr)->SER_file->s_file);
-    fseek((*sptr)->SER_file->s_file, 0, SEEK_SET);
-    (*sptr)->SER_file->size_in_bytes = size;
-
+    (*sptr)->SER_file->io_context = ser_file;
+    (*sptr)->SER_file->reader = ser_file_read;
     (*sptr)->SER_file->access_mode = mode;
 
     return;
@@ -303,16 +382,17 @@ void ser_open_file(serfile** sptr, char* filename, int mode, int* status) {
  *  @return Void.
  */
 void ser_close_file(serfile* sptr, int* status) {
-    if (!sptr) { return (void)(*status = NULL_SPTR); }
+    if (!sptr) { 
+      return (void)(*status = NULL_SPTR); 
+    }
 
-    if (!sptr->SER_file->s_file || fclose(sptr->SER_file->s_file)) {
+    if (!sptr->SER_file->io_context || fclose((FILE*)sptr->SER_file->io_context)) {
         *status = FILE_CLOSE_ERROR;
     }
 
     free(sptr->SER_file);
     free(sptr);
     sptr = NULL;
-
 
     return;
 }
@@ -414,14 +494,14 @@ void ser_get_idx_record(serfile* sptr, void* dest, int idx, int* status) {
             break;
     }
     
-    fseek(sptr->SER_file->s_file, fpos, SEEK_SET);
-    int bytes_read = 0;
-    bytes_read = fread(dest, 1, byte_len, sptr->SER_file->s_file);
+    int bytes_read = sptr->SER_file->reader(sptr->SER_file->io_context, dest, byte_len, fpos);
 
+    /*
     if (bytes_read < byte_len) {
-        if (feof(sptr->SER_file->s_file)) { *status = EOF_ERROR; }
-        if (ferror(sptr->SER_file->s_file)) { *status = FREAD_ERROR; }
+        if (feof(sptr->SER_file->io_context)) { *status = EOF_ERROR; }
+        if (ferror(sptr->SER_file->io_context)) { *status = FREAD_ERROR; }
     }
+    */
 
     return;
 }
@@ -489,13 +569,13 @@ void ser_get_key_record(serfile* sptr, void* dest, int key, int* status) {
     
     if (byte_len == 0) { return (void)(*status = INVALID_HDR_KEY); }
 
-    fseek(sptr->SER_file->s_file, key, SEEK_SET);
+    fseek(sptr->SER_file->io_context, key, SEEK_SET);
     int bytes_read = 0;
-    bytes_read = fread(dest, 1, byte_len, sptr->SER_file->s_file);
+    bytes_read = fread(dest, 1, byte_len, sptr->SER_file->io_context);
 
     if (bytes_read < byte_len) {
-        if (feof(sptr->SER_file->s_file)) { *status = EOF_ERROR; }
-        if (ferror(sptr->SER_file->s_file)) { *status = FREAD_ERROR; }
+        if (feof(sptr->SER_file->io_context)) { *status = EOF_ERROR; }
+        if (ferror(sptr->SER_file->io_context)) { *status = FREAD_ERROR; }
     }
 
     return;
@@ -577,8 +657,8 @@ void ser_write_idx_record(serfile* sptr, void* data, int idx, size_t size, int* 
     }
 
     if (size > max_byte_len) size = max_byte_len;
-    fseek(sptr->SER_file->s_file, fpos, SEEK_SET);
-    if(fwrite(data, 1, size, sptr->SER_file->s_file) != size) { *status = HDR_WRITE_WARN; }
+    fseek(sptr->SER_file->io_context, fpos, SEEK_SET);
+    if(fwrite(data, 1, size, sptr->SER_file->io_context) != size) { *status = HDR_WRITE_WARN; }
 
     return;
 }
@@ -649,8 +729,8 @@ void ser_write_key_record(serfile* sptr, void* data, int key, size_t size, int* 
     if (max_byte_len == 0) { return (void)(*status = INVALID_HDR_KEY); }
     if (size > max_byte_len) size = max_byte_len;
 
-    fseek(sptr->SER_file->s_file, key, SEEK_SET);
-    if(fwrite(data, 1, size, sptr->SER_file->s_file) != size) { *status = HDR_WRITE_WARN; }
+    fseek(sptr->SER_file->io_context, key, SEEK_SET);
+    if(fwrite(data, 1, size, sptr->SER_file->io_context) != size) { *status = HDR_WRITE_WARN; }
 
     return;
 }
@@ -823,14 +903,14 @@ void ser_read_frame(serfile* sptr, void* dest, int idx, int* status) {
     if (intern_status) { return (void)(*status = INTERN_CALL_ERROR); }
 
     unsigned long frame_offset = DATA_START_SET + (frame_byte_size * idx);
-    fseek(sptr->SER_file->s_file, frame_offset, SEEK_SET);
+    fseek(sptr->SER_file->io_context, frame_offset, SEEK_SET);
 
     int bytes_read = 0;
-    bytes_read = fread(dest, 1, frame_byte_size, sptr->SER_file->s_file);
+    bytes_read = fread(dest, 1, frame_byte_size, sptr->SER_file->io_context);
 
     if (bytes_read < frame_byte_size) {
-        if (feof(sptr->SER_file->s_file)) { *status = EOF_ERROR; }
-        if (ferror(sptr->SER_file->s_file)) { *status = FREAD_ERROR; }
+        if (feof(sptr->SER_file->io_context)) { *status = EOF_ERROR; }
+        if (ferror(sptr->SER_file->io_context)) { *status = FREAD_ERROR; }
     }
 
     return;

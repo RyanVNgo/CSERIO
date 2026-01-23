@@ -12,7 +12,7 @@ $(UNITY_TARGET):
 	$(CC) -DUNITY_TEST main.c -o $@
 
 $(PRECOMP_TARGET):
-	$(CC) -DCSERIO_IMPLEMENTATION -x c -c ../cserio.h
+	$(CC) -DSER_TESTING -DCSERIO_IMPLEMENTATION  -x c -c ../cserio.h
 	$(CC) $(SRC_FILES) cserio.o -o $@
 
 run:
