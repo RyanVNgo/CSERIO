@@ -33,6 +33,7 @@
 
 #define EOF_ERROR           110
 #define FREAD_ERROR         111
+#define READ_ERROR          112
 
 #define INTERN_CALL_ERROR   121
 
@@ -149,6 +150,7 @@ typedef int DIM_TYPE;
 typedef struct SERfile {
   void* io_context;
   size_t (*reader)(void* io_context, void* buffer, size_t size, size_t offset);
+  size_t (*writer)(void* io_context, void* data, size_t size, size_t offset);
   int access_mode;
 } SERfile;
 
@@ -216,7 +218,7 @@ void ser_read_frame(serfile* sptr, void* dest, int idx, int* status);
 #if defined(SER_TESTING)
 
 typedef struct {
-  const uint8_t* data;
+  uint8_t* data;
   size_t size;
 } serMem;
 
@@ -234,6 +236,25 @@ static size_t ser_memory_read(void* io_context, void* buffer, size_t size, size_
   }
 
   memcpy(buffer, memory_io->data + offset, size);
+
+  return size;
+}
+
+static size_t ser_memory_write(void* io_context, void* data, size_t size, size_t offset) {
+  serMem* memory_io = (serMem*)(io_context);
+
+  if (memory_io->size < offset) {
+    return 0;
+  }
+
+  if (memory_io->size < offset + size) {
+    size_t cut_size = memory_io->size - offset;
+    memcpy(memory_io->data + offset, data, cut_size);
+    return cut_size;
+  }
+
+  memcpy(memory_io->data + offset, data, size);
+
   return size;
 }
 
@@ -260,7 +281,9 @@ void ser_open_memory(serfile** sptr, uint8_t* data, size_t size, int* status) {
 
     (*sptr)->SER_file->io_context = ser_data;
     (*sptr)->SER_file->reader = ser_memory_read;
+    (*sptr)->SER_file->writer = ser_memory_write;
     (*sptr)->SER_file->access_mode = READWRITE;
+
     return;
 }
 
@@ -290,6 +313,12 @@ static size_t ser_file_read(void* io_context, void* buffer, size_t size, size_t 
   FILE* file_io = (FILE*)io_context;
   fseek(file_io, offset, SEEK_SET);
   return fread(buffer, 1, size, file_io);
+}
+
+static size_t ser_file_write(void* io_context, void* data, size_t size, size_t offset) {
+  FILE* file_io = (FILE*)io_context;
+  fseek(file_io, offset, SEEK_SET);
+  return fwrite(data, 1, size, file_io);
 }
 
 /*-------------------- Core Routines --------------------*/
@@ -367,6 +396,7 @@ void ser_open_file(serfile** sptr, char* filename, int mode, int* status) {
 
     (*sptr)->SER_file->io_context = ser_file;
     (*sptr)->SER_file->reader = ser_file_read;
+    (*sptr)->SER_file->writer = ser_file_write;
     (*sptr)->SER_file->access_mode = mode;
 
     return;
@@ -412,8 +442,14 @@ void ser_close_file(serfile* sptr, int* status) {
  *  @return Void.
  */
 void ser_get_hdr_count(serfile* sptr, int* rec_count, int* status) {
-    if (!sptr) { return (void)(*status = NULL_SPTR); }
-    if (!rec_count) { return (void)(*status = NULL_PARAM); }
+    if (!sptr) { 
+      return (void)(*status = NULL_SPTR); 
+    }
+
+    if (!rec_count) { 
+      return (void)(*status = NULL_PARAM); 
+    }
+
     *rec_count = HDR_UNIT_COUNT;
     return;
 }
@@ -494,14 +530,11 @@ void ser_get_idx_record(serfile* sptr, void* dest, int idx, int* status) {
             break;
     }
     
-    int bytes_read = sptr->SER_file->reader(sptr->SER_file->io_context, dest, byte_len, fpos);
-
-    /*
+    SERfile* sfile = sptr->SER_file;
+    int bytes_read = sfile->reader(sfile->io_context, dest, byte_len, fpos);
     if (bytes_read < byte_len) {
-        if (feof(sptr->SER_file->io_context)) { *status = EOF_ERROR; }
-        if (ferror(sptr->SER_file->io_context)) { *status = FREAD_ERROR; }
+      *status = READ_ERROR;
     }
-    */
 
     return;
 }
@@ -567,15 +600,15 @@ void ser_get_key_record(serfile* sptr, void* dest, int key, int* status) {
             byte_len = 0;
     }
     
-    if (byte_len == 0) { return (void)(*status = INVALID_HDR_KEY); }
+    if (byte_len == 0) { 
+      return (void)(*status = INVALID_HDR_KEY); 
+    }
 
-    fseek(sptr->SER_file->io_context, key, SEEK_SET);
-    int bytes_read = 0;
-    bytes_read = fread(dest, 1, byte_len, sptr->SER_file->io_context);
+    SERfile* sfile = sptr->SER_file;
+    int bytes_read = sfile->reader(sfile->io_context, dest, byte_len, key);
 
     if (bytes_read < byte_len) {
-        if (feof(sptr->SER_file->io_context)) { *status = EOF_ERROR; }
-        if (ferror(sptr->SER_file->io_context)) { *status = FREAD_ERROR; }
+      *status = READ_ERROR;
     }
 
     return;
@@ -656,9 +689,15 @@ void ser_write_idx_record(serfile* sptr, void* data, int idx, size_t size, int* 
             break;
     }
 
-    if (size > max_byte_len) size = max_byte_len;
-    fseek(sptr->SER_file->io_context, fpos, SEEK_SET);
-    if(fwrite(data, 1, size, sptr->SER_file->io_context) != size) { *status = HDR_WRITE_WARN; }
+    if (size > max_byte_len) {
+      size = max_byte_len;
+    }
+
+    SERfile* sfile = sptr->SER_file;
+    size_t bytes_written = sfile->writer(sfile->io_context, data, size, fpos);
+    if (bytes_written != size) {
+      *status = HDR_WRITE_WARN;
+    }
 
     return;
 }
@@ -726,16 +765,24 @@ void ser_write_key_record(serfile* sptr, void* data, int key, size_t size, int* 
             max_byte_len = 0;
     }
     
-    if (max_byte_len == 0) { return (void)(*status = INVALID_HDR_KEY); }
-    if (size > max_byte_len) size = max_byte_len;
+    if (max_byte_len == 0) { 
+      return (void)(*status = INVALID_HDR_KEY); 
+    }
 
-    fseek(sptr->SER_file->io_context, key, SEEK_SET);
-    if(fwrite(data, 1, size, sptr->SER_file->io_context) != size) { *status = HDR_WRITE_WARN; }
+    if (size > max_byte_len) {
+      size = max_byte_len;
+    }
+
+    SERfile* sfile = sptr->SER_file;
+    size_t bytes_written = sfile->writer(sfile->io_context, data, size, key);
+    if (bytes_written != size) {
+      *status = HDR_WRITE_WARN;
+    }
 
     return;
 }
 
-/*-------------------- Hidden Image Symbolic Constants --------------------*/
+/*-------------------- Image Symbolic Constants --------------------*/
 
 /* Currently, all SER file frames have just 3 dimensions. */
 #define MIN_DIM_IDX 0
@@ -752,17 +799,23 @@ void ser_write_key_record(serfile* sptr, void* data, int key, size_t size, int* 
  *  @return Void.
  */
 void ser_get_frame_count(serfile* sptr, int* frame_count, int* status) {
-    /* sptr exists */
-    if (!sptr) { return (void)(*status = NULL_SPTR); }
+    if (!sptr) { 
+      return (void)(*status = NULL_SPTR); 
+    }
 
-    /* frame_count pointer exists */
-    if (!frame_count) { return (void)(*status = NULL_PARAM); }
+    if (!frame_count) { 
+      return (void)(*status = NULL_PARAM); 
+    }
 
     /* get frame count from header */
-    int intern_status= 0;
+    int intern_status = 0;
     int temp_frame_count = 0;
     ser_get_key_record(sptr, &temp_frame_count, FRAMECOUNT_KEY, &intern_status);
-    if (intern_status) { return (void)(*status = INTERN_CALL_ERROR); }
+
+    if (intern_status) { 
+      return (void)(*status = INTERN_CALL_ERROR); 
+    }
+    
     *frame_count = temp_frame_count;
 
     return;
@@ -776,9 +829,17 @@ void ser_get_frame_count(serfile* sptr, int* frame_count, int* status) {
  *  @return Void
  */
 void ser_get_frame_dim_size(serfile* sptr, int* size, DIM_TYPE dim, int* status) {
-    if (!sptr) { return (void)(*status = NULL_SPTR); }
-    if (!size) { return (void)(*status = NULL_PARAM); }
-    if (dim < MIN_DIM_IDX || dim > MAX_DIM_IDX) { return (void)(*status = INVALID_DIM_IDX); }
+    if (!sptr) { 
+      return (void)(*status = NULL_SPTR); 
+    }
+
+    if (!size) { 
+      return (void)(*status = NULL_PARAM); 
+    }
+
+    if (dim < MIN_DIM_IDX || dim > MAX_DIM_IDX) { 
+      return (void)(*status = INVALID_DIM_IDX); 
+    }
 
     int key = 0;
     switch (dim) {
@@ -797,7 +858,9 @@ void ser_get_frame_dim_size(serfile* sptr, int* size, DIM_TYPE dim, int* status)
     int intern_status = 0;
     int temp_size = 0;
     ser_get_key_record(sptr, &temp_size, key, &intern_status);
-    if (intern_status) { return (void)(*status = INTERN_CALL_ERROR); }
+    if (intern_status) { 
+      return (void)(*status = INTERN_CALL_ERROR); 
+    }
     *size = temp_size;
     
     /*  If the first dimension is called, then size will
@@ -825,18 +888,27 @@ void ser_get_frame_dim_size(serfile* sptr, int* size, DIM_TYPE dim, int* status)
  *  @return Error status.
  */
 void ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int* status) {
-    if (!sptr) { return (void)(*status = NULL_SPTR); }
-    if (!bytes_per_pixel) { return (void)(*status = NULL_PARAM); }
+    if (!sptr) { 
+      return (void)(*status = NULL_SPTR); 
+    }
+
+    if (!bytes_per_pixel) { 
+      return (void)(*status = NULL_PARAM); 
+    }
 
     int intern_status = 0;
     int color_ID = 0;
     ser_get_key_record(sptr, &color_ID, COLORID_KEY, &intern_status);
-    if (intern_status) { return (void)(*status = INTERN_CALL_ERROR); }
+    if (intern_status) { 
+      return (void)(*status = INTERN_CALL_ERROR); 
+    }
     int number_of_planes = color_ID < 100? 1 : 3;
 
     int pixel_depth = 0;
     ser_get_key_record(sptr, &pixel_depth, PIXELDEPTHPERPLANE_KEY, &intern_status);
-    if (intern_status) { return (void)(*status = INTERN_CALL_ERROR); }
+    if (intern_status) { 
+      return (void)(*status = INTERN_CALL_ERROR); 
+    }
 
     if (pixel_depth <= 8) {
         *bytes_per_pixel = number_of_planes; /* 1 byte per pixel */
@@ -854,21 +926,32 @@ void ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int*
  *  @return Error status.
  */
 void ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* status) {
-    if (!sptr) { return (void)(*status = NULL_SPTR); }
-    if (!byte_size) { return (void)(*status = NULL_PARAM); }
+    if (!sptr) { 
+      return (void)(*status = NULL_SPTR); 
+    }
+
+    if (!byte_size) { 
+      return (void)(*status = NULL_PARAM); 
+    }
 
     int intern_status = 0;
     unsigned long bytes_per_pixel = 0;
     ser_get_bytes_per_pixel(sptr, &bytes_per_pixel, &intern_status);
-    if (intern_status) { return (void)(*status = INTERN_CALL_ERROR); }
+    if (intern_status) { 
+      return (void)(*status = INTERN_CALL_ERROR); 
+    }
 
     int width = 0;
     ser_get_key_record(sptr, &width, IMAGEWIDTH_KEY, &intern_status);
-    if (intern_status) { return (void)(*status = INTERN_CALL_ERROR); }
+    if (intern_status) { 
+      return (void)(*status = INTERN_CALL_ERROR); 
+    }
 
     int height = 0;
     ser_get_key_record(sptr, &height, IMAGEHEIGHT_KEY, &intern_status);
-    if (intern_status) { return (void)(*status = INTERN_CALL_ERROR); }
+    if (intern_status) { 
+      return (void)(*status = INTERN_CALL_ERROR); 
+    }
 
     *byte_size = bytes_per_pixel * width * height;
 
@@ -888,29 +971,37 @@ void ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* statu
  *  @return Error status.
  */
 void ser_read_frame(serfile* sptr, void* dest, int idx, int* status) {
-    if (!sptr) { return (void)(*status = NULL_SPTR); }
-    if (!dest) { return (void)(*status = NULL_DEST_BUFF); }
+    if (!sptr) { 
+      return (void)(*status = NULL_SPTR); 
+    }
+
+    if (!dest) { 
+      return (void)(*status = NULL_DEST_BUFF); 
+    }
 
     int intern_status = 0;
     int frame_count = 0;
     ser_get_key_record(sptr, &frame_count, FRAMECOUNT_KEY, &intern_status);
-    if (intern_status) { return (void)(*status = INTERN_CALL_ERROR); }
+    if (intern_status) { 
+      return (void)(*status = INTERN_CALL_ERROR); 
+    }
 
-    if (idx < 0 || idx >= frame_count) { return (void)(*status = INVALID_FRAME_IDX); }
+    if (idx < 0 || idx >= frame_count) {
+      return (void)(*status = INVALID_FRAME_IDX); 
+    }
 
     unsigned long frame_byte_size = 0;
     ser_get_frame_byte_size(sptr, &frame_byte_size, &intern_status);
-    if (intern_status) { return (void)(*status = INTERN_CALL_ERROR); }
+    if (intern_status) { 
+      return (void)(*status = INTERN_CALL_ERROR); 
+    }
 
     unsigned long frame_offset = DATA_START_SET + (frame_byte_size * idx);
-    fseek(sptr->SER_file->io_context, frame_offset, SEEK_SET);
 
-    int bytes_read = 0;
-    bytes_read = fread(dest, 1, frame_byte_size, sptr->SER_file->io_context);
-
+    SERfile* sfile = sptr->SER_file;
+    int bytes_read = sfile->reader(sfile->io_context, dest, frame_byte_size, frame_offset);
     if (bytes_read < frame_byte_size) {
-        if (feof(sptr->SER_file->io_context)) { *status = EOF_ERROR; }
-        if (ferror(sptr->SER_file->io_context)) { *status = FREAD_ERROR; }
+      *status = READ_ERROR;
     }
 
     return;
