@@ -35,8 +35,6 @@
 #define FREAD_ERROR         111
 #define READ_ERROR          112
 
-#define INTERN_CALL_ERROR   121
-
 #define WRITE_ON_READONLY   131
 
 /*-------------------- File Access Errors --------------------*/
@@ -148,10 +146,10 @@ typedef int DIM_TYPE;
  *  utilized by the user.
  */
 typedef struct SERfile {
-  void* io_context;
-  size_t (*reader)(void* io_context, void* buffer, size_t size, size_t offset);
-  size_t (*writer)(void* io_context, void* data, size_t size, size_t offset);
-  int access_mode;
+    void* io_context;
+    size_t (*reader)(void* io_context, void* buffer, size_t size, size_t offset);
+    size_t (*writer)(void* io_context, void* data, size_t size, size_t offset);
+    int access_mode;
 } SERfile;
 
 
@@ -162,7 +160,7 @@ typedef struct SERfile {
  *  undefined behavior.
  */
 typedef struct serfile {
-  SERfile* SER_file;
+    SERfile* SER_file;
 } serfile;
 
 
@@ -175,15 +173,13 @@ typedef struct serfile {
 
 void cserio_version_number(int* major, int* minor, int* micro);
 
-/*-------------------- File Access Routines --------------------*/
+/*-------------------- SER Access Routines --------------------*/
+
+void ser_open_memory(serfile** sptr, uint8_t* data, size_t size, int mode, int* status);
+void ser_close_memory(serfile* sptr, int* status);
 
 void ser_open_file(serfile** sptr, char* filename, int mode, int* status);
 void ser_close_file(serfile* sptr, int* status);
-
-/*-------------------- Memory Access Routines --------------------*/
-
-void ser_open_memory(serfile** sptr, uint8_t* data, size_t size, int* status);
-void ser_close_memory(serfile* sptr, int* status);
 
 /*-------------------- Header Routines --------------------*/
 
@@ -206,68 +202,117 @@ void ser_read_frame(serfile* sptr, void* dest, int idx, int* status);
 
 
 /*------------------------------------------------------------------*/
-/* Testing Components */ 
+/* CSERIO Implementation */ 
 /*------------------------------------------------------------------*/
 
 /*
-#define SER_TESTING
 #define CSERIO_IMPLEMENTATION
 */
 
+#if defined(CSERIO_IMPLEMENTATION)
 
-#if defined(SER_TESTING)
+/*-------------------- Internal Helpers --------------------*/
 
 typedef struct {
-  uint8_t* data;
-  size_t size;
+    uint8_t* data;
+    size_t size;
 } serMem;
 
 static size_t ser_memory_read(void* io_context, void* buffer, size_t size, size_t offset) {
-  serMem* memory_io = (serMem*)(io_context);
+    serMem* memory_io = (serMem*)(io_context);
 
-  if (memory_io->size < offset) {
-    return 0;
-  }
+    if (memory_io->size < offset) {
+        return 0;
+    }
 
-  if (memory_io->size < offset + size) {
-    size_t cut_size = memory_io->size - offset;
-    memcpy(buffer, memory_io->data + offset, cut_size);
-    return cut_size;
-  }
+    if (memory_io->size < offset + size) {
+        size_t cut_size = memory_io->size - offset;
+        memcpy(buffer, memory_io->data + offset, cut_size);
+        return cut_size;
+    }
 
-  memcpy(buffer, memory_io->data + offset, size);
+    memcpy(buffer, memory_io->data + offset, size);
 
-  return size;
+    return size;
 }
 
 static size_t ser_memory_write(void* io_context, void* data, size_t size, size_t offset) {
-  serMem* memory_io = (serMem*)(io_context);
+    serMem* memory_io = (serMem*)(io_context);
 
-  if (memory_io->size < offset) {
-    return 0;
-  }
+    if (memory_io->size < offset) {
+        return 0;
+    }
 
-  if (memory_io->size < offset + size) {
-    size_t cut_size = memory_io->size - offset;
-    memcpy(memory_io->data + offset, data, cut_size);
-    return cut_size;
-  }
+    if (memory_io->size < offset + size) {
+        size_t cut_size = memory_io->size - offset;
+        memcpy(memory_io->data + offset, data, cut_size);
+        return cut_size;
+    }
 
-  memcpy(memory_io->data + offset, data, size);
+    memcpy(memory_io->data + offset, data, size);
 
-  return size;
+    return size;
 }
 
-void ser_open_memory(serfile** sptr, uint8_t* data, size_t size, int* status) {
+static size_t ser_file_read(void* io_context, void* buffer, size_t size, size_t offset) {
+    FILE* file_io = (FILE*)io_context;
+    fseek(file_io, offset, SEEK_SET);
+    return fread(buffer, 1, size, file_io);
+}
+
+static size_t ser_file_write(void* io_context, void* data, size_t size, size_t offset) {
+    FILE* file_io = (FILE*)io_context;
+    fseek(file_io, offset, SEEK_SET);
+    return fwrite(data, 1, size, file_io);
+}
+
+
+/*-------------------- Core Routines --------------------*/
+
+/*  @brief  Provides the Major, Minor, and Micro numbers for
+ *          the current version of CSERIO.
+ *  @param  major     (IO)  - Pointer to Major int.
+ *  @param  minor     (IO)  - Pointer to Minor int.
+ *  @param  micro     (IO)  - Pointer to Micro int.
+ *  @return Void.
+ */
+void cserio_version_number(int* major, int* minor, int* micro) {
+    if (major) {
+        *major = CSERIO_MAJOR;
+    }
+    if (minor) {
+        *minor = CSERIO_MINOR;
+    }
+    if (micro) {
+        *micro = CSERIO_MICRO;
+    }
+    return;
+}
+
+
+/*-------------------- SER Access Routines --------------------*/
+
+/*  @brief  Opens in-memory SER file.
+ *
+ *  For when a SER file is located in memory. Note that the input
+ *  data must persist so long as it is opened to the serfile.
+ *  Currently supports readwrite only.
+ *
+ *  @param  sptr      (IO)  - Pointer to a pointer of a serfile.
+ *  @param  data      (I)   - Pointer to in-memory SER file.
+ *  @param  size      (I)   - Size of in-memory SER file.
+ *  @param  status    (IO)  - Error status.
+ *  @return Void.
+ */
+void ser_open_memory(serfile** sptr, uint8_t* data, size_t size, int mode, int* status) {
     if (!sptr) {
-      return (void)(*status = NULL_SPTR);
+        return (void)(*status = NULL_SPTR);
     }
 
     *sptr = (serfile*)malloc(sizeof(serfile));
     if (!*sptr) {
         return (void)(*status = MEM_ALLOC);
     }
-
 
     (*sptr)->SER_file = (SERfile*)malloc(sizeof(SERfile));
     if (!(*sptr)->SER_file) {
@@ -282,14 +327,27 @@ void ser_open_memory(serfile** sptr, uint8_t* data, size_t size, int* status) {
     (*sptr)->SER_file->io_context = ser_data;
     (*sptr)->SER_file->reader = ser_memory_read;
     (*sptr)->SER_file->writer = ser_memory_write;
-    (*sptr)->SER_file->access_mode = READWRITE;
+
+    if (mode != READWRITE) {
+        mode = READONLY;
+    }
+    (*sptr)->SER_file->access_mode = mode;
 
     return;
 }
 
+/*  @brief  Close in-memory SER file
+ *
+ *  Closes the serfile and frees the structure. Parameter sptr will
+ *  be set to NULL.
+ *
+ *  @param  sptr      (IO)  - Pointer to a serfile.
+ *  @param  status    (IO)  - Error status.
+ *  @return Void.
+ */
 void ser_close_memory(serfile* sptr, int* status) {
     if (!sptr) { 
-      return (void)(*status = NULL_SPTR); 
+        return (void)(*status = NULL_SPTR); 
     }
 
     free(sptr->SER_file);
@@ -298,52 +356,6 @@ void ser_close_memory(serfile* sptr, int* status) {
 
     return;
 }
-
-#endif
-
-/*------------------------------------------------------------------*/
-/* CSERIO Implementation */ 
-/*------------------------------------------------------------------*/
-
-#if defined(CSERIO_IMPLEMENTATION)
-
-/*-------------------- Internal Helpers --------------------*/
-
-static size_t ser_file_read(void* io_context, void* buffer, size_t size, size_t offset) {
-  FILE* file_io = (FILE*)io_context;
-  fseek(file_io, offset, SEEK_SET);
-  return fread(buffer, 1, size, file_io);
-}
-
-static size_t ser_file_write(void* io_context, void* data, size_t size, size_t offset) {
-  FILE* file_io = (FILE*)io_context;
-  fseek(file_io, offset, SEEK_SET);
-  return fwrite(data, 1, size, file_io);
-}
-
-/*-------------------- Core Routines --------------------*/
-
-/*  @brief  Provides the Major, Minor, and Micro numbers for
- *          the current version of CSERIO.
- *  @param  major     (IO)  - Pointer to Major int.
- *  @param  minor     (IO)  - Pointer to Minor int.
- *  @param  micro     (IO)  - Pointer to Micro int.
- *  @return Void.
- */
-void cserio_version_number(int* major, int* minor, int* micro) {
-    if (major) {
-      *major = CSERIO_MAJOR;
-    }
-    if (minor) {
-      *minor = CSERIO_MINOR;
-    }
-    if (micro) {
-      *micro = CSERIO_MICRO;
-    }
-    return;
-}
-
-/*-------------------- File Access Routines --------------------*/
 
 /*  @brief  Opens SER file
  *
@@ -358,11 +370,11 @@ void cserio_version_number(int* major, int* minor, int* micro) {
  */
 void ser_open_file(serfile** sptr, char* filename, int mode, int* status) {
     if (!sptr) {
-      return (void)(*status = NULL_SPTR);
+        return (void)(*status = NULL_SPTR);
     }
 
     if (!filename) {
-      return (void)(*status = NULL_FILENAME);
+        return (void)(*status = NULL_FILENAME);
     }
 
     char* ext = strrchr(filename, '.');
@@ -375,6 +387,7 @@ void ser_open_file(serfile** sptr, char* filename, int mode, int* status) {
         ser_file = fopen(filename, "r+");
     } else {
         ser_file = fopen(filename, "r"); /* default behavior */
+        mode = READONLY;
     }
 
     if (!ser_file) {
@@ -413,7 +426,7 @@ void ser_open_file(serfile** sptr, char* filename, int mode, int* status) {
  */
 void ser_close_file(serfile* sptr, int* status) {
     if (!sptr) { 
-      return (void)(*status = NULL_SPTR); 
+        return (void)(*status = NULL_SPTR); 
     }
 
     if (!sptr->SER_file->io_context || fclose((FILE*)sptr->SER_file->io_context)) {
@@ -443,11 +456,11 @@ void ser_close_file(serfile* sptr, int* status) {
  */
 void ser_get_hdr_count(serfile* sptr, int* rec_count, int* status) {
     if (!sptr) { 
-      return (void)(*status = NULL_SPTR); 
+        return (void)(*status = NULL_SPTR); 
     }
 
     if (!rec_count) { 
-      return (void)(*status = NULL_PARAM); 
+        return (void)(*status = NULL_PARAM); 
     }
 
     *rec_count = HDR_UNIT_COUNT;
@@ -529,11 +542,11 @@ void ser_get_idx_record(serfile* sptr, void* dest, int idx, int* status) {
             fpos = DATETIMEUTC_KEY;
             break;
     }
-    
+
     SERfile* sfile = sptr->SER_file;
     int bytes_read = sfile->reader(sfile->io_context, dest, byte_len, fpos);
     if (bytes_read < byte_len) {
-      *status = READ_ERROR;
+        *status = READ_ERROR;
     }
 
     return;
@@ -552,8 +565,13 @@ void ser_get_idx_record(serfile* sptr, void* dest, int idx, int* status) {
  *  @return Void.
  */
 void ser_get_key_record(serfile* sptr, void* dest, int key, int* status) {
-    if (!sptr) { return (void)(*status = NULL_SPTR); }
-    if (!dest) { return (void)(*status = NULL_DEST_BUFF); }
+    if (!sptr) { 
+        return (void)(*status = NULL_SPTR); 
+    }
+
+    if (!dest) { 
+        return (void)(*status = NULL_DEST_BUFF); 
+    }
 
     int byte_len = 0;
     switch (key) {
@@ -599,16 +617,16 @@ void ser_get_key_record(serfile* sptr, void* dest, int key, int* status) {
         default:
             byte_len = 0;
     }
-    
+
     if (byte_len == 0) { 
-      return (void)(*status = INVALID_HDR_KEY); 
+        return (void)(*status = INVALID_HDR_KEY); 
     }
 
     SERfile* sfile = sptr->SER_file;
     int bytes_read = sfile->reader(sfile->io_context, dest, byte_len, key);
 
     if (bytes_read < byte_len) {
-      *status = READ_ERROR;
+        *status = READ_ERROR;
     }
 
     return;
@@ -627,10 +645,21 @@ void ser_get_key_record(serfile* sptr, void* dest, int key, int* status) {
  *  @return Error status.
  */
 void ser_write_idx_record(serfile* sptr, void* data, int idx, size_t size, int* status) {
-    if (!sptr) { return (void)(*status = NULL_SPTR); }
-    if (!data) { return (void)(*status = NULL_PARAM); }
-    if (idx < 0 || idx >= HDR_UNIT_COUNT) { return (void)(*status = INVALID_HDR_IDX); }
-    if (sptr->SER_file->access_mode != READWRITE) { return (void)(*status = WRITE_ON_READONLY); }
+    if (!sptr) { 
+        return (void)(*status = NULL_SPTR); 
+    }
+
+    if (!data) { 
+        return (void)(*status = NULL_PARAM); 
+    }
+
+    if (idx < 0 || idx >= HDR_UNIT_COUNT) { 
+        return (void)(*status = INVALID_HDR_IDX); 
+    }
+
+    if (sptr->SER_file->access_mode != READWRITE) { 
+        return (void)(*status = WRITE_ON_READONLY); 
+    }
 
     size_t max_byte_len = 0;
     int fpos = 0;
@@ -690,18 +719,17 @@ void ser_write_idx_record(serfile* sptr, void* data, int idx, size_t size, int* 
     }
 
     if (size > max_byte_len) {
-      size = max_byte_len;
+        size = max_byte_len;
     }
 
     SERfile* sfile = sptr->SER_file;
     size_t bytes_written = sfile->writer(sfile->io_context, data, size, fpos);
     if (bytes_written != size) {
-      *status = HDR_WRITE_WARN;
+        *status = HDR_WRITE_WARN;
     }
 
     return;
 }
-
 
 /** @brief  Write data to header key
  *  
@@ -716,9 +744,17 @@ void ser_write_idx_record(serfile* sptr, void* data, int idx, size_t size, int* 
  *  @return Void.
  */
 void ser_write_key_record(serfile* sptr, void* data, int key, size_t size, int* status) {
-    if (!sptr) { return (void)(*status = NULL_SPTR); }
-    if (!data) { return (void)(*status = NULL_PARAM); }
-    if (sptr->SER_file->access_mode != READWRITE) { return (void)(*status = WRITE_ON_READONLY); }
+    if (!sptr) { 
+        return (void)(*status = NULL_SPTR); 
+    }
+
+    if (!data) { 
+        return (void)(*status = NULL_PARAM); 
+    }
+
+    if (sptr->SER_file->access_mode != READWRITE) { 
+        return (void)(*status = WRITE_ON_READONLY); 
+    }
 
     int max_byte_len = 0;
     switch (key) {
@@ -764,19 +800,19 @@ void ser_write_key_record(serfile* sptr, void* data, int key, size_t size, int* 
         default:
             max_byte_len = 0;
     }
-    
+
     if (max_byte_len == 0) { 
-      return (void)(*status = INVALID_HDR_KEY); 
+        return (void)(*status = INVALID_HDR_KEY); 
     }
 
     if (size > max_byte_len) {
-      size = max_byte_len;
+        size = max_byte_len;
     }
 
     SERfile* sfile = sptr->SER_file;
     size_t bytes_written = sfile->writer(sfile->io_context, data, size, key);
     if (bytes_written != size) {
-      *status = HDR_WRITE_WARN;
+        *status = HDR_WRITE_WARN;
     }
 
     return;
@@ -800,22 +836,21 @@ void ser_write_key_record(serfile* sptr, void* data, int key, size_t size, int* 
  */
 void ser_get_frame_count(serfile* sptr, int* frame_count, int* status) {
     if (!sptr) { 
-      return (void)(*status = NULL_SPTR); 
+        return (void)(*status = NULL_SPTR); 
     }
 
     if (!frame_count) { 
-      return (void)(*status = NULL_PARAM); 
+        return (void)(*status = NULL_PARAM); 
     }
 
     /* get frame count from header */
-    int intern_status = 0;
     int temp_frame_count = 0;
-    ser_get_key_record(sptr, &temp_frame_count, FRAMECOUNT_KEY, &intern_status);
+    ser_get_key_record(sptr, &temp_frame_count, FRAMECOUNT_KEY, status);
 
-    if (intern_status) { 
-      return (void)(*status = INTERN_CALL_ERROR); 
+    if (status) { 
+        return;
     }
-    
+
     *frame_count = temp_frame_count;
 
     return;
@@ -830,15 +865,15 @@ void ser_get_frame_count(serfile* sptr, int* frame_count, int* status) {
  */
 void ser_get_frame_dim_size(serfile* sptr, int* size, DIM_TYPE dim, int* status) {
     if (!sptr) { 
-      return (void)(*status = NULL_SPTR); 
+        return (void)(*status = NULL_SPTR); 
     }
 
     if (!size) { 
-      return (void)(*status = NULL_PARAM); 
+        return (void)(*status = NULL_PARAM); 
     }
 
     if (dim < MIN_DIM_IDX || dim > MAX_DIM_IDX) { 
-      return (void)(*status = INVALID_DIM_IDX); 
+        return (void)(*status = INVALID_DIM_IDX); 
     }
 
     int key = 0;
@@ -855,14 +890,13 @@ void ser_get_frame_dim_size(serfile* sptr, int* size, DIM_TYPE dim, int* status)
     }
 
     /* get size from header */
-    int intern_status = 0;
     int temp_size = 0;
-    ser_get_key_record(sptr, &temp_size, key, &intern_status);
-    if (intern_status) { 
-      return (void)(*status = INTERN_CALL_ERROR); 
+    ser_get_key_record(sptr, &temp_size, key, status);
+    if (status) { 
+        return;
     }
     *size = temp_size;
-    
+
     /*  If the first dimension is called, then size will
      *  be set to the color ID of the SER, the size of the
      *  dimension is derived from the color ID by the
@@ -889,25 +923,24 @@ void ser_get_frame_dim_size(serfile* sptr, int* size, DIM_TYPE dim, int* status)
  */
 void ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int* status) {
     if (!sptr) { 
-      return (void)(*status = NULL_SPTR); 
+        return (void)(*status = NULL_SPTR); 
     }
 
     if (!bytes_per_pixel) { 
-      return (void)(*status = NULL_PARAM); 
+        return (void)(*status = NULL_PARAM); 
     }
 
-    int intern_status = 0;
     int color_ID = 0;
-    ser_get_key_record(sptr, &color_ID, COLORID_KEY, &intern_status);
-    if (intern_status) { 
-      return (void)(*status = INTERN_CALL_ERROR); 
+    ser_get_key_record(sptr, &color_ID, COLORID_KEY, status);
+    if (status) { 
+        return; 
     }
     int number_of_planes = color_ID < 100? 1 : 3;
 
     int pixel_depth = 0;
-    ser_get_key_record(sptr, &pixel_depth, PIXELDEPTHPERPLANE_KEY, &intern_status);
-    if (intern_status) { 
-      return (void)(*status = INTERN_CALL_ERROR); 
+    ser_get_key_record(sptr, &pixel_depth, PIXELDEPTHPERPLANE_KEY, status);
+    if (status) { 
+        return; 
     }
 
     if (pixel_depth <= 8) {
@@ -927,30 +960,29 @@ void ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int*
  */
 void ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* status) {
     if (!sptr) { 
-      return (void)(*status = NULL_SPTR); 
+        return (void)(*status = NULL_SPTR); 
     }
 
     if (!byte_size) { 
-      return (void)(*status = NULL_PARAM); 
+        return (void)(*status = NULL_PARAM); 
     }
 
-    int intern_status = 0;
     unsigned long bytes_per_pixel = 0;
-    ser_get_bytes_per_pixel(sptr, &bytes_per_pixel, &intern_status);
-    if (intern_status) { 
-      return (void)(*status = INTERN_CALL_ERROR); 
+    ser_get_bytes_per_pixel(sptr, &bytes_per_pixel, status);
+    if (status) { 
+        return;
     }
 
     int width = 0;
-    ser_get_key_record(sptr, &width, IMAGEWIDTH_KEY, &intern_status);
-    if (intern_status) { 
-      return (void)(*status = INTERN_CALL_ERROR); 
+    ser_get_key_record(sptr, &width, IMAGEWIDTH_KEY, status);
+    if (status) { 
+        return; 
     }
 
     int height = 0;
-    ser_get_key_record(sptr, &height, IMAGEHEIGHT_KEY, &intern_status);
-    if (intern_status) { 
-      return (void)(*status = INTERN_CALL_ERROR); 
+    ser_get_key_record(sptr, &height, IMAGEHEIGHT_KEY, status);
+    if (status) { 
+        return;
     }
 
     *byte_size = bytes_per_pixel * width * height;
@@ -972,28 +1004,27 @@ void ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* statu
  */
 void ser_read_frame(serfile* sptr, void* dest, int idx, int* status) {
     if (!sptr) { 
-      return (void)(*status = NULL_SPTR); 
+        return (void)(*status = NULL_SPTR); 
     }
 
     if (!dest) { 
-      return (void)(*status = NULL_DEST_BUFF); 
+        return (void)(*status = NULL_DEST_BUFF); 
     }
 
-    int intern_status = 0;
     int frame_count = 0;
-    ser_get_key_record(sptr, &frame_count, FRAMECOUNT_KEY, &intern_status);
-    if (intern_status) { 
-      return (void)(*status = INTERN_CALL_ERROR); 
+    ser_get_key_record(sptr, &frame_count, FRAMECOUNT_KEY, status);
+    if (status) { 
+        return; 
     }
 
     if (idx < 0 || idx >= frame_count) {
-      return (void)(*status = INVALID_FRAME_IDX); 
+        return (void)(*status = INVALID_FRAME_IDX); 
     }
 
     unsigned long frame_byte_size = 0;
-    ser_get_frame_byte_size(sptr, &frame_byte_size, &intern_status);
-    if (intern_status) { 
-      return (void)(*status = INTERN_CALL_ERROR); 
+    ser_get_frame_byte_size(sptr, &frame_byte_size, status);
+    if (status) { 
+        return; 
     }
 
     unsigned long frame_offset = DATA_START_SET + (frame_byte_size * idx);
@@ -1001,7 +1032,7 @@ void ser_read_frame(serfile* sptr, void* dest, int idx, int* status) {
     SERfile* sfile = sptr->SER_file;
     int bytes_read = sfile->reader(sfile->io_context, dest, frame_byte_size, frame_offset);
     if (bytes_read < frame_byte_size) {
-      *status = READ_ERROR;
+        *status = READ_ERROR;
     }
 
     return;
