@@ -6,6 +6,7 @@
 
 #include "../cserio.h"
 
+
 typedef struct __attribute__((__packed__)) DummySERFile {
   char file_id[14];
   int32_t lu_id;
@@ -22,8 +23,8 @@ typedef struct __attribute__((__packed__)) DummySERFile {
   int64_t date_time_utc;
 } DummySERFile;
 
-static DummySERFile test_data = {
-  "LUCAM_RECORDER",
+static const DummySERFile test_data = {
+  "LUCAM-RECORDER",
   0,
   0,
   0,
