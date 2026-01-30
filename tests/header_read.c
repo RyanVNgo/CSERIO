@@ -1,5 +1,6 @@
 
 #include <check.h>
+#include <time.h>
 
 #include "ser_test_data.h"
 
@@ -8,198 +9,179 @@
 
 void header_read_setup() {
     int status;
-    ser_open_memory(&test_ser, (uint8_t*)&test_data, sizeof(test_data), READONLY, &status);
+    ser_open_memory(
+            &readonly_test_ser,
+            (uint8_t*)&readonly_test_data,
+            sizeof(readonly_test_data),
+            READONLY,
+            &status
+    );
 }
 
 void header_read_teardown() {
     int status;
-    ser_close_memory(test_ser, &status);
+    ser_close_memory(readonly_test_ser, &status);
 }
 
 START_TEST(idx_record_reading_success) {
     int status = 0;
-    DummySERFile check_ser;
-
-    int key_map[HDR_UNIT_COUNT] = {
-        FILEID_KEY              ,
-        LUID_KEY                ,
-        COLORID_KEY             ,
-        LITTLEENDIAN_KEY        ,
-        IMAGEWIDTH_KEY          ,
-        IMAGEHEIGHT_KEY         ,
-        PIXELDEPTHPERPLANE_KEY  ,
-        FRAMECOUNT_KEY          ,
-        OBSERVER_KEY            , 
-        INSTRUMENT_KEY          , 
-        TELESCOPE_KEY           , 
-        DATETIME_KEY            ,
-        DATETIMEUTC_KEY         
-    };
-
-    int len_map[HDR_UNIT_COUNT] = {
-        FILEID_LEN              ,
-        LUID_LEN                ,
-        COLORID_LEN             ,
-        LITTLEENDIAN_LEN        ,
-        IMAGEWIDTH_LEN          ,
-        IMAGEHEIGHT_LEN         ,
-        PIXELDEPTHPERPLANE_LEN  ,
-        FRAMECOUNT_LEN          ,
-        OBSERVER_LEN            , 
-        INSTRUMENT_LEN          , 
-        TELESCOPE_LEN           , 
-        DATETIME_LEN            ,
-        DATETIMEUTC_LEN         
-    };
+    SERHdrStructure check_hdr = {0};
 
     for (size_t i = 0; i < HDR_UNIT_COUNT; i++) {
-        ser_get_idx_record(test_ser, ((uint8_t*)&check_ser) + key_map[i], i, &status);
+        ser_get_idx_record(readonly_test_ser, ((uint8_t*)&check_hdr) + key_map[i], i, &status);
         ck_assert_int_eq(status, NO_ERROR);
         ck_assert_mem_eq(
-                ((uint8_t*)&test_data) + key_map[i], 
-                ((uint8_t*)&check_ser) + key_map[i], 
+                ((uint8_t*)&readonly_test_data) + key_map[i], 
+                ((uint8_t*)&check_hdr) + key_map[i], 
                 len_map[i]
-                );
+        );
     }
 
 } END_TEST
 
-START_TEST(idx_record_reading_null_ser) {
+START_TEST(idx_record_reading_oob_idx) {
     int status = 0;
-    DummySERFile check_ser;
+    SERHdrStructure check_hdr = {0};
+    const SERHdrStructure blank_hdr = {0};
 
-    int key_map[HDR_UNIT_COUNT] = {
-        FILEID_KEY              ,
-        LUID_KEY                ,
-        COLORID_KEY             ,
-        LITTLEENDIAN_KEY        ,
-        IMAGEWIDTH_KEY          ,
-        IMAGEHEIGHT_KEY         ,
-        PIXELDEPTHPERPLANE_KEY  ,
-        FRAMECOUNT_KEY          ,
-        OBSERVER_KEY            , 
-        INSTRUMENT_KEY          , 
-        TELESCOPE_KEY           , 
-        DATETIME_KEY            ,
-        DATETIMEUTC_KEY         
-    };
-
+    /* under bound */
+    ser_get_idx_record(
+            readonly_test_ser,
+            ((uint8_t*)&check_hdr),
+            -1,
+            &status
+    );
+    ck_assert_int_ne(status, NO_ERROR);
     for (size_t i = 0; i < HDR_UNIT_COUNT; i++) {
-        ser_get_idx_record(NULL, ((uint8_t*)&check_ser) + key_map[i], i, &status);
-        ck_assert_int_ne(status, NO_ERROR);
+        ck_assert_mem_eq(
+                ((uint8_t*)&check_hdr) + key_map[i],
+                ((uint8_t*)&blank_hdr) + key_map[i],
+                len_map[i]
+        );
+    }
+
+    /* over bound */
+    ser_get_idx_record(
+            readonly_test_ser,
+            ((uint8_t*)&check_hdr),
+            HDR_UNIT_COUNT + 1,
+            &status
+    );
+    ck_assert_int_ne(status, NO_ERROR);
+    for (size_t i = 0; i < HDR_UNIT_COUNT; i++) {
+        ck_assert_mem_eq(
+                ((uint8_t*)&check_hdr) + key_map[i],
+                ((uint8_t*)&blank_hdr) + key_map[i],
+                len_map[i]
+        );
     }
 
 } END_TEST
 
 START_TEST(idx_record_reading_null_dest) {
     int status = 0;
-    DummySERFile check_ser;
 
     for (size_t i = 0; i < HDR_UNIT_COUNT; i++) {
-        ser_get_idx_record(test_ser, NULL, i, &status);
+        ser_get_idx_record(readonly_test_ser, NULL, i, &status);
         ck_assert_int_ne(status, NO_ERROR);
+    }
+
+} END_TEST
+
+START_TEST(idx_record_reading_null_ser) {
+    int status = 0;
+    SERHdrStructure check_hdr = {0};
+    const SERHdrStructure blank_hdr = {0};
+
+    for (size_t i = 0; i < HDR_UNIT_COUNT; i++) {
+        ser_get_idx_record(NULL, ((uint8_t*)&check_hdr) + key_map[i] , i, &status);
+        ck_assert_int_ne(status, NO_ERROR);
+    }
+
+    for (size_t i = 0; i < HDR_UNIT_COUNT; i++) {
+        ck_assert_mem_eq(
+                ((uint8_t*)&check_hdr) + key_map[i],
+                ((uint8_t*)&blank_hdr) + key_map[i],
+                len_map[i]
+        );
     }
 
 } END_TEST
 
 START_TEST(key_record_reading_success) {
     int status = 0;
-    DummySERFile check_ser;
-
-    int key_map[HDR_UNIT_COUNT] = {
-        FILEID_KEY              ,
-        LUID_KEY                ,
-        COLORID_KEY             ,
-        LITTLEENDIAN_KEY        ,
-        IMAGEWIDTH_KEY          ,
-        IMAGEHEIGHT_KEY         ,
-        PIXELDEPTHPERPLANE_KEY  ,
-        FRAMECOUNT_KEY          ,
-        OBSERVER_KEY            , 
-        INSTRUMENT_KEY          , 
-        TELESCOPE_KEY           , 
-        DATETIME_KEY            ,
-        DATETIMEUTC_KEY         
-    };
-
-    int len_map[HDR_UNIT_COUNT] = {
-        FILEID_LEN              ,
-        LUID_LEN                ,
-        COLORID_LEN             ,
-        LITTLEENDIAN_LEN        ,
-        IMAGEWIDTH_LEN          ,
-        IMAGEHEIGHT_LEN         ,
-        PIXELDEPTHPERPLANE_LEN  ,
-        FRAMECOUNT_LEN          ,
-        OBSERVER_LEN            , 
-        INSTRUMENT_LEN          , 
-        TELESCOPE_LEN           , 
-        DATETIME_LEN            ,
-        DATETIMEUTC_LEN         
-    };
+    SERHdrStructure check_hdr = {0};
 
     for (size_t i = 0; i < HDR_UNIT_COUNT; i++) {
-        ser_get_key_record(test_ser, ((uint8_t*)&check_ser) + key_map[i], key_map[i], &status);
+        ser_get_key_record(
+                readonly_test_ser,
+                ((uint8_t*)&check_hdr) + key_map[i],
+                key_map[i],
+                &status
+        );
+
         ck_assert_int_eq(status, NO_ERROR);
         ck_assert_mem_eq(
-                ((uint8_t*)&test_data) + key_map[i], 
-                ((uint8_t*)&check_ser) + key_map[i], 
+                ((uint8_t*)&readonly_test_data) + key_map[i], 
+                ((uint8_t*)&check_hdr) + key_map[i], 
                 len_map[i]
-                );
+        );
     }
 
 } END_TEST
 
-START_TEST(key_record_reading_null_ser) {
+START_TEST(key_record_reading_invalid_key) {
     int status = 0;
-    DummySERFile check_ser;
+    SERHdrStructure check_hdr = {0};
+    const SERHdrStructure blank_hdr = {0};
 
-    int key_map[HDR_UNIT_COUNT] = {
-        FILEID_KEY              ,
-        LUID_KEY                ,
-        COLORID_KEY             ,
-        LITTLEENDIAN_KEY        ,
-        IMAGEWIDTH_KEY          ,
-        IMAGEHEIGHT_KEY         ,
-        PIXELDEPTHPERPLANE_KEY  ,
-        FRAMECOUNT_KEY          ,
-        OBSERVER_KEY            , 
-        INSTRUMENT_KEY          , 
-        TELESCOPE_KEY           , 
-        DATETIME_KEY            ,
-        DATETIMEUTC_KEY         
-    };
+    int invalid_keys[3] = {-1, 213, FILEID_KEY + 1};
+    for (size_t i = 0; i < 3; i++) {
+        ser_get_key_record(
+                readonly_test_ser, 
+                ((uint8_t*)&check_hdr) + key_map[i],
+                invalid_keys[i],
+                &status
+        );
 
-    for (size_t i = 0; i < HDR_UNIT_COUNT; i++) {
-        ser_get_key_record(NULL, ((uint8_t*)&check_ser) + key_map[i], key_map[i], &status);
         ck_assert_int_ne(status, NO_ERROR);
+        for (size_t j = 0; j < HDR_UNIT_COUNT; j++) {
+            ck_assert_mem_eq(
+                    ((uint8_t*)&check_hdr) + key_map[j],
+                    ((uint8_t*)&blank_hdr) + key_map[j],
+                    len_map[j]
+            );
+        }
     }
 
 } END_TEST
 
 START_TEST(key_record_reading_null_dest) {
     int status = 0;
-    DummySERFile check_ser;
-
-    int key_map[HDR_UNIT_COUNT] = {
-        FILEID_KEY              ,
-        LUID_KEY                ,
-        COLORID_KEY             ,
-        LITTLEENDIAN_KEY        ,
-        IMAGEWIDTH_KEY          ,
-        IMAGEHEIGHT_KEY         ,
-        PIXELDEPTHPERPLANE_KEY  ,
-        FRAMECOUNT_KEY          ,
-        OBSERVER_KEY            , 
-        INSTRUMENT_KEY          , 
-        TELESCOPE_KEY           , 
-        DATETIME_KEY            ,
-        DATETIMEUTC_KEY         
-    };
 
     for (size_t i = 0; i < HDR_UNIT_COUNT; i++) {
-        ser_get_key_record(test_ser, NULL, key_map[i], &status);
+        ser_get_key_record(readonly_test_ser, NULL, key_map[i], &status);
         ck_assert_int_ne(status, NO_ERROR);
+    }
+
+} END_TEST
+
+START_TEST(key_record_reading_null_ser) {
+    int status = 0;
+    SERHdrStructure check_hdr = {0};
+    const SERHdrStructure blank_hdr = {0};
+
+    for (size_t i = 0; i < HDR_UNIT_COUNT; i++) {
+        ser_get_key_record(NULL, ((uint8_t*)&check_hdr) + key_map[i], key_map[i], &status);
+        ck_assert_int_ne(status, NO_ERROR);
+    }
+
+    for (size_t i = 0; i < HDR_UNIT_COUNT; i++) {
+        ck_assert_mem_eq(
+                ((uint8_t*)&check_hdr) + key_map[i],
+                ((uint8_t*)&blank_hdr) + key_map[i],
+                len_map[i]
+        );
     }
 
 } END_TEST
@@ -212,16 +194,18 @@ Suite* header_read_suite() {
     tc_idx_record = tcase_create("idx_record");
     tcase_add_checked_fixture(tc_idx_record, header_read_setup, header_read_teardown);
     tcase_add_test(tc_idx_record, idx_record_reading_success);
-    tcase_add_test(tc_idx_record, idx_record_reading_null_ser);
+    tcase_add_test(tc_idx_record, idx_record_reading_oob_idx);
     tcase_add_test(tc_idx_record, idx_record_reading_null_dest);
+    tcase_add_test(tc_idx_record, idx_record_reading_null_ser);
     suite_add_tcase(s, tc_idx_record);
 
     TCase* tc_key_record;
     tc_key_record = tcase_create("key_record");
     tcase_add_checked_fixture(tc_key_record, header_read_setup, header_read_teardown);
     tcase_add_test(tc_key_record, key_record_reading_success);
-    tcase_add_test(tc_key_record, key_record_reading_null_ser);
+    tcase_add_test(tc_key_record, key_record_reading_invalid_key);
     tcase_add_test(tc_key_record, key_record_reading_null_dest);
+    tcase_add_test(tc_key_record, key_record_reading_null_ser);
     suite_add_tcase(s, tc_key_record);
 
     return s;

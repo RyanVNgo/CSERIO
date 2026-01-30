@@ -7,7 +7,7 @@
 #include "../cserio.h"
 
 
-typedef struct __attribute__((__packed__)) DummySERFile {
+typedef struct __attribute__((__packed__)) SERHdrStructure {
   char file_id[14];
   int32_t lu_id;
   int32_t color_id;
@@ -21,25 +21,58 @@ typedef struct __attribute__((__packed__)) DummySERFile {
   char telescope[TELESCOPE_LEN];
   int64_t date_time;
   int64_t date_time_utc;
-} DummySERFile;
+} SERHdrStructure;
 
-static const DummySERFile test_data = {
+static const SERHdrStructure readonly_test_data = {
   "LUCAM-RECORDER",
   0,
-  0,
-  0,
+  8,
+  1,
   50,
   50,
   1,
-  0,
+  -1,
   "test_observer",
   "test_instrument",
   "test_telescope",
-  -1, 
-  0
+  0x08d126583cd43bb0,
+  0x08d126583cd43bb0
 };
 
-static serfile* test_ser;
+static serfile* readonly_test_ser;
+
+const int key_map[HDR_UNIT_COUNT] = {
+    FILEID_KEY              ,
+    LUID_KEY                ,
+    COLORID_KEY             ,
+    LITTLEENDIAN_KEY        ,
+    IMAGEWIDTH_KEY          ,
+    IMAGEHEIGHT_KEY         ,
+    PIXELDEPTHPERPLANE_KEY  ,
+    FRAMECOUNT_KEY          ,
+    OBSERVER_KEY            , 
+    INSTRUMENT_KEY          , 
+    TELESCOPE_KEY           , 
+    DATETIME_KEY            ,
+    DATETIMEUTC_KEY         
+};
+
+const int len_map[HDR_UNIT_COUNT] = {
+    FILEID_LEN              ,
+    LUID_LEN                ,
+    COLORID_LEN             ,
+    LITTLEENDIAN_LEN        ,
+    IMAGEWIDTH_LEN          ,
+    IMAGEHEIGHT_LEN         ,
+    PIXELDEPTHPERPLANE_LEN  ,
+    FRAMECOUNT_LEN          ,
+    OBSERVER_LEN            , 
+    INSTRUMENT_LEN          , 
+    TELESCOPE_LEN           , 
+    DATETIME_LEN            ,
+    DATETIMEUTC_LEN         
+};
+
 
 #endif
 
