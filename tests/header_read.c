@@ -28,7 +28,12 @@ START_TEST(idx_record_reading_success) {
     SERHdrStructure check_hdr = {0};
 
     for (size_t i = 0; i < HDR_UNIT_COUNT; i++) {
-        ser_get_idx_record(readonly_test_ser, ((uint8_t*)&check_hdr) + key_map[i], i, &status);
+        ser_get_idx_record(
+                readonly_test_ser,
+                ((uint8_t*)&check_hdr) + key_map[i],
+                i,
+                &status
+        );
         ck_assert_int_eq(status, NO_ERROR);
         ck_assert_mem_eq(
                 ((uint8_t*)&readonly_test_data) + key_map[i], 
@@ -94,7 +99,12 @@ START_TEST(idx_record_reading_null_ser) {
     const SERHdrStructure blank_hdr = {0};
 
     for (size_t i = 0; i < HDR_UNIT_COUNT; i++) {
-        ser_get_idx_record(NULL, ((uint8_t*)&check_hdr) + key_map[i] , i, &status);
+        ser_get_idx_record(
+                NULL,
+                ((uint8_t*)&check_hdr) + key_map[i],
+                i,
+                &status
+        );
         ck_assert_int_ne(status, NO_ERROR);
     }
 
@@ -172,7 +182,12 @@ START_TEST(key_record_reading_null_ser) {
     const SERHdrStructure blank_hdr = {0};
 
     for (size_t i = 0; i < HDR_UNIT_COUNT; i++) {
-        ser_get_key_record(NULL, ((uint8_t*)&check_hdr) + key_map[i], key_map[i], &status);
+        ser_get_key_record(
+                NULL,
+                ((uint8_t*)&check_hdr) + key_map[i],
+                key_map[i],
+                &status
+        );
         ck_assert_int_ne(status, NO_ERROR);
     }
 

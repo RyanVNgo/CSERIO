@@ -17,7 +17,13 @@ START_TEST(version_check) {
 START_TEST(open_memory) {
     serfile* test_ser;
     int status = 0;
-    ser_open_memory(&test_ser, (uint8_t*)&readonly_test_data, sizeof(readonly_test_data), READWRITE, &status);
+    ser_open_memory(
+            &test_ser,
+            (uint8_t*)&readonly_test_data, 
+            sizeof(readonly_test_data),
+            READWRITE,
+            &status
+    );
     ck_assert_int_eq(status, NO_ERROR);
 
     ser_close_memory(test_ser, &status);

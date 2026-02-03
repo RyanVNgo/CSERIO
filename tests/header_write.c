@@ -11,7 +11,13 @@ START_TEST(idx_record_write) {
     SERHdrStructure check_hdr = {0};
 
     int status = 0;
-    ser_open_memory(&s, (uint8_t*)&check_hdr, sizeof(check_hdr), READWRITE, &status);
+    ser_open_memory(
+            &s,
+            (uint8_t*)&check_hdr,
+            sizeof(check_hdr),
+            READWRITE,
+            &status
+    );
 
     for (size_t i = 0 ; i < HDR_UNIT_COUNT; i++) {
         ser_write_idx_record(
@@ -38,7 +44,13 @@ START_TEST(idx_record_write_oob_idx) {
     const SERHdrStructure blank_hdr = {0};
 
     int status = 0;
-    ser_open_memory(&s, (uint8_t*)&check_hdr, sizeof(check_hdr), READWRITE, &status);
+    ser_open_memory(
+            &s,
+            (uint8_t*)&check_hdr,
+            sizeof(check_hdr),
+            READWRITE,
+            &status
+    );
 
     /* under bound */
     ser_write_idx_record(
@@ -83,7 +95,13 @@ START_TEST(idx_record_write_null_data) {
     const SERHdrStructure blank_hdr = {0};
 
     int status = 0;
-    ser_open_memory(&s, (uint8_t*)&check_hdr, sizeof(check_hdr), READWRITE, &status);
+    ser_open_memory(
+            &s,
+            (uint8_t*)&check_hdr,
+            sizeof(check_hdr),
+            READWRITE,
+            &status
+    );
 
     for (size_t i = 0 ; i < HDR_UNIT_COUNT; i++) {
         ser_write_idx_record(
@@ -109,6 +127,7 @@ START_TEST(idx_record_write_null_data) {
 
 START_TEST(idx_record_write_null_ser) {
     int status = 0;
+
     for (size_t i = 0 ; i < HDR_UNIT_COUNT; i++) {
         ser_write_idx_record(
                 NULL, 
@@ -119,14 +138,21 @@ START_TEST(idx_record_write_null_ser) {
         );
         ck_assert_int_ne(status, NO_ERROR);
     }
-}
+
+} END_TEST
 
 START_TEST(key_record_write) {
     serfile* s;
     SERHdrStructure check_hdr = {0};
 
     int status = 0;
-    ser_open_memory(&s, (uint8_t*)&check_hdr, sizeof(check_hdr), READWRITE, &status);
+    ser_open_memory(
+            &s,
+            (uint8_t*)&check_hdr,
+            sizeof(check_hdr),
+            READWRITE,
+            &status
+    );
 
     for (size_t i = 0 ; i < HDR_UNIT_COUNT; i++) {
         ser_write_key_record(
@@ -153,7 +179,13 @@ START_TEST(key_record_write_invalid_key) {
     const SERHdrStructure blank_hdr = {0};
 
     int status = 0;
-    ser_open_memory(&s, (uint8_t*)&check_hdr, sizeof(check_hdr), READWRITE, &status);
+    ser_open_memory(
+            &s,
+            (uint8_t*)&check_hdr,
+            sizeof(check_hdr),
+            READWRITE,
+            &status
+    );
 
     int invalid_keys[3] = {-1, 213, FILEID_KEY + 1};
     for (size_t i = 0; i < 3; i++) {
@@ -176,7 +208,7 @@ START_TEST(key_record_write_invalid_key) {
     }
 
     ser_close_memory(s, &status);
-}
+} END_TEST
 
 START_TEST(key_record_write_null_data) {
     serfile* s;
@@ -184,7 +216,13 @@ START_TEST(key_record_write_null_data) {
     const SERHdrStructure blank_hdr = {0};
 
     int status = 0;
-    ser_open_memory(&s, (uint8_t*)&check_hdr, sizeof(check_hdr), READWRITE, &status);
+    ser_open_memory(
+            &s,
+            (uint8_t*)&check_hdr,
+            sizeof(check_hdr),
+            READWRITE,
+            &status
+    );
 
     for (size_t i = 0 ; i < HDR_UNIT_COUNT; i++) {
         ser_write_key_record(
@@ -207,6 +245,7 @@ START_TEST(key_record_write_null_data) {
 
 START_TEST(key_record_write_null_ser) {
     int status = 0;
+
     for (size_t i = 0 ; i < HDR_UNIT_COUNT; i++) {
         ser_write_key_record(
                 NULL, 
@@ -217,7 +256,8 @@ START_TEST(key_record_write_null_ser) {
         );
         ck_assert_int_ne(status, NO_ERROR);
     }
-}
+
+} END_TEST
 
 Suite* header_write_suite() {
     Suite* s;
