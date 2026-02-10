@@ -8,7 +8,7 @@
 
 
 typedef struct __attribute__((__packed__)) SERHdrStructure {
-  char file_id[14];
+  char file_id[FILEID_LEN];
   int32_t lu_id;
   int32_t color_id;
   int32_t little_endian;

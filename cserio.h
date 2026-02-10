@@ -57,6 +57,8 @@
 #define INVALID_DIM_IDX     401
 #define INVALID_FRAME_IDX   402
 
+#define IMAGE_WRITE_WARN    410
+
 /*-------------------- SER File Symbolic Constants --------------------*/
 
 #define SER_EXT ".ser"
@@ -148,7 +150,7 @@ typedef int DIM_TYPE;
 typedef struct SERfile {
     void* io_context;
     size_t (*reader)(void* io_context, void* buffer, size_t size, size_t offset);
-    size_t (*writer)(void* io_context, void* data, size_t size, size_t offset);
+    size_t (*writer)(void* io_context, const void* data, size_t size, size_t offset);
     int access_mode;
 } SERfile;
 
@@ -187,8 +189,8 @@ void ser_get_hdr_count(serfile* sptr, int* rec_count, int* status);
 void ser_get_idx_record(serfile* sptr, void* dest, int idx, int* status);
 void ser_get_key_record(serfile* sptr, void* dest, int key, int* status);
 
-void ser_write_idx_record(serfile* sptr, void* data, int idx, size_t size, int* status);
-void ser_write_key_record(serfile* sptr, void* data, int key, size_t size, int* status);
+void ser_write_idx_record(serfile* sptr, const void* data, int idx, size_t size, int* status);
+void ser_write_key_record(serfile* sptr, const void* data, int key, size_t size, int* status);
 
 /*-------------------- Image Routines --------------------*/
 
@@ -199,6 +201,7 @@ void ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int*
 void ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* status);
 
 void ser_read_frame(serfile* sptr, void* dest, int idx, int* status);
+void ser_write_frame(serfile* sptr, const void* data, int idx, int* status);
 
 
 /*------------------------------------------------------------------*/
@@ -236,7 +239,7 @@ static size_t ser_memory_read(void* io_context, void* buffer, size_t size, size_
     return size;
 }
 
-static size_t ser_memory_write(void* io_context, void* data, size_t size, size_t offset) {
+static size_t ser_memory_write(void* io_context, const void* data, size_t size, size_t offset) {
     serMem* memory_io = (serMem*)(io_context);
 
     if (memory_io->size < offset) {
@@ -260,7 +263,7 @@ static size_t ser_file_read(void* io_context, void* buffer, size_t size, size_t 
     return fread(buffer, 1, size, file_io);
 }
 
-static size_t ser_file_write(void* io_context, void* data, size_t size, size_t offset) {
+static size_t ser_file_write(void* io_context, const void* data, size_t size, size_t offset) {
     FILE* file_io = (FILE*)io_context;
     fseek(file_io, offset, SEEK_SET);
     return fwrite(data, 1, size, file_io);
@@ -644,7 +647,7 @@ void ser_get_key_record(serfile* sptr, void* dest, int key, int* status) {
  *  @param  status  (IO)    - Error status.
  *  @return Error status.
  */
-void ser_write_idx_record(serfile* sptr, void* data, int idx, size_t size, int* status) {
+void ser_write_idx_record(serfile* sptr, const void* data, int idx, size_t size, int* status) {
     if (!sptr) { 
         return (void)(*status = NULL_SPTR); 
     }
@@ -743,7 +746,7 @@ void ser_write_idx_record(serfile* sptr, void* data, int idx, size_t size, int* 
  *  @param  status  (IO)    - Error status.
  *  @return Void.
  */
-void ser_write_key_record(serfile* sptr, void* data, int key, size_t size, int* status) {
+void ser_write_key_record(serfile* sptr, const void* data, int key, size_t size, int* status) {
     if (!sptr) { 
         return (void)(*status = NULL_SPTR); 
     }
@@ -935,7 +938,7 @@ void ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int*
     if (status) { 
         return; 
     }
-    int number_of_planes = color_ID < 100? 1 : 3;
+    int number_of_planes = color_ID < 100 ? 1 : 3;
 
     int pixel_depth = 0;
     ser_get_key_record(sptr, &pixel_depth, PIXELDEPTHPERPLANE_KEY, status);
@@ -992,15 +995,15 @@ void ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* statu
 
 /*  @brief  Read the image frame at the index.
  *  
- *  Note that this function returns the entire data entry for
- *  the target frame. Ensure that the dest buffer can store
- *  the entire frame. Function uses 0 based indexing.
- *
+ *  The entire frame is returned, ensure the dest buffer has the
+ *  appropriate capacity. Data between 1-8 bits is NOT shifted 
+ *  when data is returned.
+ *  
  *  @param  sptr    (I)   - Pointer to serfile.
  *  @param  dest    (IO)  - Pointer to destination buffer.
- *  @param  idx     (I)   - Index of the frame.
+ *  @param  idx     (I)   - Index of the frame (0 based indexing).
  *  @param  status  (IO)  - Error status. 
- *  @return Error status.
+ *  @return Void.
  */
 void ser_read_frame(serfile* sptr, void* dest, int idx, int* status) {
     if (!sptr) { 
@@ -1037,6 +1040,59 @@ void ser_read_frame(serfile* sptr, void* dest, int idx, int* status) {
 
     return;
 }
+
+/*  @brief  Write image frame at the index.
+ *
+ *  The byte size of a whole frame is written from data.
+ *  Data between 1-8 bits is NOT shifted when the data is written.
+ *
+ *  @param  sptr    (I)   - Pointer to serfile.
+ *  @param  data    (I)   - Pointer to data buffer.
+ *  @param  idx     (I)   - Index of the frame (0 based indexing).
+ *  @param  status  (IO)  - Error status. 
+ *  @return Void.
+ */
+void ser_write_frame(serfile* sptr, const void* data, int idx, int* status) {
+    if (!sptr) { 
+        return (void)(*status = NULL_SPTR); 
+    }
+
+    if (!data) { 
+        return (void)(*status = NULL_PARAM); 
+    }
+
+    int frame_count = 0;
+    ser_get_key_record(sptr, &frame_count, FRAMECOUNT_KEY, status);
+    if (status) { 
+        return; 
+    }
+
+    if (idx < 0 || idx >= frame_count) {
+        return (void)(*status = INVALID_FRAME_IDX); 
+    }
+
+    unsigned long frame_byte_size = 0;
+    ser_get_frame_byte_size(sptr, &frame_byte_size, status);
+    if (status) { 
+        return; 
+    }
+
+    unsigned long frame_offset = DATA_START_SET + (frame_byte_size * idx);
+
+    SERfile* sfile = sptr->SER_file;
+    int bytes_written = sfile->writer(
+            sfile->io_context,
+            data,
+            frame_byte_size,
+            frame_offset
+    );
+    if (bytes_written < frame_byte_size) {
+        *status = IMAGE_WRITE_WARN;
+    }
+
+    return;
+}
+
 
 #endif /* CSERIO_IMPLEMENTATION */
 
