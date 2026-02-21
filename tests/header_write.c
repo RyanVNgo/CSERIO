@@ -272,7 +272,7 @@ Suite* header_write_suite() {
     suite_add_tcase(s, tc_idx_record);
 
     TCase* tc_key_record;
-    tc_key_record = tcase_create("idx_record");
+    tc_key_record = tcase_create("key_record");
     tcase_add_test(tc_key_record, key_record_write);
     tcase_add_test(tc_key_record, key_record_write_invalid_key);
     tcase_add_test(tc_key_record, key_record_write_null_data);

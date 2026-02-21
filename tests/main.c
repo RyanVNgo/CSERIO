@@ -8,6 +8,7 @@
 #include "core.c"
 #include "header_read.c"
 #include "header_write.c"
+#include "image_info.c"
 #include "trailer_read.c"
 
 
@@ -34,6 +35,13 @@ int main() {
     srunner_run_all(hdr_write_sr, CK_VERBOSE);
     number_failed = srunner_ntests_failed(hdr_write_sr);
     srunner_free(hdr_write_sr);
+
+    Suite* image_info_s; 
+    image_info_s = image_info_suite();
+    SRunner* image_info_sr = srunner_create(image_info_s);
+    srunner_run_all(image_info_sr, CK_VERBOSE);
+    number_failed = srunner_ntests_failed(image_info_sr);
+    srunner_free(image_info_sr);
 
     Suite* trlr_read_s; 
     trlr_read_s = trailer_read_suite();
