@@ -59,6 +59,10 @@
 
 #define IMAGE_WRITE_WARN    410
 
+/*-------------------- Trailer Routine Errors --------------------*/
+
+#define INVALID_TRLR_IDX    501
+
 /*-------------------- SER File Symbolic Constants --------------------*/
 
 #define SER_EXT ".ser"
@@ -202,6 +206,10 @@ void ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* statu
 
 void ser_read_frame(serfile* sptr, void* dest, int idx, int* status);
 void ser_write_frame(serfile* sptr, const void* data, int idx, int* status);
+
+/*-------------------- Trailer Routines --------------------*/
+
+void ser_get_trlr_record(serfile* sptr, int64_t* dest, int idx, int* status);
 
 
 /*------------------------------------------------------------------*/
@@ -413,6 +421,10 @@ void ser_open_file(serfile** sptr, char* filename, int mode, int* status) {
     (*sptr)->SER_file->io_context = ser_file;
     (*sptr)->SER_file->reader = ser_file_read;
     (*sptr)->SER_file->writer = ser_file_write;
+
+    if (mode != READWRITE) {
+        mode = READONLY;
+    }
     (*sptr)->SER_file->access_mode = mode;
 
     return;
@@ -850,7 +862,7 @@ void ser_get_frame_count(serfile* sptr, int* frame_count, int* status) {
     int temp_frame_count = 0;
     ser_get_key_record(sptr, &temp_frame_count, FRAMECOUNT_KEY, status);
 
-    if (status) { 
+    if (*status) { 
         return;
     }
 
@@ -895,7 +907,7 @@ void ser_get_frame_dim_size(serfile* sptr, int* size, DIM_TYPE dim, int* status)
     /* get size from header */
     int temp_size = 0;
     ser_get_key_record(sptr, &temp_size, key, status);
-    if (status) { 
+    if (*status) { 
         return;
     }
     *size = temp_size;
@@ -905,7 +917,7 @@ void ser_get_frame_dim_size(serfile* sptr, int* size, DIM_TYPE dim, int* status)
      *  dimension is derived from the color ID by the
      *  following case.
      */
-    if (key  == COLORID_KEY) {
+    if (key == COLORID_KEY) {
         *size = *size < 100 ? 1 : 3;
     }
 
@@ -935,14 +947,14 @@ void ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int*
 
     int color_ID = 0;
     ser_get_key_record(sptr, &color_ID, COLORID_KEY, status);
-    if (status) { 
+    if (*status) { 
         return; 
     }
     int number_of_planes = color_ID < 100 ? 1 : 3;
 
     int pixel_depth = 0;
     ser_get_key_record(sptr, &pixel_depth, PIXELDEPTHPERPLANE_KEY, status);
-    if (status) { 
+    if (*status) { 
         return; 
     }
 
@@ -972,19 +984,19 @@ void ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* statu
 
     unsigned long bytes_per_pixel = 0;
     ser_get_bytes_per_pixel(sptr, &bytes_per_pixel, status);
-    if (status) { 
+    if (*status) { 
         return;
     }
 
     int width = 0;
     ser_get_key_record(sptr, &width, IMAGEWIDTH_KEY, status);
-    if (status) { 
+    if (*status) { 
         return; 
     }
 
     int height = 0;
     ser_get_key_record(sptr, &height, IMAGEHEIGHT_KEY, status);
-    if (status) { 
+    if (*status) { 
         return;
     }
 
@@ -1016,7 +1028,7 @@ void ser_read_frame(serfile* sptr, void* dest, int idx, int* status) {
 
     int frame_count = 0;
     ser_get_key_record(sptr, &frame_count, FRAMECOUNT_KEY, status);
-    if (status) { 
+    if (*status) { 
         return; 
     }
 
@@ -1026,7 +1038,7 @@ void ser_read_frame(serfile* sptr, void* dest, int idx, int* status) {
 
     unsigned long frame_byte_size = 0;
     ser_get_frame_byte_size(sptr, &frame_byte_size, status);
-    if (status) { 
+    if (*status) { 
         return; 
     }
 
@@ -1063,7 +1075,7 @@ void ser_write_frame(serfile* sptr, const void* data, int idx, int* status) {
 
     int frame_count = 0;
     ser_get_key_record(sptr, &frame_count, FRAMECOUNT_KEY, status);
-    if (status) { 
+    if (*status) { 
         return; 
     }
 
@@ -1073,7 +1085,7 @@ void ser_write_frame(serfile* sptr, const void* data, int idx, int* status) {
 
     unsigned long frame_byte_size = 0;
     ser_get_frame_byte_size(sptr, &frame_byte_size, status);
-    if (status) { 
+    if (*status) { 
         return; 
     }
 
@@ -1088,6 +1100,60 @@ void ser_write_frame(serfile* sptr, const void* data, int idx, int* status) {
     );
     if (bytes_written < frame_byte_size) {
         *status = IMAGE_WRITE_WARN;
+    }
+
+    return;
+}
+
+
+/*-------------------- Trailer Routines --------------------*/
+
+/*  @brief  Read trailer time stamp at index.
+ *  @param  sptr    (I)     - Pointer to serfile.
+ *  @param  dest    (IO)    - Pointer to data buffer.
+ *  @param  idx     (I)     - Index of time stamp.
+ *  @param  status  (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_get_trlr_record(serfile* sptr, int64_t* dest, int idx, int* status) {
+    if (!sptr) { 
+        return (void)(*status = NULL_SPTR); 
+    }
+
+    if (!dest) { 
+        return (void)(*status = NULL_PARAM); 
+    }
+
+    int frame_count = 0;
+    ser_get_key_record(sptr, &frame_count, FRAMECOUNT_KEY, status);
+    if (*status) { 
+        return; 
+    }
+
+    if (idx < 0 || idx >= frame_count) {
+        return (void)(*status = INVALID_TRLR_IDX); 
+    }
+
+    unsigned long frame_byte_size = 0;
+    ser_get_frame_byte_size(sptr, &frame_byte_size, status);
+    if (*status) { 
+        return; 
+    }
+
+    unsigned long trailer_offset = DATA_START_SET + (frame_count * frame_byte_size);
+    unsigned long stamp_offset = sizeof(int64_t) * idx;
+    unsigned long data_offset = trailer_offset + stamp_offset;
+
+    SERfile* sfile = sptr->SER_file;
+    int bytes_read = sfile->reader(
+            sfile->io_context,
+            dest,
+            sizeof(int64_t),
+            data_offset
+    );
+
+    if (bytes_read < sizeof(int64_t)) {
+        *status = READ_ERROR;
     }
 
     return;
