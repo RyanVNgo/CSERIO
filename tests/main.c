@@ -8,6 +8,7 @@
 #include "core.c"
 #include "header_read.c"
 #include "header_write.c"
+#include "trailer_read.c"
 
 
 int main() {
@@ -33,6 +34,13 @@ int main() {
     srunner_run_all(hdr_write_sr, CK_VERBOSE);
     number_failed = srunner_ntests_failed(hdr_write_sr);
     srunner_free(hdr_write_sr);
+
+    Suite* trlr_read_s; 
+    trlr_read_s = trailer_read_suite();
+    SRunner* trlr_read_sr = srunner_create(trlr_read_s);
+    srunner_run_all(trlr_read_sr, CK_VERBOSE);
+    number_failed = srunner_ntests_failed(trlr_read_sr);
+    srunner_free(trlr_read_sr);
 
     return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

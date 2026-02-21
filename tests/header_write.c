@@ -22,7 +22,7 @@ START_TEST(idx_record_write) {
     for (size_t i = 0 ; i < HDR_UNIT_COUNT; i++) {
         ser_write_idx_record(
                 s, 
-                ((uint8_t*)&readonly_test_data) + key_map[i],
+                ((uint8_t*)&test_data_3x50) + key_map[i],
                 i,
                 len_map[i],
                 &status
@@ -30,7 +30,7 @@ START_TEST(idx_record_write) {
         ck_assert_int_eq(status, NO_ERROR);
         ck_assert_mem_eq(
                 ((uint8_t*)&check_hdr) + key_map[i],
-                ((uint8_t*)&readonly_test_data) + key_map[i],
+                ((uint8_t*)&test_data_3x50) + key_map[i],
                 len_map[i]
         );
     }
@@ -55,7 +55,7 @@ START_TEST(idx_record_write_oob_idx) {
     /* under bound */
     ser_write_idx_record(
             s, 
-            ((uint8_t*)&readonly_test_data) + key_map[0],
+            ((uint8_t*)&test_data_3x50) + key_map[0],
             -1,
             len_map[0],
             &status
@@ -72,7 +72,7 @@ START_TEST(idx_record_write_oob_idx) {
     /* over bound */
     ser_write_idx_record(
             s, 
-            ((uint8_t*)&readonly_test_data) + key_map[0],
+            ((uint8_t*)&test_data_3x50) + key_map[0],
             HDR_UNIT_COUNT + 1,
             len_map[0],
             &status
@@ -131,7 +131,7 @@ START_TEST(idx_record_write_null_ser) {
     for (size_t i = 0 ; i < HDR_UNIT_COUNT; i++) {
         ser_write_idx_record(
                 NULL, 
-                ((uint8_t*)&readonly_test_data) + key_map[i],
+                ((uint8_t*)&test_data_3x50) + key_map[i],
                 i,
                 len_map[i],
                 &status
@@ -157,7 +157,7 @@ START_TEST(key_record_write) {
     for (size_t i = 0 ; i < HDR_UNIT_COUNT; i++) {
         ser_write_key_record(
                 s, 
-                ((uint8_t*)&readonly_test_data) + key_map[i],
+                ((uint8_t*)&test_data_3x50) + key_map[i],
                 key_map[i],
                 len_map[i],
                 &status
@@ -165,7 +165,7 @@ START_TEST(key_record_write) {
         ck_assert_int_eq(status, NO_ERROR);
         ck_assert_mem_eq(
                 ((uint8_t*)&check_hdr) + key_map[i],
-                ((uint8_t*)&readonly_test_data) + key_map[i],
+                ((uint8_t*)&test_data_3x50) + key_map[i],
                 len_map[i]
         );
     }
@@ -191,7 +191,7 @@ START_TEST(key_record_write_invalid_key) {
     for (size_t i = 0; i < 3; i++) {
         ser_write_key_record(
                 s, 
-                ((uint8_t*)&readonly_test_data) + key_map[0],
+                ((uint8_t*)&test_data_3x50) + key_map[0],
                 invalid_keys[i],
                 len_map[0],
                 &status
@@ -249,7 +249,7 @@ START_TEST(key_record_write_null_ser) {
     for (size_t i = 0 ; i < HDR_UNIT_COUNT; i++) {
         ser_write_key_record(
                 NULL, 
-                ((uint8_t*)&readonly_test_data) + key_map[i],
+                ((uint8_t*)&test_data_3x50) + key_map[i],
                 key_map[i],
                 len_map[i],
                 &status

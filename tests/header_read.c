@@ -10,9 +10,9 @@
 void header_read_setup() {
     int status;
     ser_open_memory(
-            &readonly_test_ser,
-            (uint8_t*)&readonly_test_data,
-            sizeof(readonly_test_data),
+            &test_ser_3x50,
+            (uint8_t*)&test_data_3x50,
+            sizeof(test_data_3x50),
             READONLY,
             &status
     );
@@ -20,7 +20,7 @@ void header_read_setup() {
 
 void header_read_teardown() {
     int status;
-    ser_close_memory(readonly_test_ser, &status);
+    ser_close_memory(test_ser_3x50, &status);
 }
 
 START_TEST(idx_record_reading_success) {
@@ -29,14 +29,14 @@ START_TEST(idx_record_reading_success) {
 
     for (size_t i = 0; i < HDR_UNIT_COUNT; i++) {
         ser_get_idx_record(
-                readonly_test_ser,
+                test_ser_3x50,
                 ((uint8_t*)&check_hdr) + key_map[i],
                 i,
                 &status
         );
         ck_assert_int_eq(status, NO_ERROR);
         ck_assert_mem_eq(
-                ((uint8_t*)&readonly_test_data) + key_map[i], 
+                ((uint8_t*)&test_data_3x50) + key_map[i], 
                 ((uint8_t*)&check_hdr) + key_map[i], 
                 len_map[i]
         );
@@ -51,7 +51,7 @@ START_TEST(idx_record_reading_oob_idx) {
 
     /* under bound */
     ser_get_idx_record(
-            readonly_test_ser,
+            test_ser_3x50,
             ((uint8_t*)&check_hdr),
             -1,
             &status
@@ -67,7 +67,7 @@ START_TEST(idx_record_reading_oob_idx) {
 
     /* over bound */
     ser_get_idx_record(
-            readonly_test_ser,
+            test_ser_3x50,
             ((uint8_t*)&check_hdr),
             HDR_UNIT_COUNT + 1,
             &status
@@ -87,7 +87,7 @@ START_TEST(idx_record_reading_null_dest) {
     int status = 0;
 
     for (size_t i = 0; i < HDR_UNIT_COUNT; i++) {
-        ser_get_idx_record(readonly_test_ser, NULL, i, &status);
+        ser_get_idx_record(test_ser_3x50, NULL, i, &status);
         ck_assert_int_ne(status, NO_ERROR);
     }
 
@@ -124,7 +124,7 @@ START_TEST(key_record_reading_success) {
 
     for (size_t i = 0; i < HDR_UNIT_COUNT; i++) {
         ser_get_key_record(
-                readonly_test_ser,
+                test_ser_3x50,
                 ((uint8_t*)&check_hdr) + key_map[i],
                 key_map[i],
                 &status
@@ -132,7 +132,7 @@ START_TEST(key_record_reading_success) {
 
         ck_assert_int_eq(status, NO_ERROR);
         ck_assert_mem_eq(
-                ((uint8_t*)&readonly_test_data) + key_map[i], 
+                ((uint8_t*)&test_data_3x50) + key_map[i], 
                 ((uint8_t*)&check_hdr) + key_map[i], 
                 len_map[i]
         );
@@ -148,7 +148,7 @@ START_TEST(key_record_reading_invalid_key) {
     int invalid_keys[3] = {-1, 213, FILEID_KEY + 1};
     for (size_t i = 0; i < 3; i++) {
         ser_get_key_record(
-                readonly_test_ser, 
+                test_ser_3x50, 
                 ((uint8_t*)&check_hdr) + key_map[i],
                 invalid_keys[i],
                 &status
@@ -170,7 +170,7 @@ START_TEST(key_record_reading_null_dest) {
     int status = 0;
 
     for (size_t i = 0; i < HDR_UNIT_COUNT; i++) {
-        ser_get_key_record(readonly_test_ser, NULL, key_map[i], &status);
+        ser_get_key_record(test_ser_3x50, NULL, key_map[i], &status);
         ck_assert_int_ne(status, NO_ERROR);
     }
 

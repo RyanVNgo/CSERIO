@@ -5,6 +5,7 @@
 
 #include "../cserio.h"
 
+
 START_TEST(version_check) {
     int major, minor, micro;
     cserio_version_number(&major, &minor, &micro);
@@ -19,8 +20,8 @@ START_TEST(open_memory) {
     int status = 0;
     ser_open_memory(
             &test_ser,
-            (uint8_t*)&readonly_test_data, 
-            sizeof(readonly_test_data),
+            (uint8_t*)&test_data_3x50, 
+            sizeof(test_data_3x50),
             READWRITE,
             &status
     );

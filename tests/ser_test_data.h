@@ -7,6 +7,8 @@
 #include "../cserio.h"
 
 
+#define TEST_TIMESTAMP_VALUE    0x08d126583cd43bb0
+
 typedef struct __attribute__((__packed__)) SERHdrStructure {
   char file_id[FILEID_LEN];
   int32_t lu_id;
@@ -23,23 +25,33 @@ typedef struct __attribute__((__packed__)) SERHdrStructure {
   int64_t date_time_utc;
 } SERHdrStructure;
 
-static const SERHdrStructure readonly_test_data = {
-  "LUCAM-RECORDER",
-  0,
-  8,
-  1,
-  50,
-  50,
-  1,
-  -1,
-  "test_observer",
-  "test_instrument",
-  "test_telescope",
-  0x08d126583cd43bb0,
-  0x08d126583cd43bb0
+typedef struct __attribute__((__packed__)) SERTest3x50Structure {
+    SERHdrStructure hdr;
+    uint8_t data[3 * 50 * 50];
+    int64_t trlr[3];
+} SERTest3x50Structure;
+
+static const SERTest3x50Structure test_data_3x50 = {
+    .hdr = {
+        "LUCAM-RECORDER",
+        0,
+        BAYER_RGGB,
+        1,
+        50,
+        50,
+        1,
+        3,
+        "test_observer",
+        "test_instrument",
+        "test_telescope",
+        TEST_TIMESTAMP_VALUE,
+        TEST_TIMESTAMP_VALUE
+    },
+    .data = {},
+    .trlr = {TEST_TIMESTAMP_VALUE, TEST_TIMESTAMP_VALUE, TEST_TIMESTAMP_VALUE}
 };
 
-static serfile* readonly_test_ser;
+static serfile* test_ser_3x50;
 
 const int key_map[HDR_UNIT_COUNT] = {
     FILEID_KEY              ,
