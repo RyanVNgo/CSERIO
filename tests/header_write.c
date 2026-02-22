@@ -11,7 +11,7 @@ START_TEST(idx_record_write) {
     SERHdrStructure check_hdr = {0};
 
     int status = 0;
-    ser_open_memory(
+    ser_open_view(
             &s,
             (uint8_t*)&check_hdr,
             sizeof(check_hdr),
@@ -38,13 +38,45 @@ START_TEST(idx_record_write) {
     ser_close_memory(s, &status);
 } END_TEST
 
-START_TEST(idx_record_write_oob_idx) {
+START_TEST(idx_record_write_readonly) {
     serfile* s;
-    SERHdrStructure check_hdr = {0};
     const SERHdrStructure blank_hdr = {0};
+    SERHdrStructure check_hdr = blank_hdr;
 
     int status = 0;
-    ser_open_memory(
+    ser_open_view(
+            &s,
+            (uint8_t*)&check_hdr,
+            sizeof(check_hdr),
+            READONLY,
+            &status
+    );
+
+    for (size_t i = 0 ; i < HDR_UNIT_COUNT; i++) {
+        ser_write_idx_record(
+                s, 
+                ((uint8_t*)&test_data_3x50) + key_map[i],
+                i,
+                len_map[i],
+                &status
+        );
+        ck_assert_int_ne(status, READ_ERROR);
+        ck_assert_mem_eq(
+                ((uint8_t*)&check_hdr) + key_map[i],
+                ((uint8_t*)&blank_hdr) + key_map[i],
+                len_map[i]
+        );
+    }
+
+} END_TEST
+
+START_TEST(idx_record_write_oob_idx) {
+    serfile* s;
+    const SERHdrStructure blank_hdr = {0};
+    SERHdrStructure check_hdr = blank_hdr;
+
+    int status = 0;
+    ser_open_view(
             &s,
             (uint8_t*)&check_hdr,
             sizeof(check_hdr),
@@ -91,11 +123,11 @@ START_TEST(idx_record_write_oob_idx) {
 
 START_TEST(idx_record_write_null_data) {
     serfile* s;
-    SERHdrStructure check_hdr = {0};
     const SERHdrStructure blank_hdr = {0};
+    SERHdrStructure check_hdr = blank_hdr;
 
     int status = 0;
-    ser_open_memory(
+    ser_open_view(
             &s,
             (uint8_t*)&check_hdr,
             sizeof(check_hdr),
@@ -146,7 +178,7 @@ START_TEST(key_record_write) {
     SERHdrStructure check_hdr = {0};
 
     int status = 0;
-    ser_open_memory(
+    ser_open_view(
             &s,
             (uint8_t*)&check_hdr,
             sizeof(check_hdr),
@@ -173,13 +205,46 @@ START_TEST(key_record_write) {
     ser_close_memory(s, &status);
 } END_TEST
 
-START_TEST(key_record_write_invalid_key) {
+START_TEST(key_record_write_readonly) {
     serfile* s;
-    SERHdrStructure check_hdr = {0};
     const SERHdrStructure blank_hdr = {0};
+    SERHdrStructure check_hdr = blank_hdr;
 
     int status = 0;
-    ser_open_memory(
+    ser_open_view(
+            &s,
+            (uint8_t*)&check_hdr,
+            sizeof(check_hdr),
+            READONLY,
+            &status
+    );
+
+    for (size_t i = 0 ; i < HDR_UNIT_COUNT; i++) {
+        ser_write_key_record(
+                s, 
+                ((uint8_t*)&test_data_3x50) + key_map[i],
+                key_map[i],
+                len_map[i],
+                &status
+        );
+        ck_assert_int_ne(status, NO_ERROR);
+        ck_assert_mem_eq(
+                ((uint8_t*)&check_hdr) + key_map[i],
+                ((uint8_t*)&blank_hdr) + key_map[i],
+                len_map[i]
+        );
+    }
+
+    ser_close_memory(s, &status);
+} END_TEST
+
+START_TEST(key_record_write_invalid_key) {
+    serfile* s;
+    const SERHdrStructure blank_hdr = {0};
+    SERHdrStructure check_hdr = blank_hdr;
+
+    int status = 0;
+    ser_open_view(
             &s,
             (uint8_t*)&check_hdr,
             sizeof(check_hdr),
@@ -212,11 +277,11 @@ START_TEST(key_record_write_invalid_key) {
 
 START_TEST(key_record_write_null_data) {
     serfile* s;
-    SERHdrStructure check_hdr = {0};
     const SERHdrStructure blank_hdr = {0};
+    SERHdrStructure check_hdr = blank_hdr;
 
     int status = 0;
-    ser_open_memory(
+    ser_open_view(
             &s,
             (uint8_t*)&check_hdr,
             sizeof(check_hdr),
@@ -266,6 +331,7 @@ Suite* header_write_suite() {
     TCase* tc_idx_record;
     tc_idx_record = tcase_create("idx_record");
     tcase_add_test(tc_idx_record, idx_record_write);
+    tcase_add_test(tc_idx_record, idx_record_write_readonly);
     tcase_add_test(tc_idx_record, idx_record_write_oob_idx);
     tcase_add_test(tc_idx_record, idx_record_write_null_data);
     tcase_add_test(tc_idx_record, idx_record_write_null_ser);
@@ -274,6 +340,7 @@ Suite* header_write_suite() {
     TCase* tc_key_record;
     tc_key_record = tcase_create("key_record");
     tcase_add_test(tc_key_record, key_record_write);
+    tcase_add_test(tc_key_record, key_record_write_readonly);
     tcase_add_test(tc_key_record, key_record_write_invalid_key);
     tcase_add_test(tc_key_record, key_record_write_null_data);
     tcase_add_test(tc_key_record, key_record_write_null_ser);

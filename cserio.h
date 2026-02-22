@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
 
 
 /*-------------------- CSERIO Version --------------------*/
@@ -62,11 +63,6 @@
 /*-------------------- Trailer Routine Errors --------------------*/
 
 #define INVALID_TRLR_IDX    501
-
-/*-------------------- SER File Symbolic Constants --------------------*/
-
-#define SER_EXT ".ser"
-#define SER_EXT_LEN 4
 
 /*-------------------- SER File IO Modes --------------------*/
 
@@ -181,10 +177,11 @@ void cserio_version_number(int* major, int* minor, int* micro);
 
 /*-------------------- SER Access Routines --------------------*/
 
-void ser_open_memory(serfile** sptr, uint8_t* data, size_t size, int mode, int* status);
+void ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* status);
+void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode, int* status);
 void ser_close_memory(serfile* sptr, int* status);
 
-void ser_open_file(serfile** sptr, char* filename, int mode, int* status);
+void ser_open_file(serfile** sptr, const char* path, int mode, int* status);
 void ser_close_file(serfile* sptr, int* status);
 
 /*-------------------- Header Routines --------------------*/
@@ -227,6 +224,7 @@ void ser_get_trlr_record(serfile* sptr, int64_t* dest, int idx, int* status);
 typedef struct {
     uint8_t* data;
     size_t size;
+    bool owns_buffer;
 } serMem;
 
 static size_t ser_memory_read(void* io_context, void* buffer, size_t size, size_t offset) {
@@ -250,14 +248,28 @@ static size_t ser_memory_read(void* io_context, void* buffer, size_t size, size_
 static size_t ser_memory_write(void* io_context, const void* data, size_t size, size_t offset) {
     serMem* memory_io = (serMem*)(io_context);
 
-    if (memory_io->size < offset) {
-        return 0;
-    }
+    if (!memory_io->owns_buffer) {
+        if (memory_io->size < offset) {
+            return 0;
+        }
 
-    if (memory_io->size < offset + size) {
-        size_t cut_size = memory_io->size - offset;
-        memcpy(memory_io->data + offset, data, cut_size);
-        return cut_size;
+        if (memory_io->size < offset + size) {
+            size_t cut_size = memory_io->size - offset;
+            memcpy(memory_io->data + offset, data, cut_size);
+            return cut_size;
+        }
+    } else {
+        if (memory_io->size < offset + size) {
+            void* new_block = realloc(memory_io->data, offset + size);
+            if (new_block) {
+                memory_io->data = (uint8_t*)new_block;
+                memory_io->size = offset + size;
+            } else {
+                size_t cut_size = memory_io->size - offset;
+                memcpy(memory_io->data + offset, data, cut_size);
+                return cut_size;
+            }
+        }
     }
 
     memcpy(memory_io->data + offset, data, size);
@@ -315,7 +327,7 @@ void cserio_version_number(int* major, int* minor, int* micro) {
  *  @param  status    (IO)  - Error status.
  *  @return Void.
  */
-void ser_open_memory(serfile** sptr, uint8_t* data, size_t size, int mode, int* status) {
+void ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* status) {
     if (!sptr) {
         return (void)(*status = NULL_SPTR);
     }
@@ -334,6 +346,45 @@ void ser_open_memory(serfile** sptr, uint8_t* data, size_t size, int mode, int* 
     serMem* ser_data = (serMem*)malloc(sizeof(serMem));
     ser_data->data = data;
     ser_data->size = size;
+    ser_data->owns_buffer = false;
+
+    (*sptr)->SER_file->io_context = ser_data;
+    (*sptr)->SER_file->reader = ser_memory_read;
+    (*sptr)->SER_file->writer = ser_memory_write;
+
+    if (mode != READWRITE) {
+        mode = READONLY;
+    }
+    (*sptr)->SER_file->access_mode = mode;
+
+    return;
+}
+
+void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    *sptr = (serfile*)malloc(sizeof(serfile));
+    if (!*sptr) {
+        return (void)(*status = MEM_ALLOC);
+    }
+
+    (*sptr)->SER_file = (SERfile*)malloc(sizeof(SERfile));
+    if (!(*sptr)->SER_file) {
+        free(*sptr);
+        return (void)(*status = MEM_ALLOC);
+    }
+
+    serMem* ser_data = (serMem*)malloc(sizeof(serMem));
+
+    ser_data->data = (uint8_t*)malloc(size);
+    if (data) {
+        memcpy(ser_data->data, data, size);
+    }
+
+    ser_data->size = size;
+    ser_data->owns_buffer = true;
 
     (*sptr)->SER_file->io_context = ser_data;
     (*sptr)->SER_file->reader = ser_memory_read;
@@ -361,6 +412,11 @@ void ser_close_memory(serfile* sptr, int* status) {
         return (void)(*status = NULL_SPTR); 
     }
 
+    serMem* memory_io = (serMem*)(sptr->SER_file->io_context);
+    if (memory_io->owns_buffer) {
+        free(memory_io->data);
+    }
+
     free(sptr->SER_file);
     free(sptr);
     sptr = NULL;
@@ -374,31 +430,33 @@ void ser_close_memory(serfile* sptr, int* status) {
  *  on file open and freed on file close.
  *
  *  @param  sptr      (IO)  - Pointer to a pointer of a serfile.
- *  @param  filename  (I)   - root name of the SER file to open.
+ *  @param  path      (I)   - SER file path.
  *  @param  mode      (I)   - Access type, either READONLY or READWRITE.
  *  @param  status    (IO)  - Error status.
  *  @return Void.
  */
-void ser_open_file(serfile** sptr, char* filename, int mode, int* status) {
+void ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
     if (!sptr) {
         return (void)(*status = NULL_SPTR);
     }
 
-    if (!filename) {
+    if (!path) {
         return (void)(*status = NULL_FILENAME);
     }
 
-    char* ext = strrchr(filename, '.');
-    if (!ext || strncmp(ext, SER_EXT, SER_EXT_LEN)) {
-        return (void)(*status = INVALID_FILENAME);
-    }
-
     FILE* ser_file;
-    if (mode == READWRITE) {
-        ser_file = fopen(filename, "r+");
-    } else {
-        ser_file = fopen(filename, "r"); /* default behavior */
-        mode = READONLY;
+    switch (mode) {
+        case READWRITE:
+            ser_file = fopen(path, "r+b");
+            if (!ser_file) {
+                ser_file = fopen(path, "w+b");
+            }
+            break;
+        case READONLY:
+        default:
+            mode = READONLY;
+            ser_file = fopen(path, "rb");
+            break;
     }
 
     if (!ser_file) {
@@ -421,10 +479,6 @@ void ser_open_file(serfile** sptr, char* filename, int mode, int* status) {
     (*sptr)->SER_file->io_context = ser_file;
     (*sptr)->SER_file->reader = ser_file_read;
     (*sptr)->SER_file->writer = ser_file_write;
-
-    if (mode != READWRITE) {
-        mode = READONLY;
-    }
     (*sptr)->SER_file->access_mode = mode;
 
     return;
