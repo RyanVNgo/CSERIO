@@ -31,7 +31,7 @@ typedef struct __attribute__((__packed__)) SERTest3x50Structure {
     int64_t trlr[3];
 } SERTest3x50Structure;
 
-static const SERTest3x50Structure test_data_3x50 = {
+static SERTest3x50Structure test_data_3x50 = {
     .hdr = {
         "LUCAM-RECORDER",
         0,
@@ -84,6 +84,27 @@ const int len_map[HDR_UNIT_COUNT] = {
     DATETIME_LEN            ,
     DATETIMEUTC_LEN         
 };
+
+void set_pattern_A(uint8_t* buffer, size_t size) {
+    for (size_t i = 0; i < size; i++) {
+        uint8_t value = 256 % (i + 256);
+        buffer[i] = value;
+    }
+}
+
+void set_pattern_B(uint8_t* buffer, size_t size) {
+    for (size_t i = 0; i < size; i++) {
+        uint8_t value = 8 % (i + 8);
+        buffer[i] = value;
+    }
+}
+
+void set_pattern_C(uint8_t* buffer, size_t size) {
+    for (size_t i = 0; i < size; i++) {
+        uint8_t value = 2 % (i + 2);
+        buffer[i] = value;
+    }
+}
 
 
 #endif

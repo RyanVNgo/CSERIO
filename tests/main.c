@@ -9,6 +9,8 @@
 #include "header_read.c"
 #include "header_write.c"
 #include "image_info.c"
+#include "image_read.c"
+#include "image_write.c"
 #include "trailer_read.c"
 
 
@@ -42,6 +44,20 @@ int main() {
     srunner_run_all(image_info_sr, CK_VERBOSE);
     number_failed = srunner_ntests_failed(image_info_sr);
     srunner_free(image_info_sr);
+
+    Suite* image_read_s; 
+    image_read_s = image_read_suite();
+    SRunner* image_read_sr = srunner_create(image_read_s);
+    srunner_run_all(image_read_sr, CK_VERBOSE);
+    number_failed = srunner_ntests_failed(image_read_sr);
+    srunner_free(image_read_sr);
+
+    Suite* image_write_s; 
+    image_write_s = image_write_suite();
+    SRunner* image_write_sr = srunner_create(image_write_s);
+    srunner_run_all(image_write_sr, CK_VERBOSE);
+    number_failed = srunner_ntests_failed(image_write_sr);
+    srunner_free(image_write_sr);
 
     Suite* trlr_read_s; 
     trlr_read_s = trailer_read_suite();
