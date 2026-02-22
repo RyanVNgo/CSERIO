@@ -186,7 +186,7 @@ void ser_close_file(serfile* sptr, int* status);
 
 /*-------------------- Header Routines --------------------*/
 
-void ser_get_hdr_count(serfile* sptr, int* rec_count, int* status);
+void ser_get_rec_count(serfile* sptr, int* rec_count, int* status);
 void ser_get_idx_record(serfile* sptr, void* dest, int idx, int* status);
 void ser_get_key_record(serfile* sptr, void* dest, int key, int* status);
 
@@ -317,13 +317,14 @@ void cserio_version_number(int* major, int* minor, int* micro) {
 
 /*  @brief  Opens in-memory SER file.
  *
- *  For when a SER file is located in memory. Note that the input
+ *  For when a SER file is located in memory. Note that the 
  *  data must persist so long as it is opened to the serfile.
- *  Currently supports readwrite only.
+ *  Read and write routines only operate within the range
+ *  provided by size. 
  *
  *  @param  sptr      (IO)  - Pointer to a pointer of a serfile.
- *  @param  data      (I)   - Pointer to in-memory SER file.
- *  @param  size      (I)   - Size of in-memory SER file.
+ *  @param  data      (I)   - Pointer to data.
+ *  @param  size      (I)   - Size of data to manage.
  *  @param  status    (IO)  - Error status.
  *  @return Void.
  */
@@ -360,6 +361,17 @@ void ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* st
     return;
 }
 
+/*  @brief  Opens/Copies in-memory SER file.
+ *
+ *  Memory is allocated and managed by the serfile. If data is not
+ *  NULL, the data of length size is copied over.
+ *
+ *  @param  sptr      (IO)  - Pointer to a pointer of a serfile.
+ *  @param  data      (I)   - Pointer to data.
+ *  @param  size      (I)   - Size to initially allocate / copy over.
+ *  @param  status    (IO)  - Error status.
+ *  @return Void.
+ */
 void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode, int* status) {
     if (!sptr) {
         return (void)(*status = NULL_SPTR);
@@ -513,7 +525,7 @@ void ser_close_file(serfile* sptr, int* status) {
 
 /*  @brief  Returns number of records in the header
  *
- *  Assigns passed hdr_count integer with number of records
+ *  Assigns passed rec_count integer with number of records
  *  in the header. (Note that as of Version 3 SER files, the
  *  number of records in a header is a constant 13 which makes
  *  up the first 178 bytes of data)
@@ -523,7 +535,7 @@ void ser_close_file(serfile* sptr, int* status) {
  *  @param  status      (IO)  - Error status.
  *  @return Void.
  */
-void ser_get_hdr_count(serfile* sptr, int* rec_count, int* status) {
+void ser_get_rec_count(serfile* sptr, int* rec_count, int* status) {
     if (!sptr) { 
         return (void)(*status = NULL_SPTR); 
     }

@@ -23,6 +23,46 @@ void header_read_teardown() {
     ser_close_memory(test_ser_3x50, &status);
 }
 
+START_TEST(rec_count_success) {
+    int status = 0;
+
+    int rec_count = 0;
+    ser_get_rec_count(
+            test_ser_3x50,
+            &rec_count,
+            &status
+    );
+    ck_assert_int_eq(status, NO_ERROR);
+    ck_assert_int_eq(rec_count, HDR_UNIT_COUNT);
+
+} END_TEST
+
+START_TEST(rec_count_success_null_data) {
+    int status = 0;
+
+    ser_get_rec_count(
+            test_ser_3x50,
+            NULL,
+            &status
+    );
+    ck_assert_int_ne(status, NO_ERROR);
+
+} END_TEST
+
+START_TEST(rec_count_successn_null_ser) {
+    int status = 0;
+
+    int rec_count = 0;
+    ser_get_rec_count(
+            NULL,
+            &rec_count,
+            &status
+    );
+    ck_assert_int_ne(status, NO_ERROR);
+    ck_assert_int_eq(rec_count, 0);
+
+} END_TEST
+
 START_TEST(idx_record_reading_success) {
     int status = 0;
     SERHdrStructure check_hdr = {0};
@@ -204,6 +244,14 @@ START_TEST(key_record_reading_null_ser) {
 Suite* header_read_suite() {
     Suite* s;
     s = suite_create("Header Read");
+
+    TCase* tc_rec_count;
+    tc_rec_count = tcase_create("rec_count");
+    tcase_add_checked_fixture(tc_rec_count, header_read_setup, header_read_teardown);
+    tcase_add_test(tc_rec_count, rec_count_success);
+    tcase_add_test(tc_rec_count, rec_count_success_null_data);
+    tcase_add_test(tc_rec_count, rec_count_successn_null_ser);
+    suite_add_tcase(s, tc_rec_count);
 
     TCase* tc_idx_record;
     tc_idx_record = tcase_create("idx_record");
