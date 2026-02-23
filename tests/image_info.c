@@ -7,7 +7,7 @@
 
 
 void image_info_setup() {
-    int status;
+    int status = 0;
     ser_open_memory(
             &test_ser_3x50,
             (uint8_t*)&test_data_3x50,
@@ -18,7 +18,7 @@ void image_info_setup() {
 }
 
 void image_info_teardown() {
-    int status;
+    int status = 0;
     ser_close_memory(test_ser_3x50, &status);
 }
 

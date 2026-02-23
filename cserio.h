@@ -32,19 +32,25 @@
 #define NULL_DEST_BUFF      103
 #define NULL_PARAM          104
 
-#define EOF_ERROR           110
-#define FREAD_ERROR         111
-#define READ_ERROR          112
+#define EOF_ERROR           111
+#define FREAD_ERROR         112
+#define READ_ERROR          113
 
 #define WRITE_ON_READONLY   131
 
 /*-------------------- File Access Errors --------------------*/
 
-#define NULL_FILENAME       201
-#define INVALID_FILENAME    202
+#define NULL_PATH           201
+#define FILE_EXISTS         202
+#define FILE_DNE            203
 
 #define FILE_OPEN_ERROR     211
 #define FILE_CLOSE_ERROR    212
+
+#define INVALID_FILE        221
+#define INVALID_STRUCTURE   222
+#define INVALID_TRAILER     223
+
 
 /*-------------------- Header Routine Errors --------------------*/
 
@@ -58,26 +64,28 @@
 #define INVALID_DIM_IDX     401
 #define INVALID_FRAME_IDX   402
 
-#define IMAGE_WRITE_WARN    410
+#define IMAGE_WRITE_WARN    411
 
 /*-------------------- Trailer Routine Errors --------------------*/
 
-#define INVALID_TRLR_IDX    501
+#define TRAILER_DNE         501
+#define INVALID_TRLR_IDX    511
 
 /*-------------------- SER File IO Modes --------------------*/
 
-#define READONLY 0
-#define READWRITE 1
+#define READONLY    0
+#define READWRITE   1
 
 /*-------------------- Header Types --------------------*/
 
-typedef char* S_STRING;
-typedef int32_t S_INT32;
-typedef int64_t S_INT64;
+typedef char*       SER_STRING;
+typedef int32_t     SER_INT32;
+typedef int64_t     SER_INT64;
 
 /*-------------------- Header Symbolic Constants --------------------*/
 
-#define HDR_UNIT_COUNT 13
+#define HDR_UNIT_COUNT          13
+#define HDR_SIZE                178
 
 /*  These constants represent the byte length of each header component
  *  for V3 SER files.
@@ -148,10 +156,29 @@ typedef int DIM_TYPE;
  *  utilized by the user.
  */
 typedef struct SERfile {
-    void* io_context;
-    size_t (*reader)(void* io_context, void* buffer, size_t size, size_t offset);
-    size_t (*writer)(void* io_context, const void* data, size_t size, size_t offset);
-    int access_mode;
+    void*       io_context;
+    size_t      (*reader)(void* io_context, void* buffer, size_t size, size_t offset);
+    size_t      (*writer)(void* io_context, const void* data, size_t size, size_t offset);
+    int         access_mode;
+
+	char		file_id[FILEID_LEN];
+	int32_t		lu_id;
+	int32_t		color_id;
+	int32_t		little_endian;
+	int32_t		image_width;
+	int32_t		image_height;
+	int32_t		pixel_depth_per_plane;
+	int32_t		frame_count;
+	char		observer[OBSERVER_LEN];
+	char		instrument[INSTRUMENT_LEN];
+	char		telescope[TELESCOPE_LEN];
+	int64_t		date_time;
+	int64_t		date_time_utc;
+
+    bool        has_trailer;
+    uint64_t*   timestamps;
+    size_t      timestamp_count;
+
 } SERfile;
 
 
@@ -181,21 +208,37 @@ void ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* st
 void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode, int* status);
 void ser_close_memory(serfile* sptr, int* status);
 
+void ser_create_file(serfile** sptr, const char* path, bool has_trailer, int* status);
 void ser_open_file(serfile** sptr, const char* path, int mode, int* status);
 void ser_close_file(serfile* sptr, int* status);
 
 /*-------------------- Header Routines --------------------*/
 
 void ser_get_rec_count(serfile* sptr, int* rec_count, int* status);
+
 void ser_get_idx_record(serfile* sptr, void* dest, int idx, int* status);
 void ser_get_key_record(serfile* sptr, void* dest, int key, int* status);
 
 void ser_write_idx_record(serfile* sptr, const void* data, int idx, size_t size, int* status);
 void ser_write_key_record(serfile* sptr, const void* data, int key, size_t size, int* status);
 
+void ser_get_file_id(const serfile* sptr, char* file_id, int* status);
+void ser_get_lu_id(const serfile* sptr, int32_t* lu_id, int* status);
+void ser_get_color_id(const serfile* sptr, int32_t* color_id, int* status);
+void ser_get_little_endian(const serfile* sptr, int32_t* little_endian, int* status);
+void ser_get_image_width(const serfile* sptr, int32_t* image_width, int* status);
+void ser_get_image_height(const serfile* sptr, int32_t* image_height, int* status);
+void ser_get_pixel_depth_per_plane(const serfile* sptr, int32_t* pixel_depth_per_plane, int* status);
+void ser_get_frame_count(const serfile* sptr, int32_t* frame_count, int* status);
+void ser_get_observer(const serfile* sptr, char* observer, int* status);
+void ser_get_instrument(const serfile* sptr, char* instrument, int* status);
+void ser_get_telescope(const serfile* sptr, char* telescope, int* status);
+void ser_get_date_time(const serfile* sptr, int64_t* date_time, int* status);
+void ser_get_date_time_utc(const serfile* sptr, int64_t* date_time_utc, int* status);
+
+
 /*-------------------- Image Routines --------------------*/
 
-void ser_get_frame_count(serfile* sptr, int* frame_count, int* status);
 void ser_get_frame_dim_size(serfile* sptr, int* size, int dim, int* status);
 
 void ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int* status); 
@@ -325,6 +368,7 @@ void cserio_version_number(int* major, int* minor, int* micro) {
  *  @param  sptr      (IO)  - Pointer to a pointer of a serfile.
  *  @param  data      (I)   - Pointer to data.
  *  @param  size      (I)   - Size of data to manage.
+ *  @param  mode      (I)   - Access type, either READONLY or READWRITE.
  *  @param  status    (IO)  - Error status.
  *  @return Void.
  */
@@ -333,6 +377,16 @@ void ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* st
         return (void)(*status = NULL_SPTR);
     }
 
+    if (!data) {
+        return (void)(*status = NULL_PARAM);
+    }
+
+    /* determine existence of header */
+    if (size < HDR_SIZE) {
+        return (void)(*status = INVALID_FILE);
+    }
+
+    /* allocate memory for serfile */
     *sptr = (serfile*)malloc(sizeof(serfile));
     if (!*sptr) {
         return (void)(*status = MEM_ALLOC);
@@ -344,19 +398,69 @@ void ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* st
         return (void)(*status = MEM_ALLOC);
     }
 
+    /* allocate data reference */
     serMem* ser_data = (serMem*)malloc(sizeof(serMem));
     ser_data->data = data;
     ser_data->size = size;
     ser_data->owns_buffer = false;
 
-    (*sptr)->SER_file->io_context = ser_data;
-    (*sptr)->SER_file->reader = ser_memory_read;
-    (*sptr)->SER_file->writer = ser_memory_write;
+    /* general setup */
+    SERfile* sf = (*sptr)->SER_file;
+    sf->io_context = ser_data;
+    sf->reader = ser_memory_read;
+    sf->writer = ser_memory_write;
 
     if (mode != READWRITE) {
         mode = READONLY;
     }
-    (*sptr)->SER_file->access_mode = mode;
+    sf->access_mode = mode;
+
+    /* parse file metadata after validating header existence */
+    ser_get_key_record(*sptr, sf->file_id, FILEID_KEY, status);
+    ser_get_key_record(*sptr, &sf->lu_id, LUID_KEY, status);
+    ser_get_key_record(*sptr, &sf->color_id, COLORID_KEY, status);
+    ser_get_key_record(*sptr, &sf->little_endian, LITTLEENDIAN_KEY, status);
+    ser_get_key_record(*sptr, &sf->image_width, IMAGEWIDTH_KEY, status);
+    ser_get_key_record(*sptr, &sf->image_height, IMAGEHEIGHT_KEY, status);
+    ser_get_key_record(*sptr, &sf->pixel_depth_per_plane, PIXELDEPTHPERPLANE_KEY, status);
+    ser_get_key_record(*sptr, &sf->frame_count, FRAMECOUNT_KEY, status);
+    ser_get_key_record(*sptr, sf->observer, OBSERVER_KEY, status);
+    ser_get_key_record(*sptr, sf->instrument, INSTRUMENT_KEY, status);
+    ser_get_key_record(*sptr, sf->telescope, TELESCOPE_KEY, status);
+    ser_get_key_record(*sptr, &sf->date_time, DATETIME_KEY, status);
+    ser_get_key_record(*sptr, &sf->date_time, DATETIMEUTC_KEY, status);
+
+    /* determine validity of image data section */
+    size_t image_frame_byte_size = 0;
+    ser_get_frame_byte_size(*sptr, &image_frame_byte_size, status);
+    if (*status) {
+        return;
+    }
+    size_t image_data_size = sf->frame_count * image_frame_byte_size;
+    if (size < HDR_SIZE + image_data_size) {
+        return (void)(*status = INVALID_STRUCTURE);
+    }
+
+    /* determine existence of trailer */
+    sf->has_trailer = false;
+    sf->timestamps = NULL;
+    sf->timestamp_count = 0;
+
+    size_t trailer_offset = HDR_SIZE + image_data_size;
+    if (size > trailer_offset) {
+        sf->has_trailer = true;
+
+        /* determine validity of trailer */
+        size_t trailer_size = size - trailer_offset;
+        if (trailer_size != sf->frame_count * sizeof(uint64_t)) {
+            return (void)(*status = INVALID_TRAILER);
+        }
+
+        /* parse trailer */
+        sf->timestamps = (uint64_t*)realloc(sf->timestamps, trailer_size);
+        sf->timestamp_count = sf->frame_count;
+        sf->reader(sf->io_context, sf->timestamps, trailer_size, trailer_offset);
+    }
 
     return;
 }
@@ -369,6 +473,7 @@ void ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* st
  *  @param  sptr      (IO)  - Pointer to a pointer of a serfile.
  *  @param  data      (I)   - Pointer to data.
  *  @param  size      (I)   - Size to initially allocate / copy over.
+ *  @param  mode      (I)   - Access type, either READONLY or READWRITE.
  *  @param  status    (IO)  - Error status.
  *  @return Void.
  */
@@ -377,6 +482,16 @@ void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode,
         return (void)(*status = NULL_SPTR);
     }
 
+    if (!data) {
+        return (void)(*status = NULL_PARAM);
+    }
+
+    /* determine existence of header */
+    if (size < HDR_SIZE) {
+        return (void)(*status = INVALID_FILE);
+    }
+
+    /* allocate memory for serfile */
     *sptr = (serfile*)malloc(sizeof(serfile));
     if (!*sptr) {
         return (void)(*status = MEM_ALLOC);
@@ -388,24 +503,73 @@ void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode,
         return (void)(*status = MEM_ALLOC);
     }
 
+    /* allocate data reference */
     serMem* ser_data = (serMem*)malloc(sizeof(serMem));
-
     ser_data->data = (uint8_t*)malloc(size);
     if (data) {
         memcpy(ser_data->data, data, size);
     }
-
     ser_data->size = size;
     ser_data->owns_buffer = true;
 
-    (*sptr)->SER_file->io_context = ser_data;
-    (*sptr)->SER_file->reader = ser_memory_read;
-    (*sptr)->SER_file->writer = ser_memory_write;
+    /* general setup */
+    SERfile* sf = (*sptr)->SER_file;
+    sf->io_context = ser_data;
+    sf->reader = ser_memory_read;
+    sf->writer = ser_memory_write;
 
     if (mode != READWRITE) {
         mode = READONLY;
     }
-    (*sptr)->SER_file->access_mode = mode;
+    sf->access_mode = mode;
+
+    /* parse file metadata after validating header existence */
+    ser_get_key_record(*sptr, sf->file_id, FILEID_KEY, status);
+    ser_get_key_record(*sptr, &sf->lu_id, LUID_KEY, status);
+    ser_get_key_record(*sptr, &sf->color_id, COLORID_KEY, status);
+    ser_get_key_record(*sptr, &sf->little_endian, LITTLEENDIAN_KEY, status);
+    ser_get_key_record(*sptr, &sf->image_width, IMAGEWIDTH_KEY, status);
+    ser_get_key_record(*sptr, &sf->image_height, IMAGEHEIGHT_KEY, status);
+    ser_get_key_record(*sptr, &sf->pixel_depth_per_plane, PIXELDEPTHPERPLANE_KEY, status);
+    ser_get_key_record(*sptr, &sf->frame_count, FRAMECOUNT_KEY, status);
+    ser_get_key_record(*sptr, sf->observer, OBSERVER_KEY, status);
+    ser_get_key_record(*sptr, sf->instrument, INSTRUMENT_KEY, status);
+    ser_get_key_record(*sptr, sf->telescope, TELESCOPE_KEY, status);
+    ser_get_key_record(*sptr, &sf->date_time, DATETIME_KEY, status);
+    ser_get_key_record(*sptr, &sf->date_time, DATETIMEUTC_KEY, status);
+
+    /* determine validity of image data section */
+    size_t image_frame_byte_size = 0;
+    ser_get_frame_byte_size(*sptr, &image_frame_byte_size, status);
+    if (*status) {
+        //printf("Status: %d\n", *status);
+        return;
+    }
+    size_t image_data_size = sf->frame_count * image_frame_byte_size;
+    if (size < HDR_SIZE + image_data_size) {
+        return (void)(*status = INVALID_STRUCTURE);
+    }
+
+    /* determine existence of trailer */
+    sf->has_trailer = false;
+    sf->timestamps = NULL;
+    sf->timestamp_count = 0;
+
+    size_t trailer_offset = HDR_SIZE + image_data_size;
+    if (size > trailer_offset) {
+        sf->has_trailer = true;
+
+        /* determine validity of trailer */
+        size_t trailer_size = size - trailer_offset;
+        if (trailer_size != sf->frame_count * sizeof(uint64_t)) {
+            return (void)(*status = INVALID_TRAILER);
+        }
+
+        /* parse trailer */
+        sf->timestamps = (uint64_t*)realloc(sf->timestamps, trailer_size);
+        sf->timestamp_count = sf->frame_count;
+        sf->reader(sf->io_context, sf->timestamps, trailer_size, trailer_offset);
+    }
 
     return;
 }
@@ -429,6 +593,10 @@ void ser_close_memory(serfile* sptr, int* status) {
         free(memory_io->data);
     }
 
+    if (sptr->SER_file->timestamps) {
+        free(sptr->SER_file->timestamps);
+    }
+
     free(sptr->SER_file);
     free(sptr);
     sptr = NULL;
@@ -436,10 +604,78 @@ void ser_close_memory(serfile* sptr, int* status) {
     return;
 }
 
-/*  @brief  Opens SER file
+/*  @brief  Create a new SER file.
  *
- *  The memory for the serfile structure is automatically allocated
- *  on file open and freed on file close.
+ *  @param  sptr        (IO)    - Pointer to pointer of a serfile.
+ *  @param  path        (I)     - File path.
+ *  @param  has_trailer (I)     - Should file have a trailer.
+ *  @param  status      (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_create_file(serfile** sptr, const char* path, bool has_trailer, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    if (!path) {
+        return (void)(*status = NULL_PATH);
+    }
+
+    FILE* file;
+    if ((file = fopen(path, "r"))) {
+        fclose(file);
+        return (void)(*status = FILE_EXISTS);
+    }
+
+    file = fopen(path, "w+b");
+    if (!file) {
+        return (void)(*status = FILE_OPEN_ERROR);
+    }
+
+    *sptr = (serfile*)malloc(sizeof(serfile));
+    if (!*sptr) {
+        fclose(file);
+        return (void)(*status = MEM_ALLOC);
+    }
+
+    (*sptr)->SER_file = (SERfile*)malloc(sizeof(SERfile));
+    if (!(*sptr)->SER_file) {
+        fclose(file);
+        free(*sptr);
+        return (void)(*status = MEM_ALLOC);
+    }
+
+    SERfile* sf = (*sptr)->SER_file;
+    sf->io_context = file;
+    sf->reader = ser_file_read;
+    sf->writer = ser_file_write;
+    sf->access_mode = READWRITE;
+
+    memset(sf->file_id, 0, FILEID_LEN);
+    sf->lu_id = 0;
+    sf->color_id = MONO;
+    sf->little_endian = 1;
+    sf->image_width = 0;
+    sf->image_height = 0;
+    sf->pixel_depth_per_plane = 8;
+    sf->frame_count = 0;
+    memset(sf->observer, 0, OBSERVER_LEN);
+    memset(sf->instrument, 0, INSTRUMENT_LEN);
+    memset(sf->telescope, 0, TELESCOPE_LEN);
+    sf->date_time = 0;
+    sf->date_time_utc = 0;
+
+    sf->has_trailer = has_trailer;
+    sf->timestamps = NULL;
+    sf->timestamp_count = 0;
+    if (sf->has_trailer) {
+        sf->timestamps = (uint64_t*)calloc(0, sizeof(uint64_t)); 
+    }
+
+    return;
+}
+
+/*  @brief  Opens existing SER file
  *
  *  @param  sptr      (IO)  - Pointer to a pointer of a serfile.
  *  @param  path      (I)   - SER file path.
@@ -453,45 +689,104 @@ void ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
     }
 
     if (!path) {
-        return (void)(*status = NULL_FILENAME);
+        return (void)(*status = NULL_PATH);
     }
 
-    FILE* ser_file;
+    FILE* file;
     switch (mode) {
         case READWRITE:
-            ser_file = fopen(path, "r+b");
-            if (!ser_file) {
-                ser_file = fopen(path, "w+b");
-            }
-            break;
+            file = fopen(path, "r+b");
         case READONLY:
         default:
-            mode = READONLY;
-            ser_file = fopen(path, "rb");
-            break;
+            file = fopen(path, "rb");
     }
-
-    if (!ser_file) {
+    
+    if (!file) {
         return (void)(*status = FILE_OPEN_ERROR);
     }
 
+    /* retrieve size of file and return to start */
+    fseek(file, 0, SEEK_END);
+    long file_size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    /* determine existence of header */
+    if (file_size < HDR_SIZE) {
+        fclose(file);
+        return (void)(*status = INVALID_FILE);
+    }
+
+    /* allocate memory for serfile */
     *sptr = (serfile*)malloc(sizeof(serfile));
     if (!*sptr) {
-        fclose(ser_file);
+        fclose(file);
         return (void)(*status = MEM_ALLOC);
     }
 
     (*sptr)->SER_file = (SERfile*)malloc(sizeof(SERfile));
     if (!(*sptr)->SER_file) {
-        fclose(ser_file);
+        fclose(file);
         free(*sptr);
         return (void)(*status = MEM_ALLOC);
     }
 
-    (*sptr)->SER_file->io_context = ser_file;
-    (*sptr)->SER_file->reader = ser_file_read;
-    (*sptr)->SER_file->writer = ser_file_write;
-    (*sptr)->SER_file->access_mode = mode;
+    /* general setup */
+    SERfile* sf = (*sptr)->SER_file;
+    sf->io_context = file;
+    sf->reader = ser_file_read;
+    sf->writer = ser_file_write;
+
+    if (mode != READWRITE) {
+        mode = READONLY;
+    }
+    sf->access_mode = mode;
+
+    /* parse file metadata after validating header existence */
+    ser_get_key_record(*sptr, sf->file_id, FILEID_KEY, status);
+    ser_get_key_record(*sptr, &sf->lu_id, LUID_KEY, status);
+    ser_get_key_record(*sptr, &sf->color_id, COLORID_KEY, status);
+    ser_get_key_record(*sptr, &sf->little_endian, LITTLEENDIAN_KEY, status);
+    ser_get_key_record(*sptr, &sf->image_width, IMAGEWIDTH_KEY, status);
+    ser_get_key_record(*sptr, &sf->image_height, IMAGEHEIGHT_KEY, status);
+    ser_get_key_record(*sptr, &sf->pixel_depth_per_plane, PIXELDEPTHPERPLANE_KEY, status);
+    ser_get_key_record(*sptr, &sf->frame_count, FRAMECOUNT_KEY, status);
+    ser_get_key_record(*sptr, sf->observer, OBSERVER_KEY, status);
+    ser_get_key_record(*sptr, sf->instrument, INSTRUMENT_KEY, status);
+    ser_get_key_record(*sptr, sf->telescope, TELESCOPE_KEY, status);
+    ser_get_key_record(*sptr, &sf->date_time, DATETIME_KEY, status);
+    ser_get_key_record(*sptr, &sf->date_time, DATETIMEUTC_KEY, status);
+
+    /* determine validity of image data section */
+    size_t image_frame_byte_size = 0;
+    ser_get_frame_byte_size(*sptr, &image_frame_byte_size, status);
+    if (*status) {
+        return;
+    }
+    size_t image_data_size = sf->frame_count * image_frame_byte_size;
+    if (file_size < HDR_SIZE + image_data_size) {
+        return (void)(*status = INVALID_STRUCTURE);
+    }
+
+    /* determine existence of trailer */
+    sf->has_trailer = false;
+    sf->timestamps = NULL;
+    sf->timestamp_count = 0;
+
+    size_t trailer_offset = HDR_SIZE + image_data_size;
+    if (file_size > trailer_offset) {
+        sf->has_trailer = true;
+
+        /* determine validity of trailer */
+        size_t trailer_size = file_size - trailer_offset;
+        if (trailer_size != sf->frame_count * sizeof(uint64_t)) {
+            return (void)(*status = INVALID_TRAILER);
+        }
+
+        /* parse trailer */
+        sf->timestamps = (uint64_t*)realloc(sf->timestamps, trailer_size);
+        sf->timestamp_count = sf->frame_count;
+        sf->reader(sf->io_context, sf->timestamps, trailer_size, trailer_offset);
+    }
 
     return;
 }
@@ -512,6 +807,10 @@ void ser_close_file(serfile* sptr, int* status) {
 
     if (!sptr->SER_file->io_context || fclose((FILE*)sptr->SER_file->io_context)) {
         *status = FILE_CLOSE_ERROR;
+    }
+
+    if (sptr->SER_file->timestamps) {
+        free(sptr->SER_file->timestamps);
     }
 
     free(sptr->SER_file);
@@ -713,6 +1012,240 @@ void ser_get_key_record(serfile* sptr, void* dest, int key, int* status) {
     return;
 }
 
+/*  @brief  Get File ID
+ *  @param  sptr        (I)     - Pointer to serfile.
+ *  @param  file_id     (IO)    - Destination buffer.
+ *  @param  status      (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_get_file_id(const serfile* sptr, char* file_id, int* status) {
+    if (!sptr) { 
+        return (void)(*status = NULL_SPTR); 
+    }
+
+    if (!file_id) { 
+        return (void)(*status = NULL_DEST_BUFF); 
+    }
+
+    memcpy(file_id, sptr->SER_file->file_id, FILEID_LEN);
+}
+
+/*  @brief  Get LU ID
+ *  @param  sptr        (I)     - Pointer to serfile.
+ *  @param  lu_id       (IO)    - Destination buffer.
+ *  @param  status      (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_get_lu_id(const serfile* sptr, int32_t* lu_id, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    if (!lu_id) {
+        return (void)(*status = NULL_DEST_BUFF);
+    }
+
+    *lu_id = sptr->SER_file->lu_id;
+}
+
+/*  @brief  Get Color ID
+ *  @param  sptr        (I)     - Pointer to serfile.
+ *  @param  color_id    (IO)    - Destination buffer.
+ *  @param  status      (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_get_color_id(const serfile* sptr, int32_t* color_id, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    if (!color_id) {
+        return (void)(*status = NULL_DEST_BUFF);
+    }
+
+    *color_id = sptr->SER_file->color_id;
+}
+
+/*  @brief  Get Litte Endian
+ *  @param  sptr            (I)     - Pointer to serfile.
+ *  @param  little_endian   (IO)    - Destination buffer.
+ *  @param  status          (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_get_little_endian(const serfile* sptr, int32_t* little_endian, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    if (!little_endian) {
+        return (void)(*status = NULL_DEST_BUFF);
+    }
+
+    *little_endian = sptr->SER_file->little_endian;
+}
+
+/*  @brief  Get Image Width
+ *  @param  sptr            (I)     - Pointer to serfile.
+ *  @param  image_width     (IO)    - Destination buffer.
+ *  @param  status          (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_get_image_width(const serfile* sptr, int32_t* image_width, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    if (!image_width) {
+        return (void)(*status = NULL_DEST_BUFF);
+    }
+
+    *image_width = sptr->SER_file->image_width;
+}
+
+/*  @brief  Get Image Height 
+ *  @param  sptr            (I)     - Pointer to serfile.
+ *  @param  image_height    (IO)    - Destination buffer.
+ *  @param  status          (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_get_image_height(const serfile* sptr, int32_t* image_height, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    if (!image_height) {
+        return (void)(*status = NULL_DEST_BUFF);
+    }
+
+    *image_height= sptr->SER_file->image_height;
+}
+
+/*  @brief  Get Pixel Depth Per Plane
+ *  @param  sptr                    (I)     - Pointer to serfile.
+ *  @param  pixel_depth_per_plane   (IO)    - Destination buffer.
+ *  @param  status                  (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_get_pixel_depth_per_plane(const serfile* sptr, int32_t* pixel_depth_per_plane, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    if (!pixel_depth_per_plane) {
+        return (void)(*status = NULL_DEST_BUFF);
+    }
+
+    *pixel_depth_per_plane = sptr->SER_file->pixel_depth_per_plane;
+}
+
+/*  @brief  Get Frame Count
+ *  @param  sptr        (I)     - Pointer to serfile.
+ *  @param  frame_count (IO)    - Destination buffer.
+ *  @param  status      (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_get_frame_count(const serfile* sptr, int32_t* frame_count, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    if (!frame_count) {
+        return (void)(*status = NULL_DEST_BUFF);
+    }
+
+    *frame_count = sptr->SER_file->frame_count;
+}
+
+/*  @brief  Get Observer
+ *  @param  sptr        (I)     - Pointer to serfile.
+ *  @param  observer    (IO)    - Destination buffer.
+ *  @param  status      (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_get_observer(const serfile* sptr, char* observer, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    if (!observer) {
+        return (void)(*status = NULL_DEST_BUFF);
+    }
+
+    memcpy(observer, sptr->SER_file->observer, OBSERVER_LEN);
+}
+
+/*  @brief  Get Instrument 
+ *  @param  sptr        (I)     - Pointer to serfile.
+ *  @param  instrument  (IO)    - Destination buffer.
+ *  @param  status      (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_get_instrument(const serfile* sptr, char* instrument, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    if (!instrument) {
+        return (void)(*status = NULL_DEST_BUFF);
+    }
+
+    memcpy(instrument, sptr->SER_file->instrument, INSTRUMENT_LEN);
+}
+
+/*  @brief  Get Telescope
+ *  @param  sptr        (I)     - Pointer to serfile.
+ *  @param  telescope   (IO)    - Destination buffer.
+ *  @param  status      (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_get_telescope(const serfile* sptr, char* telescope, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    if (!telescope) {
+        return (void)(*status = NULL_DEST_BUFF);
+    }
+
+    memcpy(telescope, sptr->SER_file->telescope, TELESCOPE_LEN);
+}
+
+/*  @brief  Get Date Time
+ *  @param  sptr        (I)     - Pointer to serfile.
+ *  @param  date_time   (IO)    - Destination buffer.
+ *  @param  status      (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_get_date_time(const serfile* sptr, int64_t* date_time, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    if (!date_time) {
+        return (void)(*status = NULL_DEST_BUFF);
+    }
+
+    *date_time = sptr->SER_file->date_time;
+}
+
+/*  @brief  Get Date Time UTC
+ *  @param  sptr            (I)     - Pointer to serfile.
+ *  @param  date_time_utc   (IO)    - Destination buffer.
+ *  @param  status          (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_get_date_time_utc(const serfile* sptr, int64_t* date_time_utc, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    if (!date_time_utc) {
+        return (void)(*status = NULL_DEST_BUFF);
+    }
+
+    *date_time_utc = sptr->SER_file->date_time_utc;
+}
+
 /** @brief  Write data to header idx 
  *  
  *  This write routine is capped such that it will write less
@@ -909,34 +1442,6 @@ void ser_write_key_record(serfile* sptr, const void* data, int key, size_t size,
 
 /*-------------------- Image Routines --------------------*/
 
-/*  @brief Get the number of image frames
- *  @param  sptr        (I)   - Pointer to serfile.
- *  @param  frame_count (IO)  - Pointer to int to set as frame count.
- *  @param  status      (IO)  - Error status.
- *  @return Void.
- */
-void ser_get_frame_count(serfile* sptr, int* frame_count, int* status) {
-    if (!sptr) { 
-        return (void)(*status = NULL_SPTR); 
-    }
-
-    if (!frame_count) { 
-        return (void)(*status = NULL_PARAM); 
-    }
-
-    /* get frame count from header */
-    int temp_frame_count = 0;
-    ser_get_key_record(sptr, &temp_frame_count, FRAMECOUNT_KEY, status);
-
-    if (*status) { 
-        return;
-    }
-
-    *frame_count = temp_frame_count;
-
-    return;
-}
-
 /*  @brief Get the size of a target dimension
  *  @param  sptr    (I)   - Pointer to serfile.
  *  @param  size    (IO)  - Pointer to int to set as size.
@@ -1011,18 +1516,8 @@ void ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int*
         return (void)(*status = NULL_PARAM); 
     }
 
-    int color_ID = 0;
-    ser_get_key_record(sptr, &color_ID, COLORID_KEY, status);
-    if (*status) { 
-        return; 
-    }
-    int number_of_planes = color_ID < 100 ? 1 : 3;
-
-    int pixel_depth = 0;
-    ser_get_key_record(sptr, &pixel_depth, PIXELDEPTHPERPLANE_KEY, status);
-    if (*status) { 
-        return; 
-    }
+    int number_of_planes = sptr->SER_file->color_id < 100 ? 1 : 3;
+    int pixel_depth = sptr->SER_file->pixel_depth_per_plane;
 
     if (pixel_depth <= 8) {
         *bytes_per_pixel = number_of_planes; /* 1 byte per pixel */
@@ -1054,17 +1549,8 @@ void ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* statu
         return;
     }
 
-    int width = 0;
-    ser_get_key_record(sptr, &width, IMAGEWIDTH_KEY, status);
-    if (*status) { 
-        return; 
-    }
-
-    int height = 0;
-    ser_get_key_record(sptr, &height, IMAGEHEIGHT_KEY, status);
-    if (*status) { 
-        return;
-    }
+    int32_t width = sptr->SER_file->image_width;
+    int32_t height = sptr->SER_file->image_height;
 
     *byte_size = bytes_per_pixel * width * height;
 
@@ -1190,37 +1676,15 @@ void ser_get_trlr_record(serfile* sptr, int64_t* dest, int idx, int* status) {
         return (void)(*status = NULL_PARAM); 
     }
 
-    int frame_count = 0;
-    ser_get_key_record(sptr, &frame_count, FRAMECOUNT_KEY, status);
-    if (*status) { 
-        return; 
+    if (!sptr->SER_file->has_trailer) {
+        return (void)(*status = TRAILER_DNE);
     }
 
-    if (idx < 0 || idx >= frame_count) {
+    if (idx < 0 || idx >= sptr->SER_file->timestamp_count) {
         return (void)(*status = INVALID_TRLR_IDX); 
     }
 
-    unsigned long frame_byte_size = 0;
-    ser_get_frame_byte_size(sptr, &frame_byte_size, status);
-    if (*status) { 
-        return; 
-    }
-
-    unsigned long trailer_offset = DATA_START_SET + (frame_count * frame_byte_size);
-    unsigned long stamp_offset = sizeof(int64_t) * idx;
-    unsigned long data_offset = trailer_offset + stamp_offset;
-
-    SERfile* sfile = sptr->SER_file;
-    int bytes_read = sfile->reader(
-            sfile->io_context,
-            dest,
-            sizeof(int64_t),
-            data_offset
-    );
-
-    if (bytes_read < sizeof(int64_t)) {
-        *status = READ_ERROR;
-    }
+    *dest = sptr->SER_file->timestamps[idx];
 
     return;
 }

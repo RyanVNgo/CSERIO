@@ -7,7 +7,7 @@
 
 
 void image_write_setup() {
-    int status;
+    int status = 0;
     memset(test_data_3x50.data, 0, sizeof(test_data_3x50.data));
     ser_open_view(
             &test_ser_3x50,
@@ -19,7 +19,7 @@ void image_write_setup() {
 }
 
 void image_write_teardown() {
-    int status;
+    int status = 0;
     memset(test_data_3x50.data, 0, sizeof(test_data_3x50.data));
     ser_close_memory(test_ser_3x50, &status);
 }
