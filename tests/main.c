@@ -7,6 +7,7 @@
 
 #include "core.c"
 #include "open_view.c"
+#include "open_memory.c"
 #include "header_read.c"
 #include "header_write.c"
 #include "image_info.c"
@@ -31,6 +32,13 @@ int main() {
     srunner_run_all(open_view_sr, CK_VERBOSE);
     number_failed = srunner_ntests_failed(open_view_sr);
     srunner_free(open_view_sr);
+
+    Suite* open_memory_s; 
+    open_memory_s = open_memory_suite();
+    SRunner* open_memory_sr = srunner_create(open_memory_s);
+    srunner_run_all(open_memory_sr, CK_VERBOSE);
+    number_failed = srunner_ntests_failed(open_memory_sr);
+    srunner_free(open_memory_sr);
 
     Suite* hdr_read_s; 
     hdr_read_s = header_read_suite();

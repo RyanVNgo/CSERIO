@@ -6,11 +6,11 @@
 #include "../cserio.h"
 
 
-START_TEST(open_view_success) {
+START_TEST(open_memory_success) {
     serfile* test_ser = NULL;
     int status = 0;
 
-    ser_open_view(
+    ser_open_memory(
             &test_ser,
             (uint8_t*)&test_data_3x50,
             sizeof(test_data_3x50),
@@ -25,11 +25,11 @@ START_TEST(open_view_success) {
 
 } END_TEST
 
-START_TEST(open_view_no_trailer) {
+START_TEST(open_memory_no_trailer) {
     serfile* test_ser = NULL;
     int status = 0;
 
-    ser_open_view(
+    ser_open_memory(
             &test_ser,
             (uint8_t*)&test_data_3x50,
             sizeof(test_data_3x50) - sizeof(test_data_3x50.trlr),
@@ -44,12 +44,12 @@ START_TEST(open_view_no_trailer) {
 
 } END_TEST
 
-START_TEST(open_view_invalid_trailer) {
+START_TEST(open_memory_invalid_trailer) {
     serfile* test_ser = NULL;
     int status = 0;
 
     /* Trailer only 1 byte long (does not match hdr metadata) */
-    ser_open_view(
+    ser_open_memory(
             &test_ser,
             (uint8_t*)&test_data_3x50,
             sizeof(test_data_3x50) - sizeof(test_data_3x50.trlr) + 1,
@@ -64,12 +64,12 @@ START_TEST(open_view_invalid_trailer) {
     ck_assert_int_eq(status, NO_ERROR);
 } END_TEST;
 
-START_TEST(open_view_invalid_structure) {
+START_TEST(open_memory_invalid_structure) {
     serfile* test_ser = NULL;
     int status = 0;
 
     /* Data section short by 1 */
-    ser_open_view(
+    ser_open_memory(
             &test_ser,
             (uint8_t*)&test_data_3x50,
             sizeof(test_data_3x50) - sizeof(test_data_3x50.trlr) - 1,
@@ -84,12 +84,12 @@ START_TEST(open_view_invalid_structure) {
 
 } END_TEST
 
-START_TEST(open_view_invalid_file) {
+START_TEST(open_memory_invalid_file) {
     serfile* test_ser = NULL;
     int status = 0;
 
     /* full header not present */
-    ser_open_view(
+    ser_open_memory(
             &test_ser,
             (uint8_t*)&test_data_3x50,
             HDR_SIZE - 1, 
@@ -100,10 +100,10 @@ START_TEST(open_view_invalid_file) {
 
 } END_TEST
 
-START_TEST(open_view_null_ser) {
+START_TEST(open_memory_null_ser) {
     int status = 0;
 
-    ser_open_view(
+    ser_open_memory(
             NULL,
             (uint8_t*)&test_data_3x50,
             sizeof(test_data_3x50),
@@ -114,11 +114,11 @@ START_TEST(open_view_null_ser) {
 
 } END_TEST
 
-START_TEST(open_view_null_data) {
+START_TEST(open_memory_null_data) {
     serfile* test_ser;
     int status = 0;
 
-    ser_open_view(
+    ser_open_memory(
             &test_ser,
             NULL,
             sizeof(test_data_3x50),
@@ -129,20 +129,21 @@ START_TEST(open_view_null_data) {
 
 } END_TEST
 
-Suite* open_view_suite() {
+Suite* open_memory_suite() {
     Suite* s;
     s = suite_create("Open View");
 
-    TCase* tc_open_view = tcase_create("open_view");
-    tcase_add_test(tc_open_view, open_view_success);
-    tcase_add_test(tc_open_view, open_view_no_trailer);
-    tcase_add_test(tc_open_view, open_view_invalid_trailer);
-    tcase_add_test(tc_open_view, open_view_invalid_structure);
-    tcase_add_test(tc_open_view, open_view_invalid_file);
-    tcase_add_test(tc_open_view, open_view_null_ser);
-    tcase_add_test(tc_open_view, open_view_null_data);
-    suite_add_tcase(s, tc_open_view);
+    TCase* tc_open_memory = tcase_create("open_memory");
+    tcase_add_test(tc_open_memory, open_memory_success);
+    tcase_add_test(tc_open_memory, open_memory_no_trailer);
+    tcase_add_test(tc_open_memory, open_memory_invalid_trailer);
+    tcase_add_test(tc_open_memory, open_memory_invalid_structure);
+    tcase_add_test(tc_open_memory, open_memory_invalid_file);
+    tcase_add_test(tc_open_memory, open_memory_null_ser);
+    tcase_add_test(tc_open_memory, open_memory_null_data);
+    suite_add_tcase(s, tc_open_memory);
 
     return s;
 }
+
 
