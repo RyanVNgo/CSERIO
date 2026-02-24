@@ -1,8 +1,6 @@
 
 #include <check.h>
 
-#include "ser_test_data.h"
-
 #include "../cserio.h"
 
 
@@ -13,22 +11,7 @@ START_TEST(version_check) {
     ck_assert_int_eq(major, CSERIO_MAJOR);
     ck_assert_int_eq(minor, CSERIO_MINOR);
     ck_assert_int_eq(micro, CSERIO_MICRO);
-} END_TEST
 
-START_TEST(open_memory) {
-    serfile* test_ser;
-    int status = 0;
-    ser_open_memory(
-            &test_ser,
-            (uint8_t*)&test_data_3x50, 
-            sizeof(test_data_3x50),
-            READWRITE,
-            &status
-    );
-    ck_assert_int_eq(status, NO_ERROR);
-
-    ser_close_memory(test_ser, &status);
-    ck_assert_int_eq(status, NO_ERROR);
 } END_TEST
 
 Suite* core_suite() {
@@ -37,12 +20,7 @@ Suite* core_suite() {
 
     TCase* tc_version_check = tcase_create("version_check");
     tcase_add_test(tc_version_check, version_check);
-
-    TCase* tc_open_data = tcase_create("open_data");
-    tcase_add_test(tc_open_data, open_memory);
-
     suite_add_tcase(s, tc_version_check);
-    suite_add_tcase(s, tc_open_data);
 
     return s;
 }

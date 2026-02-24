@@ -6,6 +6,7 @@
 #endif
 
 #include "core.c"
+#include "open_view.c"
 #include "header_read.c"
 #include "header_write.c"
 #include "image_info.c"
@@ -23,6 +24,13 @@ int main() {
     srunner_run_all(core_sr, CK_VERBOSE);
     number_failed = srunner_ntests_failed(core_sr);
     srunner_free(core_sr);
+
+    Suite* open_view_s; 
+    open_view_s = open_view_suite();
+    SRunner* open_view_sr = srunner_create(open_view_s);
+    srunner_run_all(open_view_sr, CK_VERBOSE);
+    number_failed = srunner_ntests_failed(open_view_sr);
+    srunner_free(open_view_sr);
 
     Suite* hdr_read_s; 
     hdr_read_s = header_read_suite();
