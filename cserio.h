@@ -428,7 +428,7 @@ void ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* st
     ser_get_key_record(*sptr, sf->instrument, INSTRUMENT_KEY, status);
     ser_get_key_record(*sptr, sf->telescope, TELESCOPE_KEY, status);
     ser_get_key_record(*sptr, &sf->date_time, DATETIME_KEY, status);
-    ser_get_key_record(*sptr, &sf->date_time, DATETIMEUTC_KEY, status);
+    ser_get_key_record(*sptr, &sf->date_time_utc, DATETIMEUTC_KEY, status);
 
     /* determine validity of image data section */
     size_t image_frame_byte_size = 0;
@@ -536,7 +536,7 @@ void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode,
     ser_get_key_record(*sptr, sf->instrument, INSTRUMENT_KEY, status);
     ser_get_key_record(*sptr, sf->telescope, TELESCOPE_KEY, status);
     ser_get_key_record(*sptr, &sf->date_time, DATETIME_KEY, status);
-    ser_get_key_record(*sptr, &sf->date_time, DATETIMEUTC_KEY, status);
+    ser_get_key_record(*sptr, &sf->date_time_utc, DATETIMEUTC_KEY, status);
 
     /* determine validity of image data section */
     size_t image_frame_byte_size = 0;
@@ -754,7 +754,7 @@ void ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
     ser_get_key_record(*sptr, sf->instrument, INSTRUMENT_KEY, status);
     ser_get_key_record(*sptr, sf->telescope, TELESCOPE_KEY, status);
     ser_get_key_record(*sptr, &sf->date_time, DATETIME_KEY, status);
-    ser_get_key_record(*sptr, &sf->date_time, DATETIMEUTC_KEY, status);
+    ser_get_key_record(*sptr, &sf->date_time_utc, DATETIMEUTC_KEY, status);
 
     /* determine validity of image data section */
     size_t image_frame_byte_size = 0;

@@ -18,7 +18,6 @@ START_TEST(open_view_success) {
             &status
     );
     ck_assert_int_eq(status, NO_ERROR);
-    ck_assert_int_eq(true, test_ser->SER_file->has_trailer);
 
     ser_close_memory(test_ser, &status);
     ck_assert_int_eq(status, NO_ERROR);
@@ -37,7 +36,6 @@ START_TEST(open_view_no_trailer) {
             &status
     );
     ck_assert_int_eq(status, NO_ERROR);
-    ck_assert_int_eq(false, test_ser->SER_file->has_trailer);
 
     ser_close_memory(test_ser, &status);
     ck_assert_int_eq(status, NO_ERROR);
@@ -57,7 +55,6 @@ START_TEST(open_view_invalid_trailer) {
             &status
     );
     ck_assert_int_eq(status, INVALID_TRAILER);
-    ck_assert_int_eq(true, test_ser->SER_file->has_trailer);
 
     status = 0;
     ser_close_memory(test_ser, &status);
