@@ -702,7 +702,7 @@ void ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
     }
     
     if (!file) {
-        return (void)(*status = FILE_OPEN_ERROR);
+        return (void)(*status = FILE_DNE);
     }
 
     /* retrieve size of file and return to start */
