@@ -7,9 +7,8 @@
 
 
 START_TEST(create_file_success) {
-    char dir_template[] = "/tmp/cserio_testXXXXXX";
-    char* dir = mkdtemp(dir_template);
-    if (!dir) {
+    char dir[] = "/tmp/cserio_testXXXXXX";
+    if (!mkdtemp(dir)) {
         ck_abort_msg("Failed to make temp directory");
     }
 
@@ -38,9 +37,8 @@ START_TEST(create_file_success) {
 } END_TEST;
 
 START_TEST(create_file_already_exists) {
-    char dir_template[] = "/tmp/cserio_testXXXXXX";
-    char* dir = mkdtemp(dir_template);
-    if (!dir) {
+    char dir[] = "/tmp/cserio_testXXXXXX";
+    if (!mkdtemp(dir)) {
         ck_abort_msg("Failed to make temp directory");
     }
 
@@ -96,9 +94,8 @@ START_TEST(create_file_null_path) {
 } END_TEST
 
 START_TEST(create_file_null_ser) {
-    char dir_template[] = "/tmp/cserio_testXXXXXX";
-    char* dir = mkdtemp(dir_template);
-    if (!dir) {
+    char dir[] = "/tmp/cserio_testXXXXXX";
+    if (!mkdtemp(dir)) {
         ck_abort_msg("Failed to make temp directory");
     }
 

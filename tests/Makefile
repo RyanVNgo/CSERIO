@@ -1,17 +1,18 @@
 CC = gcc
 CFLAGS = -std=c99 -Wall
+LDFLAGS = -lcheck -lm -lsubunit
 
-UNITY_TARGET = unity_test_base
-PRECOMP_TARGET = precomp_test_base
+UNITY_TARGET = unity_cserio_testing
+PRECOMP_TARGET = precomp_cserio_testing
 
 all: $(UNITY_TARGET) $(PRECOMP_TARGET)
 
 $(UNITY_TARGET):
-	$(CC) -DUNITY_TEST main.c -lcheck -lm -lsubunit -o $@
+	$(CC) $(CFLAGS) -DUNITY_TEST main.c $(LDFLAGS) -o $@
 
 $(PRECOMP_TARGET):
-	$(CC) -DSER_TESTING -DCSERIO_IMPLEMENTATION  -x c -c ../cserio.h
-	$(CC) main.c cserio.o -lcheck -lm -lsubunit -o $@
+	$(CC) $(CFLAGS) -DCSERIO_IMPLEMENTATION -x c -c ../cserio.h
+	$(CC) $(CFLAGS) main.c cserio.o $(LDFLAGS) -o $@
 
 run:
 	./$(UNITY_TARGET)
