@@ -1,5 +1,5 @@
 
-#include <check.h>
+#include "suites.h"
 
 #include "../cserio.h"
 

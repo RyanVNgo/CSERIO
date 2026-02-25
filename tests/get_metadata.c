@@ -1,4 +1,6 @@
 
+#include "suites.h"
+
 #include <check.h>
 
 #include "ser_test_data.h"

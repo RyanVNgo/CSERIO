@@ -69,7 +69,7 @@ static SERTest3x50Structure test_data_3x50 = {
 
 static serfile* test_ser_3x50;
 
-const int key_map[HDR_UNIT_COUNT] = {
+static const int key_map[HDR_UNIT_COUNT] = {
     FILEID_KEY              ,
     LUID_KEY                ,
     COLORID_KEY             ,
@@ -85,7 +85,7 @@ const int key_map[HDR_UNIT_COUNT] = {
     DATETIMEUTC_KEY         
 };
 
-const int len_map[HDR_UNIT_COUNT] = {
+static const int len_map[HDR_UNIT_COUNT] = {
     FILEID_LEN              ,
     LUID_LEN                ,
     COLORID_LEN             ,
@@ -101,21 +101,21 @@ const int len_map[HDR_UNIT_COUNT] = {
     DATETIMEUTC_LEN         
 };
 
-void set_pattern_A(uint8_t* buffer, size_t size) {
+static void set_pattern_A(uint8_t* buffer, size_t size) {
     for (size_t i = 0; i < size; i++) {
         uint8_t value = 256 % (i + 256);
         buffer[i] = value;
     }
 }
 
-void set_pattern_B(uint8_t* buffer, size_t size) {
+static void set_pattern_B(uint8_t* buffer, size_t size) {
     for (size_t i = 0; i < size; i++) {
         uint8_t value = 8 % (i + 8);
         buffer[i] = value;
     }
 }
 
-void set_pattern_C(uint8_t* buffer, size_t size) {
+static void set_pattern_C(uint8_t* buffer, size_t size) {
     for (size_t i = 0; i < size; i++) {
         uint8_t value = 2 % (i + 2);
         buffer[i] = value;

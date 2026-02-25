@@ -1,26 +1,43 @@
-CC = gcc
-CFLAGS = -std=c99 -Wall
-LDFLAGS = -lcheck -lm -lsubunit
+CC := gcc
+CFLAGS := -std=c99 -Wall
+LDFLAGS := -lcheck -lm -lsubunit
 
-UNITY_TARGET = unity_cserio_testing
-PRECOMP_TARGET = precomp_cserio_testing
+BUILD_DIR := build
+
+SOURCES := $(wildcard *.c)
+
+UNITY_OBJECTS := $(patsubst %.c, $(BUILD_DIR)/unity/%.o, $(SOURCES))
+PRECOMP_OBJECTS := $(patsubst %.c, $(BUILD_DIR)/precomp/%.o, $(SOURCES))
+
+UNITY_TARGET := $(BUILD_DIR)/unity_cserio_testing
+PRECOMP_TARGET := $(BUILD_DIR)/precomp_cserio_testing
 
 all: $(UNITY_TARGET) $(PRECOMP_TARGET)
 
-$(UNITY_TARGET):
-	$(CC) $(CFLAGS) -DUNITY_TEST main.c $(LDFLAGS) -o $@
+$(UNITY_TARGET) : $(UNITY_OBJECTS) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
-$(PRECOMP_TARGET):
+$(PRECOMP_TARGET) : $(PRECOMP_OBJECTS) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -DCSERIO_IMPLEMENTATION -x c -c ../cserio.h
-	$(CC) $(CFLAGS) main.c cserio.o $(LDFLAGS) -o $@
+	$(CC) $(CFLAGS) $^ cserio.o -o $@ $(LDFLAGS)
+
+$(BUILD_DIR)/unity/%.o : %.c  | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -DUNITY_TEST -c $< -o $@
+
+$(BUILD_DIR)/precomp/%.o : %.c  | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD_DIR) :
+	mkdir -p $(BUILD_DIR)/unity/
+	mkdir -p $(BUILD_DIR)/precomp/
 
 run:
 	./$(UNITY_TARGET)
-#	./$(PRECOMP_TARGET)
+	./$(PRECOMP_TARGET)
 
 clean:
-	rm -v cserio.o
-	rm -v $(UNITY_TARGET) $(PRECOMP_TARGET)
+	rm cserio.o
+	rm -r $(BUILD_DIR)
 
 .PHONY: all run clean
 
