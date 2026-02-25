@@ -169,7 +169,7 @@ typedef struct SERfile {
 	int64_t		date_time_utc;
 
     bool        has_trailer;
-    uint64_t*   timestamps;
+    int64_t*    timestamps;
     size_t      timestamp_count;
 } SERfile;
 
@@ -234,6 +234,7 @@ void ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* statu
 
 void ser_read_frame(serfile* sptr, void* dest, int idx, int* status);
 void ser_write_frame(serfile* sptr, const void* data, int idx, int* status);
+void ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* status);
 
 /*-------------------- Trailer Routines --------------------*/
 
@@ -445,7 +446,7 @@ void ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* st
         }
 
         /* parse trailer */
-        sf->timestamps = (uint64_t*)realloc(sf->timestamps, trailer_size);
+        sf->timestamps = (int64_t*)realloc(sf->timestamps, trailer_size);
         sf->timestamp_count = sf->frame_count;
         sf->reader(sf->io_context, sf->timestamps, trailer_size, trailer_offset);
     }
@@ -554,7 +555,7 @@ void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode,
         }
 
         /* parse trailer */
-        sf->timestamps = (uint64_t*)realloc(sf->timestamps, trailer_size);
+        sf->timestamps = (int64_t*)realloc(sf->timestamps, trailer_size);
         sf->timestamp_count = sf->frame_count;
         sf->reader(sf->io_context, sf->timestamps, trailer_size, trailer_offset);
     }
@@ -657,7 +658,7 @@ void ser_create_file(serfile** sptr, const char* path, bool has_trailer, int* st
     sf->timestamps = NULL;
     sf->timestamp_count = 0;
     if (sf->has_trailer) {
-        sf->timestamps = (uint64_t*)calloc(0, sizeof(uint64_t)); 
+        sf->timestamps = (int64_t*)calloc(0, sizeof(uint64_t)); 
     }
 
     return;
@@ -771,7 +772,7 @@ void ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
         }
 
         /* parse trailer */
-        sf->timestamps = (uint64_t*)realloc(sf->timestamps, trailer_size);
+        sf->timestamps = (int64_t*)realloc(sf->timestamps, trailer_size);
         sf->timestamp_count = sf->frame_count;
         sf->reader(sf->io_context, sf->timestamps, trailer_size, trailer_offset);
     }
@@ -1560,11 +1561,8 @@ void ser_read_frame(serfile* sptr, void* dest, int idx, int* status) {
         return (void)(*status = NULL_DEST_BUFF); 
     }
 
-    int frame_count = 0;
-    ser_get_key_record(sptr, &frame_count, FRAMECOUNT_KEY, status);
-    if (*status) { 
-        return; 
-    }
+    SERfile* sfile = sptr->SER_file;
+    int frame_count = sfile->frame_count;
 
     if (idx < 0 || idx >= frame_count) {
         return (void)(*status = INVALID_FRAME_IDX); 
@@ -1578,7 +1576,6 @@ void ser_read_frame(serfile* sptr, void* dest, int idx, int* status) {
 
     unsigned long frame_offset = DATA_START_SET + (frame_byte_size * idx);
 
-    SERfile* sfile = sptr->SER_file;
     int bytes_read = sfile->reader(sfile->io_context, dest, frame_byte_size, frame_offset);
     if (bytes_read < frame_byte_size) {
         *status = READ_ERROR;
@@ -1607,11 +1604,8 @@ void ser_write_frame(serfile* sptr, const void* data, int idx, int* status) {
         return (void)(*status = NULL_PARAM); 
     }
 
-    int frame_count = 0;
-    ser_get_key_record(sptr, &frame_count, FRAMECOUNT_KEY, status);
-    if (*status) { 
-        return; 
-    }
+    SERfile* sfile = sptr->SER_file;
+    int frame_count = sfile->frame_count;
 
     if (idx < 0 || idx >= frame_count) {
         return (void)(*status = INVALID_FRAME_IDX); 
@@ -1625,7 +1619,6 @@ void ser_write_frame(serfile* sptr, const void* data, int idx, int* status) {
 
     unsigned long frame_offset = DATA_START_SET + (frame_byte_size * idx);
 
-    SERfile* sfile = sptr->SER_file;
     int bytes_written = sfile->writer(
             sfile->io_context,
             data,
@@ -1639,6 +1632,58 @@ void ser_write_frame(serfile* sptr, const void* data, int idx, int* status) {
     return;
 }
 
+/*  @brief  Write image frame at the index.
+ *
+ *  The byte size of a whole frame is written from data.
+ *  Data between 1-8 bits is NOT shifted when the data is written.
+ *  If the SER does not have a trailer, nothing is done with timestamp.
+ *
+ *  @param  sptr        (I)   - Pointer to serfile.
+ *  @param  data        (I)   - Pointer to data buffer.
+ *  @param  timestamp   (I)   - Timestamp.
+ *  @param  status      (IO)  - Error status. 
+ *  @return Void.
+ */
+void ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* status) {
+    if (!sptr) { 
+        return (void)(*status = NULL_SPTR); 
+    }
+
+    if (!data) { 
+        return (void)(*status = NULL_PARAM); 
+    }
+
+    SERfile* sfile = sptr->SER_file;
+    int frame_count = sfile->frame_count;
+
+    unsigned long frame_byte_size = 0;
+    ser_get_frame_byte_size(sptr, &frame_byte_size, status);
+    if (*status) { 
+        return; 
+    }
+
+    unsigned long frame_offset = DATA_START_SET + (frame_byte_size * frame_count);
+
+    int bytes_written = sfile->writer(
+            sfile->io_context,
+            data,
+            frame_byte_size,
+            frame_offset
+    );
+    if (bytes_written < frame_byte_size) {
+        return (void)(*status = IMAGE_WRITE_WARN);
+    }
+    sfile->frame_count += 1;
+
+    if (sfile->has_trailer) {
+        sfile->timestamp_count += 1;
+        size_t new_trailer_size = sfile->timestamp_count * sizeof(int64_t);
+        sfile->timestamps = (int64_t*)realloc(sfile->timestamps, new_trailer_size);
+        sfile->timestamps[sfile->timestamp_count - 1] = timestamp;
+    }
+
+    return;
+}
 
 /*-------------------- Trailer Routines --------------------*/
 
