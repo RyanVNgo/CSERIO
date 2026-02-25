@@ -193,6 +193,7 @@ void cserio_version_number(int* major, int* minor, int* micro);
 
 /*-------------------- SER Access Routines --------------------*/
 
+void ser_create_memory(serfile** sptr, bool has_trailer, int* status);
 void ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* status);
 void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode, int* status);
 void ser_close_memory(serfile* sptr, int* status);
@@ -233,7 +234,7 @@ void ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int*
 void ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* status);
 
 void ser_read_frame(serfile* sptr, void* dest, int idx, int* status);
-void ser_write_frame(serfile* sptr, const void* data, int idx, int* status);
+// void ser_write_frame(serfile* sptr, const void* data, int idx, int* status);
 void ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* status);
 
 /*-------------------- Trailer Routines --------------------*/
@@ -346,6 +347,65 @@ void cserio_version_number(int* major, int* minor, int* micro) {
 
 
 /*-------------------- SER Access Routines --------------------*/
+
+/*  @brief  Opens new in-memory SER file.
+ *  @param  sptr        (IO)    - Pointer to a pointer of a serfile.
+ *  @param  has_trailer (I)     - Should file have a trailer.
+ *  @param  status      (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_create_memory(serfile** sptr, bool has_trailer, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    /* allocate memory for serfile */
+    *sptr = (serfile*)malloc(sizeof(serfile));
+    if (!*sptr) {
+        return (void)(*status = MEM_ALLOC);
+    }
+
+    (*sptr)->SER_file = (SERfile*)malloc(sizeof(SERfile));
+    if (!(*sptr)->SER_file) {
+        free(*sptr);
+        return (void)(*status = MEM_ALLOC);
+    }
+
+    /* allocate data reference */
+    serMem* ser_data = (serMem*)malloc(sizeof(serMem));
+    ser_data->data = (uint8_t*)malloc(HDR_SIZE);
+    ser_data->size = HDR_SIZE;
+    ser_data->owns_buffer = true;
+
+    /* general setup */
+    SERfile* sf = (*sptr)->SER_file;
+    sf->io_context = ser_data;
+    sf->reader = ser_memory_read;
+    sf->writer = ser_memory_write;
+    sf->access_mode = READWRITE;
+
+    /* intialize file metadata */
+    memset(sf->file_id, 0, FILEID_LEN);
+    sf->lu_id = 0;
+    sf->color_id = MONO;
+    sf->little_endian = 1;
+    sf->image_width = 0;
+    sf->image_height = 0;
+    sf->pixel_depth_per_plane = 8;
+    sf->frame_count = 0;
+    memset(sf->observer, 0, OBSERVER_LEN);
+    memset(sf->instrument, 0, INSTRUMENT_LEN);
+    memset(sf->telescope, 0, TELESCOPE_LEN);
+    sf->date_time = 0;
+    sf->date_time_utc = 0;
+
+    /* initialize trailer */
+    sf->has_trailer = has_trailer;
+    sf->timestamps = NULL;
+    sf->timestamp_count = 0;
+
+    return;
+}
 
 /*  @brief  Opens in-memory SER file.
  *
@@ -1595,6 +1655,7 @@ void ser_read_frame(serfile* sptr, void* dest, int idx, int* status) {
  *  @param  status  (IO)  - Error status. 
  *  @return Void.
  */
+/*
 void ser_write_frame(serfile* sptr, const void* data, int idx, int* status) {
     if (!sptr) { 
         return (void)(*status = NULL_SPTR); 
@@ -1631,6 +1692,7 @@ void ser_write_frame(serfile* sptr, const void* data, int idx, int* status) {
 
     return;
 }
+*/
 
 /*  @brief  Write image frame at the index.
  *

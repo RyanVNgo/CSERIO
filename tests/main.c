@@ -92,12 +92,14 @@ int main() {
     number_failed = srunner_ntests_failed(image_read_sr);
     srunner_free(image_read_sr);
 
+    /*
     Suite* image_write_s; 
     image_write_s = image_write_suite();
     SRunner* image_write_sr = srunner_create(image_write_s);
     srunner_run_all(image_write_sr, CK_VERBOSE);
     number_failed = srunner_ntests_failed(image_write_sr);
     srunner_free(image_write_sr);
+    */
 
     Suite* trlr_read_s; 
     trlr_read_s = trailer_read_suite();

@@ -24,6 +24,7 @@ void image_write_teardown() {
     ser_close_memory(test_ser_3x50, &status);
 }
 
+/*
 START_TEST(write_frame_success) {
     int status = 0;
 
@@ -124,11 +125,13 @@ START_TEST(write_frame_null_ser) {
     ck_assert_int_ne(status, NO_ERROR);
 
 } END_TEST
+*/
 
 Suite* image_write_suite() {
     Suite* s;
     s = suite_create("Image Write");
 
+    /*
     TCase* tc_image_write;
     tc_image_write = tcase_create("write_frame");
     tcase_add_checked_fixture(tc_image_write, image_write_setup, image_write_teardown);
@@ -137,6 +140,7 @@ Suite* image_write_suite() {
     tcase_add_test(tc_image_write, write_frame_null_data);
     tcase_add_test(tc_image_write, write_frame_null_ser);
     suite_add_tcase(s, tc_image_write);
+    */
 
     return s;
 }
