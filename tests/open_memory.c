@@ -130,7 +130,7 @@ START_TEST(open_memory_null_data) {
 
 Suite* open_memory_suite() {
     Suite* s;
-    s = suite_create("Open View");
+    s = suite_create("Open Memory");
 
     TCase* tc_open_memory = tcase_create("open_memory");
     tcase_add_test(tc_open_memory, open_memory_success);

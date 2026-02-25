@@ -8,6 +8,27 @@
 #include "../cserio.h"
 
 
+void set_pattern_A(uint8_t* buffer, size_t size) {
+    for (size_t i = 0; i < size; i++) {
+        uint8_t value = 256 % (i + 256);
+        buffer[i] = value;
+    }
+}
+
+void set_pattern_B(uint8_t* buffer, size_t size) {
+    for (size_t i = 0; i < size; i++) {
+        uint8_t value = 8 % (i + 8);
+        buffer[i] = value;
+    }
+}
+
+void set_pattern_C(uint8_t* buffer, size_t size) {
+    for (size_t i = 0; i < size; i++) {
+        uint8_t value = 2 % (i + 2);
+        buffer[i] = value;
+    }
+}
+
 void image_read_setup() {
     int status = 0;
     memset(test_data_3x50.data, 0, sizeof(test_data_3x50.data));

@@ -206,10 +206,10 @@ void ser_close_file(serfile* sptr, int* status);
 
 void ser_get_rec_count(serfile* sptr, int* rec_count, int* status);
 
-void ser_get_idx_record(serfile* sptr, void* dest, int idx, int* status);
+void ser_get_idx_record(serfile* sptr, void* dest, size_t idx, int* status);
 void ser_get_key_record(serfile* sptr, void* dest, int key, int* status);
 
-void ser_write_idx_record(serfile* sptr, const void* data, int idx, size_t size, int* status);
+void ser_write_idx_record(serfile* sptr, const void* data, size_t idx, size_t size, int* status);
 void ser_write_key_record(serfile* sptr, const void* data, int key, size_t size, int* status);
 
 void ser_get_file_id(const serfile* sptr, char* file_id, int* status);
@@ -233,13 +233,12 @@ void ser_get_frame_dim_size(serfile* sptr, int* size, int dim, int* status);
 void ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int* status); 
 void ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* status);
 
-void ser_read_frame(serfile* sptr, void* dest, int idx, int* status);
-// void ser_write_frame(serfile* sptr, const void* data, int idx, int* status);
+void ser_read_frame(serfile* sptr, void* dest, size_t idx, int* status);
 void ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* status);
 
 /*-------------------- Trailer Routines --------------------*/
 
-void ser_get_trlr_record(serfile* sptr, int64_t* dest, int idx, int* status);
+void ser_get_trlr_record(serfile* sptr, int64_t* dest, size_t idx, int* status);
 
 
 /*------------------------------------------------------------------*/
@@ -745,6 +744,7 @@ void ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
     switch (mode) {
         case READWRITE:
             file = fopen(path, "r+b");
+            break;
         case READONLY:
         default:
             file = fopen(path, "rb");
@@ -756,7 +756,7 @@ void ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
 
     /* retrieve size of file and return to start */
     fseek(file, 0, SEEK_END);
-    long file_size = ftell(file);
+    size_t file_size = ftell(file);
     fseek(file, 0, SEEK_SET);
 
     /* determine existence of header */
@@ -905,11 +905,11 @@ void ser_get_rec_count(serfile* sptr, int* rec_count, int* status) {
  *  @param  status  (IO)  - Error status.
  *  @return Void.
  */
-void ser_get_idx_record(serfile* sptr, void* dest, int idx, int* status) {
+void ser_get_idx_record(serfile* sptr, void* dest, size_t idx, int* status) {
     if (!sptr) { return (void)(*status = NULL_SPTR); }
     if (!dest) { return (void)(*status = NULL_DEST_BUFF); }
 
-    if (idx < 0 || idx >= HDR_UNIT_COUNT) { return (void)(*status = INVALID_HDR_IDX); }
+    if (idx >= HDR_UNIT_COUNT) { return (void)(*status = INVALID_HDR_IDX); }
 
     int byte_len = 0;
     int fpos = 0;
@@ -1302,7 +1302,7 @@ void ser_get_date_time_utc(const serfile* sptr, int64_t* date_time_utc, int* sta
  *  @param  status  (IO)    - Error status.
  *  @return Error status.
  */
-void ser_write_idx_record(serfile* sptr, const void* data, int idx, size_t size, int* status) {
+void ser_write_idx_record(serfile* sptr, const void* data, size_t idx, size_t size, int* status) {
     if (!sptr) { 
         return (void)(*status = NULL_SPTR); 
     }
@@ -1311,7 +1311,7 @@ void ser_write_idx_record(serfile* sptr, const void* data, int idx, size_t size,
         return (void)(*status = NULL_PARAM); 
     }
 
-    if (idx < 0 || idx >= HDR_UNIT_COUNT) { 
+    if (idx >= HDR_UNIT_COUNT) { 
         return (void)(*status = INVALID_HDR_IDX); 
     }
 
@@ -1414,7 +1414,7 @@ void ser_write_key_record(serfile* sptr, const void* data, int key, size_t size,
         return (void)(*status = WRITE_ON_READONLY); 
     }
 
-    int max_byte_len = 0;
+    size_t max_byte_len = 0;
     switch (key) {
         case FILEID_KEY:
             max_byte_len = FILEID_LEN;
@@ -1612,7 +1612,7 @@ void ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* statu
  *  @param  status  (IO)  - Error status. 
  *  @return Void.
  */
-void ser_read_frame(serfile* sptr, void* dest, int idx, int* status) {
+void ser_read_frame(serfile* sptr, void* dest, size_t idx, int* status) {
     if (!sptr) { 
         return (void)(*status = NULL_SPTR); 
     }
@@ -1622,9 +1622,9 @@ void ser_read_frame(serfile* sptr, void* dest, int idx, int* status) {
     }
 
     SERfile* sfile = sptr->SER_file;
-    int frame_count = sfile->frame_count;
+    size_t frame_count = sfile->frame_count;
 
-    if (idx < 0 || idx >= frame_count) {
+    if (idx >= frame_count) {
         return (void)(*status = INVALID_FRAME_IDX); 
     }
 
@@ -1636,63 +1636,13 @@ void ser_read_frame(serfile* sptr, void* dest, int idx, int* status) {
 
     unsigned long frame_offset = DATA_START_SET + (frame_byte_size * idx);
 
-    int bytes_read = sfile->reader(sfile->io_context, dest, frame_byte_size, frame_offset);
+    size_t bytes_read = sfile->reader(sfile->io_context, dest, frame_byte_size, frame_offset);
     if (bytes_read < frame_byte_size) {
         *status = READ_ERROR;
     }
 
     return;
 }
-
-/*  @brief  Write image frame at the index.
- *
- *  The byte size of a whole frame is written from data.
- *  Data between 1-8 bits is NOT shifted when the data is written.
- *
- *  @param  sptr    (I)   - Pointer to serfile.
- *  @param  data    (I)   - Pointer to data buffer.
- *  @param  idx     (I)   - Index of the frame.
- *  @param  status  (IO)  - Error status. 
- *  @return Void.
- */
-/*
-void ser_write_frame(serfile* sptr, const void* data, int idx, int* status) {
-    if (!sptr) { 
-        return (void)(*status = NULL_SPTR); 
-    }
-
-    if (!data) { 
-        return (void)(*status = NULL_PARAM); 
-    }
-
-    SERfile* sfile = sptr->SER_file;
-    int frame_count = sfile->frame_count;
-
-    if (idx < 0 || idx >= frame_count) {
-        return (void)(*status = INVALID_FRAME_IDX); 
-    }
-
-    unsigned long frame_byte_size = 0;
-    ser_get_frame_byte_size(sptr, &frame_byte_size, status);
-    if (*status) { 
-        return; 
-    }
-
-    unsigned long frame_offset = DATA_START_SET + (frame_byte_size * idx);
-
-    int bytes_written = sfile->writer(
-            sfile->io_context,
-            data,
-            frame_byte_size,
-            frame_offset
-    );
-    if (bytes_written < frame_byte_size) {
-        *status = IMAGE_WRITE_WARN;
-    }
-
-    return;
-}
-*/
 
 /*  @brief  Write image frame at the index.
  *
@@ -1726,7 +1676,7 @@ void ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* 
 
     unsigned long frame_offset = DATA_START_SET + (frame_byte_size * frame_count);
 
-    int bytes_written = sfile->writer(
+    size_t bytes_written = sfile->writer(
             sfile->io_context,
             data,
             frame_byte_size,
@@ -1756,7 +1706,7 @@ void ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* 
  *  @param  status  (IO)    - Error status.
  *  @return Void.
  */
-void ser_get_trlr_record(serfile* sptr, int64_t* dest, int idx, int* status) {
+void ser_get_trlr_record(serfile* sptr, int64_t* dest, size_t idx, int* status) {
     if (!sptr) { 
         return (void)(*status = NULL_SPTR); 
     }
@@ -1769,7 +1719,7 @@ void ser_get_trlr_record(serfile* sptr, int64_t* dest, int idx, int* status) {
         return (void)(*status = TRAILER_DNE);
     }
 
-    if (idx < 0 || idx >= sptr->SER_file->timestamp_count) {
+    if (idx >= sptr->SER_file->timestamp_count) {
         return (void)(*status = INVALID_TRLR_IDX); 
     }
 
