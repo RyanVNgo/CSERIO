@@ -9,6 +9,22 @@
 
 #define TEST_TIMESTAMP_VALUE    0x08d126583cd43bb0
 
+typedef struct SERHdrStructureNonPacked {
+    char file_id[FILEID_LEN];
+    int32_t lu_id;
+    int32_t color_id;
+    int32_t little_endian;
+    int32_t image_width;
+    int32_t image_height;
+    int32_t pixel_depth_per_plane;
+    int32_t frame_count;
+    char observer[OBSERVER_LEN];
+    char instrument[INSTRUMENT_LEN];
+    char telescope[TELESCOPE_LEN];
+    int64_t date_time;
+    int64_t date_time_utc;
+} SERHdrStructureNonPacked;
+
 typedef struct __attribute__((__packed__)) SERHdrStructure {
     char file_id[FILEID_LEN];
     int32_t lu_id;

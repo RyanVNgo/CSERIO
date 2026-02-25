@@ -18,7 +18,7 @@ void trailer_read_setup() {
 }
 
 void trailer_read_teardown() {
-    int status;
+    int status = 0;
     ser_close_memory(test_ser_3x50, &status);
 }
 

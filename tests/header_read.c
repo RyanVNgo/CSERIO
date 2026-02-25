@@ -8,7 +8,7 @@
 
 
 void header_read_setup() {
-    int status;
+    int status = 0;
     ser_open_memory(
             &test_ser_3x50,
             (uint8_t*)&test_data_3x50,
@@ -19,7 +19,7 @@ void header_read_setup() {
 }
 
 void header_read_teardown() {
-    int status;
+    int status = 0;
     ser_close_memory(test_ser_3x50, &status);
 }
 

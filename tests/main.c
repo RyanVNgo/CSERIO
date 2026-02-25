@@ -12,6 +12,7 @@
 #include "open_file.c"
 #include "header_read.c"
 #include "header_write.c"
+#include "get_metadata.c"
 #include "image_info.c"
 #include "image_read.c"
 #include "image_write.c"
@@ -69,6 +70,13 @@ int main() {
     srunner_run_all(hdr_write_sr, CK_VERBOSE);
     number_failed = srunner_ntests_failed(hdr_write_sr);
     srunner_free(hdr_write_sr);
+
+    Suite* get_metadata_s; 
+    get_metadata_s = get_metadata_suite();
+    SRunner* get_metadata_sr = srunner_create(get_metadata_s);
+    srunner_run_all(get_metadata_sr, CK_VERBOSE);
+    number_failed = srunner_ntests_failed(get_metadata_sr);
+    srunner_free(get_metadata_sr);
 
     Suite* image_info_s; 
     image_info_s = image_info_suite();
