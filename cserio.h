@@ -51,7 +51,6 @@
 #define INVALID_STRUCTURE   222
 #define INVALID_TRAILER     223
 
-
 /*-------------------- Header Routine Errors --------------------*/
 
 #define INVALID_HDR_IDX     301
@@ -75,12 +74,6 @@
 
 #define READONLY    0
 #define READWRITE   1
-
-/*-------------------- Header Types --------------------*/
-
-typedef char*       SER_STRING;
-typedef int32_t     SER_INT32;
-typedef int64_t     SER_INT64;
 
 /*-------------------- Header Symbolic Constants --------------------*/
 
@@ -178,20 +171,16 @@ typedef struct SERfile {
     bool        has_trailer;
     uint64_t*   timestamps;
     size_t      timestamp_count;
-
 } SERfile;
 
 
 /*  serfile is the primary data structure that users should utilize
  *  to interact with SER files. This structure should only be utilized
- *  and modified by methods provided in this library. Utilization and
- *  modificaiton of this structure by the user should be considered
- *  undefined behavior.
+ *  and modified by methods provided in this library.
  */
 typedef struct serfile {
     SERfile* SER_file;
 } serfile;
-
 
 
 /*------------------------------------------------------------------*/
@@ -235,7 +224,6 @@ void ser_get_instrument(const serfile* sptr, char* instrument, int* status);
 void ser_get_telescope(const serfile* sptr, char* telescope, int* status);
 void ser_get_date_time(const serfile* sptr, int64_t* date_time, int* status);
 void ser_get_date_time_utc(const serfile* sptr, int64_t* date_time_utc, int* status);
-
 
 /*-------------------- Image Routines --------------------*/
 
@@ -824,13 +812,11 @@ void ser_close_file(serfile* sptr, int* status) {
 
 /*  @brief  Returns number of records in the header
  *
- *  Assigns passed rec_count integer with number of records
- *  in the header. (Note that as of Version 3 SER files, the
- *  number of records in a header is a constant 13 which makes
- *  up the first 178 bytes of data)
+ *  Note that as of Version 3 SER files, the number of records 
+ *  in a header is a constant 13.
  *
- *  @param  sptr        (I)   - Pointer to serfile
- *  @param  rec_count   (IO)  - Number of records
+ *  @param  sptr        (I)   - Pointer to serfile.
+ *  @param  rec_count   (IO)  - Number of records.
  *  @param  status      (IO)  - Error status.
  *  @return Void.
  */
@@ -849,14 +835,12 @@ void ser_get_rec_count(serfile* sptr, int* rec_count, int* status) {
 
 /*  @brief  Return data at header idx 
  *  
- *  Ensure that the dest buff to which the data will be written
- *  to has enough space to store the data. Refer to the defines in
- *  cserio.h or follow the LEN_(key) format. Note that this method
- *  does a raw data copy to the dest buffer, no conversion is done.
+ *  Ensure the dest buffer is large enough to store the data.
+ *  Data of size [key]_LEN will be copied over.
  *
- *  @param  sptr    (I)   - Pointer to serfile
- *  @param  dest    (IO)  - Destination buffer for header data
- *  @param  idx     (I)   - Record index of data to fetch
+ *  @param  sptr    (I)   - Pointer to serfile.
+ *  @param  dest    (IO)  - Destination buffer.
+ *  @param  idx     (I)   - Record index.
  *  @param  status  (IO)  - Error status.
  *  @return Void.
  */
@@ -934,13 +918,12 @@ void ser_get_idx_record(serfile* sptr, void* dest, int idx, int* status) {
 
 /*  @brief  Return data at header key
  *
- *  Ensure that the dest buff to which the data will be written
- *  to has enough space to store the data. Refer to the defines in
- *  header_routines.h or follow the (key)_LEN format.
+ *  Ensure the dest buffer is large enough to store the data.
+ *  Data of size [key]_LEN will be copied over.
  *
- *  @param  sptr    (I)   - Pointer to serfile
- *  @param  dest    (IO)  - Destination buffer for header data
- *  @param  key     (I)   - Record key of data to fetch
+ *  @param  sptr    (I)   - Pointer to serfile.
+ *  @param  dest    (IO)  - Destination buffer.
+ *  @param  key     (I)   - Record key.
  *  @param  status  (IO)  - Error status.
  *  @return Void.
  */
@@ -1246,15 +1229,15 @@ void ser_get_date_time_utc(const serfile* sptr, int64_t* date_time_utc, int* sta
     *date_time_utc = sptr->SER_file->date_time_utc;
 }
 
-/** @brief  Write data to header idx 
+/*  @brief  Write data to header idx 
  *  
  *  This write routine is capped such that it will write less
- *  than or up to the maximum size of the header record space.
+ *  than or up to the maximum size of the record space.
  *
- *  @param  sptr    (I)     - Pointer to serfile
- *  @param  data    (IO)    - Pointer to data to write 
- *  @param  idx     (I)     - Header record index
- *  @param  size    (I)     - Size of data in bytes
+ *  @param  sptr    (I)     - Pointer to serfile.
+ *  @param  data    (IO)    - Pointer to data.
+ *  @param  idx     (I)     - Header record index.
+ *  @param  size    (I)     - Size of data in bytes.
  *  @param  status  (IO)    - Error status.
  *  @return Error status.
  */
@@ -1345,15 +1328,15 @@ void ser_write_idx_record(serfile* sptr, const void* data, int idx, size_t size,
     return;
 }
 
-/** @brief  Write data to header key
+/*  @brief  Write data to header key
  *  
  *  This write routine is capped such that it will write less
- *  than or up to the maximum size of the header record space.
+ *  than or up to the maximum size of the record space.
  *
- *  @param  sptr    (I)     - Pointer to serfile
- *  @param  data    (IO)    - Pointer to data to write 
- *  @param  key     (I)     - Record key
- *  @param  size    (I)     - Size of data in bytes
+ *  @param  sptr    (I)     - Pointer to serfile.
+ *  @param  data    (IO)    - Pointer to data.
+ *  @param  key     (I)     - Record key.
+ *  @param  size    (I)     - Size of data in bytes.
  *  @param  status  (IO)    - Error status.
  *  @return Void.
  */
@@ -1435,16 +1418,16 @@ void ser_write_key_record(serfile* sptr, const void* data, int key, size_t size,
 /*-------------------- Image Symbolic Constants --------------------*/
 
 /* Currently, all SER file frames have just 3 dimensions. */
-#define MIN_DIM_IDX 0
-#define MAX_DIM_IDX 2
+#define MIN_DIM_IDX         0
+#define MAX_DIM_IDX         2
 
 #define DATA_START_SET 178
 
 /*-------------------- Image Routines --------------------*/
 
-/*  @brief Get the size of a target dimension
+/*  @brief Get the size of a target dimension.
  *  @param  sptr    (I)   - Pointer to serfile.
- *  @param  size    (IO)  - Pointer to int to set as size.
+ *  @param  size    (IO)  - Pointer to int.
  *  @param  dim     (I)   - Dimension to get size of.
  *  @param  status  (IO)  - Error status. 
  *  @return Void
@@ -1497,13 +1480,12 @@ void ser_get_frame_dim_size(serfile* sptr, int* size, DIM_TYPE dim, int* status)
 
 /*  @brief  Returns the number of bytes representing each pixel.
  *
- *  This value returns the total number of bytes to represent
- *  the whole pixel value. Meaning SER files in a multi-plane
- *  format like RGB or BGR includes all color layers in the
- *  byte size.
+ *  The value returns the total number of bytes to represent
+ *  one pixel value. SER files in a multi-plane format like RGB 
+ *  or BGR include all color layers in the byte size.
  *
  *  @param  sptr            (I)   - Pointer to serfile.
- *  @param  bytes_per_pixel (IO)  - Pointer to long to set.
+ *  @param  bytes_per_pixel (IO)  - Pointer to long. 
  *  @param  status          (IO)  - Error status.
  *  @return Error status.
  */
@@ -1528,9 +1510,9 @@ void ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int*
     return;
 }
 
-/** @brief  Returns the byte size of a single frame
+/*  @brief  Returns the byte size of a single frame
  *  @param  sptr        (I)   - Pointer to serfile.
- *  @param  byte_size   (IO)  - Pointer to long to set.
+ *  @param  byte_size   (IO)  - Pointer to long.
  *  @param  status      (IO)  - Error status.
  *  @return Error status.
  */
@@ -1565,7 +1547,7 @@ void ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* statu
  *  
  *  @param  sptr    (I)   - Pointer to serfile.
  *  @param  dest    (IO)  - Pointer to destination buffer.
- *  @param  idx     (I)   - Index of the frame (0 based indexing).
+ *  @param  idx     (I)   - Index of the frame.
  *  @param  status  (IO)  - Error status. 
  *  @return Void.
  */
@@ -1612,7 +1594,7 @@ void ser_read_frame(serfile* sptr, void* dest, int idx, int* status) {
  *
  *  @param  sptr    (I)   - Pointer to serfile.
  *  @param  data    (I)   - Pointer to data buffer.
- *  @param  idx     (I)   - Index of the frame (0 based indexing).
+ *  @param  idx     (I)   - Index of the frame.
  *  @param  status  (IO)  - Error status. 
  *  @return Void.
  */
