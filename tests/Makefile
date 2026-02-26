@@ -33,7 +33,7 @@ $(BUILD_DIR) :
 
 run:
 	./$(UNITY_TARGET)
-	./$(PRECOMP_TARGET)
+#	./$(PRECOMP_TARGET)
 
 clean:
 	rm cserio.o

@@ -8,130 +8,226 @@
 #include "../cserio.h"
 
 
-void image_write_setup() {
+START_TEST(append_frame_success_empty_no_trailer) {
+    /* setup test ser and arena */
+    SERHdrStructure test_hdr = {
+        .color_id = MONO,
+        .image_width = 10,
+        .image_height = 10,
+        .pixel_depth_per_plane = 8,
+        .frame_count = 0
+    };
+    size_t ser_arena_size = 1024;
+    uint8_t* ser_arena = malloc(ser_arena_size);
+    memset(ser_arena, 0, ser_arena_size);
+    memcpy(ser_arena, &test_hdr, sizeof(test_hdr));
+
     int status = 0;
-    memset(test_data_3x50.data, 0, sizeof(test_data_3x50.data));
+    serfile* test_ser = NULL;
     ser_open_view(
-            &test_ser_3x50,
-            (uint8_t*)&test_data_3x50,
-            sizeof(test_data_3x50),
+            &test_ser,
+            ser_arena,
+            ser_arena_size,
+            false,
             READWRITE,
             &status
     );
-}
+    ck_assert_int_eq(status, NO_ERROR);
 
-void image_write_teardown() {
-    int status = 0;
-    memset(test_data_3x50.data, 0, sizeof(test_data_3x50.data));
-    ser_close_memory(test_ser_3x50, &status);
-}
-
-/*
-START_TEST(write_frame_success) {
-    int status = 0;
-
-    size_t width = test_data_3x50.hdr.image_width;
-    size_t height = test_data_3x50.hdr.image_height;
-    size_t frame_size = width * height;
-
-    uint8_t buffer[50 * 50] = {0};
-    for (size_t i = 0; i < test_data_3x50.hdr.frame_count; i++) {
-        switch (i) {
-            case 0:
-                set_pattern_A(buffer, frame_size);
-                break;
-            case 1:
-                set_pattern_B(buffer, frame_size);
-                break;
-            default:
-                set_pattern_C(buffer, frame_size);
-        }
-
-        ser_write_frame(
-                test_ser_3x50,
-                buffer,
-                i,
-                &status
-        );
-        ck_assert_int_eq(status, NO_ERROR);
-
-        for (size_t j = 0; j < frame_size; j++) {
-            ck_assert_int_eq(buffer[j], test_data_3x50.data[j + i * frame_size]);
-        }
-    }
-
-} END_TEST
-
-START_TEST(write_frame_oob_idx) {
-    int status = 0;
-
-    size_t width = test_data_3x50.hdr.image_width;
-    size_t height = test_data_3x50.hdr.image_height;
-    size_t frame_size = width * height;
-
-    uint8_t buffer[50 * 50] = {0};
-    set_pattern_A(buffer, frame_size);
-
-    status = 0;
-    ser_write_frame(
-            test_ser_3x50,
-            buffer,
-            -1,
+    /* TEST */
+    uint8_t test_data[10 * 10] = {0};
+    memset(test_data, 0xA0, sizeof(test_data));
+    ser_append_frame(
+            test_ser,
+            test_data,
+            TEST_TIMESTAMP_VALUE,
             &status
     );
-    ck_assert_int_ne(status, NO_ERROR);
-    for (size_t i = 0; i < sizeof(test_data_3x50.data); i++) {
-        ck_assert_int_eq(test_data_3x50.data[i], 0);
-    }
+    ck_assert_int_eq(status, NO_ERROR);
+    ser_close_memory(test_ser, &status);
+    ck_assert_int_eq(status, NO_ERROR);
 
-    status = 0;
-    ser_write_frame(
-            test_ser_3x50,
-            buffer,
-            test_data_3x50.hdr.frame_count,
-            &status
+    /* was data written as desired location */
+    ck_assert_mem_eq(
+            test_data,
+            ser_arena + HDR_SIZE,
+            sizeof(test_data)
     );
-    ck_assert_int_ne(status, NO_ERROR);
-    for (size_t i = 0; i < sizeof(test_data_3x50.data); i++) {
-        ck_assert_int_eq(test_data_3x50.data[i], 0);
-    }
 
+    /* is data before frame (hdr) intact */
+    ck_assert_mem_eq(
+            &test_hdr,
+            ser_arena,
+            sizeof(test_hdr)
+    );
+
+    /* is data after frame intact */
+    uint8_t empty_buff[32] = {0};
+    memset(empty_buff, 0, sizeof(empty_buff));
+    ck_assert_mem_eq(
+            empty_buff, 
+            ser_arena + HDR_SIZE + sizeof(test_data),
+            sizeof(empty_buff)
+    );
+
+    free(ser_arena);
 } END_TEST
 
-START_TEST(write_frame_null_data) {
-    int status = 0;
+START_TEST(append_frame_success_empty_with_trailer) {
+    /* setup test ser and arena */
+    SERHdrStructure test_hdr = {
+        .color_id = MONO,
+        .image_width = 10,
+        .image_height = 10,
+        .pixel_depth_per_plane = 8,
+        .frame_count = 0
+    };
+    size_t ser_arena_size = 1024;
+    uint8_t* ser_arena = malloc(ser_arena_size);
+    memset(ser_arena, 0, ser_arena_size);
+    memcpy(ser_arena, &test_hdr, sizeof(test_hdr));
 
-    ser_write_frame(
-            test_ser_3x50,
+    int status = 0;
+    serfile* test_ser = NULL;
+    ser_open_view(
+            &test_ser,
+            ser_arena,
+            ser_arena_size,
+            true,
+            READWRITE,
+            &status
+    );
+    ck_assert_int_eq(status, NO_ERROR);
+
+    /* TEST */
+    uint8_t test_data[10 * 10] = {0};
+    memset(test_data, 0xA0, sizeof(test_data));
+    ser_append_frame(
+            test_ser,
+            test_data,
+            TEST_TIMESTAMP_VALUE,
+            &status
+    );
+    ck_assert_int_eq(status, NO_ERROR);
+    ser_close_memory(test_ser, &status);
+    ck_assert_int_eq(status, NO_ERROR);
+
+    /* was data written as desired location */
+    ck_assert_mem_eq(
+            test_data,
+            ser_arena + HDR_SIZE,
+            sizeof(test_data)
+    );
+
+    /* is data before frame (hdr) intact */
+    ck_assert_mem_eq(
+            &test_hdr,
+            ser_arena,
+            sizeof(test_hdr)
+    );
+
+    /* does data after frame have trailer (after close) */
+    int64_t expect_trailer[1] = {TEST_TIMESTAMP_VALUE};
+    ck_assert_mem_eq(
+            expect_trailer, 
+            ser_arena + HDR_SIZE + sizeof(test_data),
+            sizeof(expect_trailer)
+    );
+
+    free(ser_arena);
+} END_TEST
+
+START_TEST(append_frame_null_data) {
+    /* setup test ser and arena */
+    SERHdrStructure test_hdr = {
+        .color_id = MONO,
+        .image_width = 10,
+        .image_height = 10,
+        .pixel_depth_per_plane = 8,
+        .frame_count = 0
+    };
+    size_t ser_arena_size = 1024;
+    uint8_t* ser_arena = malloc(ser_arena_size);
+    memset(ser_arena, 0, ser_arena_size);
+    memcpy(ser_arena, &test_hdr, sizeof(test_hdr));
+
+    int status = 0;
+    serfile* test_ser = NULL;
+    ser_open_view(
+            &test_ser,
+            ser_arena,
+            ser_arena_size,
+            true,
+            READWRITE,
+            &status
+    );
+    ck_assert_int_eq(status, NO_ERROR);
+
+    /* TEST */
+    ser_append_frame(
+            test_ser,
             NULL,
-            0,
+            TEST_TIMESTAMP_VALUE,
             &status
     );
-    ck_assert_int_ne(status, NO_ERROR);
-    for (size_t i = 0; i < sizeof(test_data_3x50.data); i++) {
-        ck_assert_int_eq(test_data_3x50.data[i], 0);
-    }
+    ck_assert_int_eq(status, NULL_PARAM);
+    status = 0;
+    ser_close_memory(test_ser, &status);
+    ck_assert_int_eq(status, NO_ERROR);
 
+    /* was no data written as expected location */
+    uint8_t test_data[10 * 10] = {0};
+    memset(test_data, 0, sizeof(test_data));
+    ck_assert_mem_eq(
+            test_data,
+            ser_arena + HDR_SIZE,
+            sizeof(test_data)
+    );
+
+    /* is data before frame (hdr) intact */
+    ck_assert_mem_eq(
+            &test_hdr,
+            ser_arena,
+            sizeof(test_hdr)
+    );
+
+    /* does data after frame have no trailer (after close) */
+    int64_t expect_trailer[1] = {0};
+    ck_assert_mem_eq(
+            expect_trailer, 
+            ser_arena + HDR_SIZE + sizeof(test_data),
+            sizeof(expect_trailer)
+    );
+
+    free(ser_arena);
 } END_TEST
 
-START_TEST(write_frame_null_ser) {
+START_TEST(append_frame_null_ser) {
     int status = 0;
 
-    uint8_t buffer[50 * 50] = {0};
-    ser_write_frame(
+    uint8_t test_data[10 * 10] = {0};
+    memset(test_data, 0xA0, sizeof(test_data));
+    ser_append_frame(
             NULL,
-            buffer,
-            0,
+            &test_data,
+            TEST_TIMESTAMP_VALUE,
             &status
     );
-    ck_assert_int_ne(status, NO_ERROR);
+    ck_assert_int_eq(status, NULL_SPTR);
 
 } END_TEST
-*/
 
 Suite* image_write_suite() {
     Suite* s;
     s = suite_create("Image Write");
+
+    TCase* tc_append_frame;
+    tc_append_frame = tcase_create("append_frame");
+    tcase_add_test(tc_append_frame, append_frame_success_empty_no_trailer);
+    tcase_add_test(tc_append_frame, append_frame_success_empty_with_trailer);
+    tcase_add_test(tc_append_frame, append_frame_null_data);
+    tcase_add_test(tc_append_frame, append_frame_null_ser);
+    suite_add_tcase(s, tc_append_frame);
 
     /*
     TCase* tc_image_write;

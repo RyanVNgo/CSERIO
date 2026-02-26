@@ -16,6 +16,7 @@ START_TEST(open_memory_success) {
             &test_ser,
             (uint8_t*)&test_data_3x50,
             sizeof(test_data_3x50),
+            true,
             READONLY,
             &status
     );
@@ -23,7 +24,42 @@ START_TEST(open_memory_success) {
 
     ser_close_memory(test_ser, &status);
     ck_assert_int_eq(status, NO_ERROR);
+} END_TEST
 
+START_TEST(open_memory_hdr_only) {
+    serfile* test_ser = NULL;
+    int status = 0;
+    SERHdrStructure test_hdr = {};
+
+    /* has trailer */
+    ser_open_memory(
+            &test_ser,
+            (uint8_t*)&test_hdr,
+            sizeof(test_hdr),
+            true,
+            READONLY,
+            &status
+    );
+    ck_assert_int_eq(status, NO_ERROR);
+    ck_assert_int_eq(test_ser->SER_file->has_trailer, true);
+
+    ser_close_memory(test_ser, &status);
+    ck_assert_int_eq(status, NO_ERROR);
+
+    /* no trailer */
+    ser_open_memory(
+            &test_ser,
+            (uint8_t*)&test_hdr,
+            sizeof(test_hdr),
+            false,
+            READONLY,
+            &status
+    );
+    ck_assert_int_eq(status, NO_ERROR);
+    ck_assert_int_eq(test_ser->SER_file->has_trailer, false);
+
+    ser_close_memory(test_ser, &status);
+    ck_assert_int_eq(status, NO_ERROR);
 } END_TEST
 
 START_TEST(open_memory_no_trailer) {
@@ -34,10 +70,12 @@ START_TEST(open_memory_no_trailer) {
             &test_ser,
             (uint8_t*)&test_data_3x50,
             sizeof(test_data_3x50) - sizeof(test_data_3x50.trlr),
+            true,
             READONLY,
             &status
     );
     ck_assert_int_eq(status, NO_ERROR);
+    ck_assert_int_eq(test_ser->SER_file->has_trailer, false);
 
     ser_close_memory(test_ser, &status);
     ck_assert_int_eq(status, NO_ERROR);
@@ -53,10 +91,12 @@ START_TEST(open_memory_invalid_trailer) {
             &test_ser,
             (uint8_t*)&test_data_3x50,
             sizeof(test_data_3x50) - sizeof(test_data_3x50.trlr) + 1,
+            false,
             READONLY,
             &status
     );
     ck_assert_int_eq(status, INVALID_TRAILER);
+    ck_assert_int_eq(test_ser->SER_file->has_trailer, true);
 
     status = 0;
     ser_close_memory(test_ser, &status);
@@ -72,6 +112,7 @@ START_TEST(open_memory_invalid_structure) {
             &test_ser,
             (uint8_t*)&test_data_3x50,
             sizeof(test_data_3x50) - sizeof(test_data_3x50.trlr) - 1,
+            true,
             READONLY,
             &status
     );
@@ -92,6 +133,7 @@ START_TEST(open_memory_invalid_file) {
             &test_ser,
             (uint8_t*)&test_data_3x50,
             HDR_SIZE - 1, 
+            true,
             READONLY,
             &status
     );
@@ -106,6 +148,7 @@ START_TEST(open_memory_null_ser) {
             NULL,
             (uint8_t*)&test_data_3x50,
             sizeof(test_data_3x50),
+            true,
             READONLY,
             &status
     );
@@ -121,6 +164,7 @@ START_TEST(open_memory_null_data) {
             &test_ser,
             NULL,
             sizeof(test_data_3x50),
+            true,
             READONLY,
             &status
     );
@@ -134,6 +178,7 @@ Suite* open_memory_suite() {
 
     TCase* tc_open_memory = tcase_create("open_memory");
     tcase_add_test(tc_open_memory, open_memory_success);
+    tcase_add_test(tc_open_memory, open_memory_hdr_only);
     tcase_add_test(tc_open_memory, open_memory_no_trailer);
     tcase_add_test(tc_open_memory, open_memory_invalid_trailer);
     tcase_add_test(tc_open_memory, open_memory_invalid_structure);

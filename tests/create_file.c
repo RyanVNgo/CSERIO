@@ -124,7 +124,7 @@ START_TEST(create_file_null_ser) {
 
 Suite* create_file_suite() {
     Suite* s;
-    s = suite_create("Open View");
+    s = suite_create("Create file");
 
     TCase* tc_create_file = tcase_create("create_file");
     tcase_add_test(tc_create_file, create_file_success);

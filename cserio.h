@@ -68,7 +68,10 @@
 /*-------------------- Trailer Routine Errors --------------------*/
 
 #define TRAILER_DNE         501
+
 #define INVALID_TRLR_IDX    511
+
+#define TRAILER_CLOSE_WARN  521
 
 /*-------------------- SER File IO Modes --------------------*/
 
@@ -194,8 +197,8 @@ void cserio_version_number(int* major, int* minor, int* micro);
 /*-------------------- SER Access Routines --------------------*/
 
 void ser_create_memory(serfile** sptr, bool has_trailer, int* status);
-void ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* status);
-void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode, int* status);
+void ser_open_view(serfile** sptr, uint8_t* data, size_t size, bool has_trailer, int mode, int* status);
+void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, bool has_trailer, int mode, int* status);
 void ser_close_memory(serfile* sptr, int* status);
 
 void ser_create_file(serfile** sptr, const char* path, bool has_trailer, int* status);
@@ -420,7 +423,7 @@ void ser_create_memory(serfile** sptr, bool has_trailer, int* status) {
  *  @param  status    (IO)  - Error status.
  *  @return Void.
  */
-void ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* status) {
+void ser_open_view(serfile** sptr, uint8_t* data, size_t size, bool has_trailer, int mode, int* status) {
     if (!sptr) {
         return (void)(*status = NULL_SPTR);
     }
@@ -489,10 +492,20 @@ void ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* st
         return (void)(*status = INVALID_STRUCTURE);
     }
 
-    /* determine existence of trailer */
+    /* default trailer setup */
     sf->has_trailer = false;
     sf->timestamps = NULL;
     sf->timestamp_count = 0;
+
+    /* Apply trailer option if no data section */
+    if (image_data_size == 0) {
+        if (has_trailer) {
+            sf->has_trailer = has_trailer;
+            sf->timestamps = (int64_t*)realloc(sf->timestamps, 0);
+            sf->timestamp_count = sf->frame_count;
+        }
+        return;
+    }
 
     size_t trailer_offset = HDR_SIZE + image_data_size;
     if (size > trailer_offset) {
@@ -518,14 +531,15 @@ void ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* st
  *  Memory is allocated and managed by the serfile. If data is not
  *  NULL, the data of length size is copied over.
  *
- *  @param  sptr      (IO)  - Pointer to a pointer of a serfile.
- *  @param  data      (I)   - Pointer to data.
- *  @param  size      (I)   - Size to initially allocate / copy over.
- *  @param  mode      (I)   - Access type, either READONLY or READWRITE.
- *  @param  status    (IO)  - Error status.
+ *  @param  sptr        (IO)    - Pointer to a pointer of a serfile.
+ *  @param  data        (I)     - Pointer to data.
+ *  @param  size        (I)     - Size to initially allocate / copy over.
+ *  @param  has_trailer (I)     - Should file have a trailer.
+ *  @param  mode        (I)     - Access type, either READONLY or READWRITE.
+ *  @param  status      (IO)    - Error status.
  *  @return Void.
  */
-void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode, int* status) {
+void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, bool has_trailer, int mode, int* status) {
     if (!sptr) {
         return (void)(*status = NULL_SPTR);
     }
@@ -590,7 +604,6 @@ void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode,
     size_t image_frame_byte_size = 0;
     ser_get_frame_byte_size(*sptr, &image_frame_byte_size, status);
     if (*status) {
-        //printf("Status: %d\n", *status);
         return;
     }
     size_t image_data_size = sf->frame_count * image_frame_byte_size;
@@ -598,11 +611,20 @@ void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode,
         return (void)(*status = INVALID_STRUCTURE);
     }
 
-    /* determine existence of trailer */
+    /* default trailer setup */
     sf->has_trailer = false;
     sf->timestamps = NULL;
     sf->timestamp_count = 0;
+    
+    /* Apply trailer option if no data section */
+    if (image_data_size == 0) {
+        if (has_trailer) {
+            sf->has_trailer = has_trailer;
+        }
+        return;
+    }
 
+    /* determine existence of trailer */
     size_t trailer_offset = HDR_SIZE + image_data_size;
     if (size > trailer_offset) {
         sf->has_trailer = true;
@@ -641,14 +663,32 @@ void ser_close_memory(serfile* sptr, int* status) {
         free(memory_io->data);
     }
 
-    if (sptr->SER_file->timestamps) {
+    if (sptr->SER_file->timestamps && sptr->SER_file->access_mode == READWRITE) {
+        size_t image_frame_byte_size = 0;
+        ser_get_frame_byte_size(sptr, &image_frame_byte_size, status);
+        if (*status) {
+            return;
+        }
+        size_t image_data_size = sptr->SER_file->frame_count * image_frame_byte_size;
+
+        size_t trailer_offset = HDR_SIZE + image_data_size;
+        size_t trailer_size = sizeof(int64_t) * sptr->SER_file->timestamp_count;
+
+        size_t bytes_written = sptr->SER_file->writer(
+                sptr->SER_file->io_context,
+                sptr->SER_file->timestamps,
+                trailer_size,
+                trailer_offset
+        );
+        if (bytes_written != trailer_size) {
+            *status = TRAILER_CLOSE_WARN;
+        }
         free(sptr->SER_file->timestamps);
     }
 
     free(sptr->SER_file);
     free(sptr);
     sptr = NULL;
-
     return;
 }
 
@@ -716,9 +756,6 @@ void ser_create_file(serfile** sptr, const char* path, bool has_trailer, int* st
     sf->has_trailer = has_trailer;
     sf->timestamps = NULL;
     sf->timestamp_count = 0;
-    if (sf->has_trailer) {
-        sf->timestamps = (int64_t*)calloc(0, sizeof(uint64_t)); 
-    }
 
     return;
 }
@@ -858,14 +895,32 @@ void ser_close_file(serfile* sptr, int* status) {
         *status = FILE_CLOSE_ERROR;
     }
 
-    if (sptr->SER_file->timestamps) {
+    if (sptr->SER_file->timestamps && sptr->SER_file->access_mode == READWRITE) {
+        size_t image_frame_byte_size = 0;
+        ser_get_frame_byte_size(sptr, &image_frame_byte_size, status);
+        if (*status) {
+            return;
+        }
+        size_t image_data_size = sptr->SER_file->frame_count * image_frame_byte_size;
+
+        size_t trailer_offset = HDR_SIZE + image_data_size;
+        size_t trailer_size = sizeof(int64_t) * sptr->SER_file->timestamp_count;
+
+        size_t bytes_written = sptr->SER_file->writer(
+                sptr->SER_file->io_context,
+                sptr->SER_file->timestamps,
+                trailer_size,
+                trailer_offset
+        );
+        if (bytes_written != trailer_size) {
+            *status = TRAILER_CLOSE_WARN;
+        }
         free(sptr->SER_file->timestamps);
     }
 
     free(sptr->SER_file);
     free(sptr);
     sptr = NULL;
-
     return;
 }
 
@@ -1666,9 +1721,9 @@ void ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* 
     }
 
     SERfile* sfile = sptr->SER_file;
-    int frame_count = sfile->frame_count;
+    size_t frame_count = sfile->frame_count;
 
-    unsigned long frame_byte_size = 0;
+    size_t frame_byte_size = 0;
     ser_get_frame_byte_size(sptr, &frame_byte_size, status);
     if (*status) { 
         return; 

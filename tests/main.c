@@ -12,6 +12,7 @@
 
 #define OUTPUT_MODE     CK_NORMAL
 
+
 int main() {
     int number_failed = 0;
 
@@ -21,6 +22,13 @@ int main() {
     srunner_run_all(core_sr, OUTPUT_MODE);
     number_failed = srunner_ntests_failed(core_sr);
     srunner_free(core_sr);
+
+    Suite* create_memory_s; 
+    create_memory_s = create_memory_suite();
+    SRunner* create_memory_sr = srunner_create(create_memory_s);
+    srunner_run_all(create_memory_sr, OUTPUT_MODE);
+    number_failed = srunner_ntests_failed(create_memory_sr);
+    srunner_free(create_memory_sr);
 
     Suite* open_view_s; 
     open_view_s = open_view_suite();
@@ -85,14 +93,12 @@ int main() {
     number_failed = srunner_ntests_failed(image_read_sr);
     srunner_free(image_read_sr);
 
-    /*
     Suite* image_write_s; 
     image_write_s = image_write_suite();
     SRunner* image_write_sr = srunner_create(image_write_s);
     srunner_run_all(image_write_sr, OUTPUT_MODE);
     number_failed = srunner_ntests_failed(image_write_sr);
     srunner_free(image_write_sr);
-    */
 
     Suite* trlr_read_s; 
     trlr_read_s = trailer_read_suite();
