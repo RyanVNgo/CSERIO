@@ -631,11 +631,6 @@ void ser_close_memory(serfile* sptr, int* status) {
         return (void)(*status = NULL_SPTR); 
     }
 
-    serMem* memory_io = (serMem*)(sptr->SER_file->io_context);
-    if (memory_io->owns_buffer) {
-        free(memory_io->data);
-    }
-
     if (sptr->SER_file->timestamps && sptr->SER_file->access_mode == READWRITE) {
         size_t image_frame_byte_size = 0;
         ser_get_frame_byte_size(sptr, &image_frame_byte_size, status);
@@ -654,6 +649,11 @@ void ser_close_memory(serfile* sptr, int* status) {
             *status = TRAILER_CLOSE_WARN;
         }
         free(sptr->SER_file->timestamps);
+    }
+
+    serMem* memory_io = (serMem*)(sptr->SER_file->io_context);
+    if (memory_io->owns_buffer) {
+        free(memory_io->data);
     }
 
     free(sptr->SER_file);
