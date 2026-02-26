@@ -17,7 +17,6 @@ START_TEST(idx_record_write) {
             &s,
             (uint8_t*)&check_hdr,
             sizeof(check_hdr),
-            true,
             READWRITE,
             &status
     );
@@ -51,7 +50,6 @@ START_TEST(idx_record_write_readonly) {
             &s,
             (uint8_t*)&check_hdr,
             sizeof(check_hdr),
-            true,
             READONLY,
             &status
     );
@@ -84,7 +82,6 @@ START_TEST(idx_record_write_oob_idx) {
             &s,
             (uint8_t*)&check_hdr,
             sizeof(check_hdr),
-            true,
             READWRITE,
             &status
     );
@@ -136,7 +133,6 @@ START_TEST(idx_record_write_null_data) {
             &s,
             (uint8_t*)&check_hdr,
             sizeof(check_hdr),
-            true,
             READWRITE,
             &status
     );
@@ -188,7 +184,6 @@ START_TEST(key_record_write) {
             &s,
             (uint8_t*)&check_hdr,
             sizeof(check_hdr),
-            true,
             READWRITE,
             &status
     );
@@ -222,7 +217,6 @@ START_TEST(key_record_write_readonly) {
             &s,
             (uint8_t*)&check_hdr,
             sizeof(check_hdr),
-            true,
             READONLY,
             &status
     );
@@ -256,7 +250,6 @@ START_TEST(key_record_write_invalid_key) {
             &s,
             (uint8_t*)&check_hdr,
             sizeof(check_hdr),
-            true,
             READWRITE,
             &status
     );
@@ -294,7 +287,6 @@ START_TEST(key_record_write_null_data) {
             &s,
             (uint8_t*)&check_hdr,
             sizeof(check_hdr),
-            true,
             READWRITE,
             &status
     );

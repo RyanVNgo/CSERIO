@@ -14,11 +14,10 @@ START_TEST(create_memory_success) {
 
     ser_create_memory(
             &test_ser, 
-            true,
             &status
     );
     ck_assert_int_eq(status, NO_ERROR);
-    ck_assert_int_eq(test_ser->SER_file->has_trailer, true);
+    ck_assert_int_eq(test_ser->SER_file->has_trailer, false);
 
     ser_close_memory(test_ser, &status);
     ck_assert_int_eq(status, NO_ERROR);
@@ -29,7 +28,6 @@ START_TEST(create_memory_null_ser) {
 
     ser_create_memory(
             NULL, 
-            true,
             &status
     );
     ck_assert_int_eq(status, NULL_SPTR);

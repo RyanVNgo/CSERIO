@@ -14,7 +14,6 @@ void trailer_read_setup() {
             &test_ser_3x50,
             (uint8_t*)&test_data_3x50,
             sizeof(test_data_3x50),
-            true,
             READONLY,
             &status
     );

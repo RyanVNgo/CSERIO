@@ -22,7 +22,6 @@ START_TEST(create_file_success) {
     ser_create_file(
             &test_ser,
             filepath,
-            true,
             &status
     );
     ck_assert_int_eq(status, NO_ERROR);
@@ -53,7 +52,6 @@ START_TEST(create_file_already_exists) {
     ser_create_file(
             &test_ser_1,
             filepath,
-            true,
             &status
     );
     ck_assert_int_eq(status, NO_ERROR);
@@ -69,7 +67,6 @@ START_TEST(create_file_already_exists) {
     ser_create_file(
             &test_ser_2,
             filepath,
-            true,
             &status
     );
     ck_assert_int_eq(status, FILE_EXISTS);
@@ -87,7 +84,6 @@ START_TEST(create_file_null_path) {
     ser_create_file(
             &test_ser,
             NULL,
-            true,
             &status
     );
     ck_assert_int_eq(status, NULL_PATH);
@@ -108,7 +104,6 @@ START_TEST(create_file_null_ser) {
     ser_create_file(
             NULL,
             filepath,
-            true,
             &status
     );
     ck_assert_int_eq(status, NULL_SPTR);

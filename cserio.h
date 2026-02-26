@@ -19,69 +19,68 @@
 
 /*-------------------- CSERIO Version --------------------*/
 
-#define CSERIO_MAJOR    2
-#define CSERIO_MINOR    0
-#define CSERIO_MICRO    0
+#define CSERIO_MAJOR                        2
+#define CSERIO_MINOR                        0
+#define CSERIO_MICRO                        0
 
 /*-------------------- Core Errors --------------------*/
 
-#define NO_ERROR            0
+#define NO_ERROR                            0
 
-#define MEM_ALLOC           101
-#define NULL_SPTR           102
-#define NULL_DEST_BUFF      103
-#define NULL_PARAM          104
+#define MEM_ALLOC                           101
+#define NULL_SPTR                           102
+#define NULL_DEST_BUFF                      103
+#define NULL_PARAM                          104
 
-#define EOF_ERROR           111
-#define FREAD_ERROR         112
-#define READ_ERROR          113
+#define EOF_ERROR                           111
+#define FREAD_ERROR                         112
+#define READ_ERROR                          113
 
-#define WRITE_ON_READONLY   131
+#define WRITE_ON_READONLY                   131
 
 /*-------------------- File Access Errors --------------------*/
 
-#define NULL_PATH           201
-#define FILE_EXISTS         202
-#define FILE_DNE            203
+#define NULL_PATH                           201
+#define FILE_EXISTS                         202
+#define FILE_DNE                            203
 
-#define FILE_OPEN_ERROR     211
-#define FILE_CLOSE_ERROR    212
+#define FILE_OPEN_ERROR                     211
+#define FILE_CLOSE_ERROR                    212
 
-#define INVALID_FILE        221
-#define INVALID_STRUCTURE   222
-#define INVALID_TRAILER     223
+#define INVALID_STRUCTURE                   222
 
 /*-------------------- Header Routine Errors --------------------*/
 
-#define INVALID_HDR_IDX     301
-#define INVALID_HDR_KEY     302
+#define INVALID_HDR_IDX                     301
+#define INVALID_HDR_KEY                     302
 
-#define HDR_WRITE_WARN       311
+#define HDR_WRITE_WARN                      311
 
 /*-------------------- Image Routine Errors --------------------*/
 
-#define INVALID_DIM_IDX     401
-#define INVALID_FRAME_IDX   402
+#define INVALID_DIM_IDX                     401
+#define INVALID_FRAME_IDX                   402
 
-#define IMAGE_WRITE_WARN    411
+#define IMAGE_WRITE_WARN                    411
 
 /*-------------------- Trailer Routine Errors --------------------*/
 
-#define TRAILER_DNE         501
+#define TRAILER_DNE                         501
 
-#define INVALID_TRLR_IDX    511
+#define TRAILER_INVALID_ENABLE              511
+#define INVALID_TRLR_IDX                    512
 
-#define TRAILER_CLOSE_WARN  521
+#define TRAILER_CLOSE_WARN                  521
 
 /*-------------------- SER File IO Modes --------------------*/
 
-#define READONLY    0
-#define READWRITE   1
+#define READONLY                            0
+#define READWRITE                           1
 
 /*-------------------- Header Symbolic Constants --------------------*/
 
-#define HDR_UNIT_COUNT          13
-#define HDR_SIZE                178
+#define HDR_UNIT_COUNT                      13
+#define HDR_SIZE                            178
 
 /*  These constants represent the byte length of each header component
  *  for V3 SER files.
@@ -89,61 +88,61 @@
  *  Note that these values represent the byte length as they are in the
  *  SER file.
  */
-#define FILEID_LEN              14
-#define LUID_LEN                4
-#define COLORID_LEN             4
-#define LITTLEENDIAN_LEN        4 
-#define IMAGEWIDTH_LEN          4 
-#define IMAGEHEIGHT_LEN         4 
-#define PIXELDEPTHPERPLANE_LEN  4 
-#define FRAMECOUNT_LEN          4 
-#define OBSERVER_LEN            40 
-#define INSTRUMENT_LEN          40 
-#define TELESCOPE_LEN           40 
-#define DATETIME_LEN            8 
-#define DATETIMEUTC_LEN         8 
+#define FILEID_LEN                          14
+#define LUID_LEN                            4
+#define COLORID_LEN                         4
+#define LITTLEENDIAN_LEN                    4 
+#define IMAGEWIDTH_LEN                      4 
+#define IMAGEHEIGHT_LEN                     4 
+#define PIXELDEPTHPERPLANE_LEN              4 
+#define FRAMECOUNT_LEN                      4 
+#define OBSERVER_LEN                        40 
+#define INSTRUMENT_LEN                      40 
+#define TELESCOPE_LEN                       40 
+#define DATETIME_LEN                        8 
+#define DATETIMEUTC_LEN                     8 
 
 /*  The following functionally operate as the byte index position 
  *  within the SER file.
  */
-#define FILEID_KEY              0
-#define LUID_KEY                14
-#define COLORID_KEY             18
-#define LITTLEENDIAN_KEY        22
-#define IMAGEWIDTH_KEY          26
-#define IMAGEHEIGHT_KEY         30
-#define PIXELDEPTHPERPLANE_KEY  34
-#define FRAMECOUNT_KEY          38
-#define OBSERVER_KEY            42
-#define INSTRUMENT_KEY          82
-#define TELESCOPE_KEY           122
-#define DATETIME_KEY            162
-#define DATETIMEUTC_KEY         170
+#define FILEID_KEY                          0
+#define LUID_KEY                            14
+#define COLORID_KEY                         18
+#define LITTLEENDIAN_KEY                    22
+#define IMAGEWIDTH_KEY                      26
+#define IMAGEHEIGHT_KEY                     30
+#define PIXELDEPTHPERPLANE_KEY              34
+#define FRAMECOUNT_KEY                      38
+#define OBSERVER_KEY                        42
+#define INSTRUMENT_KEY                      82
+#define TELESCOPE_KEY                       122
+#define DATETIME_KEY                        162
+#define DATETIMEUTC_KEY                     170
 
 /* Color ID types */
-#define MONO          0
-#define BAYER_RGGB    8
-#define BAYER_GRBG    9
-#define BAYER_GBRG    10
-#define BAYER_BGGR    11
-#define BAYER_CYYM    16
-#define BAYER_YCMY    17
-#define BAYER_YMCY    18
-#define BAYER_MYYC    19
-#define RGB           100
-#define BGR           101
+#define MONO                                0
+#define BAYER_RGGB                          8
+#define BAYER_GRBG                          9
+#define BAYER_GBRG                          10
+#define BAYER_BGGR                          11
+#define BAYER_CYYM                          16
+#define BAYER_YCMY                          17
+#define BAYER_YMCY                          18
+#define BAYER_MYYC                          19
+#define RGB                                 100
+#define BGR                                 101
 
 /* Little Endian types */
-#define LITTLEENDIAN_TRUE   1
-#define LITTLEENDIAN_FALSE  0
+#define LITTLEENDIAN_TRUE                   1
+#define LITTLEENDIAN_FALSE                  0
 
 
 /*-------------------- Image Symbolic Constants --------------------*/
 
 typedef int DIM_TYPE;
-#define DIM_LAYER   0
-#define DIM_WIDTH   1
-#define DIM_HEIGHT  2
+#define DIM_LAYER                           0
+#define DIM_WIDTH                           1
+#define DIM_HEIGHT                          2
 
 /*-------------------- SER Structure --------------------*/
 
@@ -196,12 +195,12 @@ void cserio_version_number(int* major, int* minor, int* micro);
 
 /*-------------------- SER Access Routines --------------------*/
 
-void ser_create_memory(serfile** sptr, bool has_trailer, int* status);
-void ser_open_view(serfile** sptr, uint8_t* data, size_t size, bool has_trailer, int mode, int* status);
-void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, bool has_trailer, int mode, int* status);
+void ser_create_memory(serfile** sptr, int* status);
+void ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* status);
+void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode, int* status);
 void ser_close_memory(serfile* sptr, int* status);
 
-void ser_create_file(serfile** sptr, const char* path, bool has_trailer, int* status);
+void ser_create_file(serfile** sptr, const char* path, int* status);
 void ser_open_file(serfile** sptr, const char* path, int mode, int* status);
 void ser_close_file(serfile* sptr, int* status);
 
@@ -241,6 +240,7 @@ void ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* 
 
 /*-------------------- Trailer Routines --------------------*/
 
+void ser_enable_trailer(serfile* sptr, int* status);
 void ser_get_trlr_record(serfile* sptr, int64_t* dest, size_t idx, int* status);
 
 
@@ -259,6 +259,7 @@ void ser_get_trlr_record(serfile* sptr, int64_t* dest, size_t idx, int* status);
 typedef struct {
     uint8_t* data;
     size_t size;
+    size_t view_size;
     bool owns_buffer;
 } serMem;
 
@@ -356,7 +357,7 @@ void cserio_version_number(int* major, int* minor, int* micro) {
  *  @param  status      (IO)    - Error status.
  *  @return Void.
  */
-void ser_create_memory(serfile** sptr, bool has_trailer, int* status) {
+void ser_create_memory(serfile** sptr, int* status) {
     if (!sptr) {
         return (void)(*status = NULL_SPTR);
     }
@@ -402,7 +403,7 @@ void ser_create_memory(serfile** sptr, bool has_trailer, int* status) {
     sf->date_time_utc = 0;
 
     /* initialize trailer */
-    sf->has_trailer = has_trailer;
+    sf->has_trailer = false;
     sf->timestamps = NULL;
     sf->timestamp_count = 0;
 
@@ -418,12 +419,12 @@ void ser_create_memory(serfile** sptr, bool has_trailer, int* status) {
  *
  *  @param  sptr      (IO)  - Pointer to a pointer of a serfile.
  *  @param  data      (I)   - Pointer to data.
- *  @param  size      (I)   - Size of data to manage.
+ *  @param  size      (I)   - Size of data view.
  *  @param  mode      (I)   - Access type, either READONLY or READWRITE.
  *  @param  status    (IO)  - Error status.
  *  @return Void.
  */
-void ser_open_view(serfile** sptr, uint8_t* data, size_t size, bool has_trailer, int mode, int* status) {
+void ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* status) {
     if (!sptr) {
         return (void)(*status = NULL_SPTR);
     }
@@ -432,20 +433,21 @@ void ser_open_view(serfile** sptr, uint8_t* data, size_t size, bool has_trailer,
         return (void)(*status = NULL_PARAM);
     }
 
-    /* determine existence of header */
+    /* determine validity of header */
     if (size < HDR_SIZE) {
-        return (void)(*status = INVALID_FILE);
+        return (void)(*status = INVALID_STRUCTURE);
     }
 
     /* allocate memory for serfile */
     *sptr = (serfile*)malloc(sizeof(serfile));
-    if (!*sptr) {
+    if (!(*sptr)) {
         return (void)(*status = MEM_ALLOC);
     }
 
     (*sptr)->SER_file = (SERfile*)malloc(sizeof(SERfile));
     if (!(*sptr)->SER_file) {
         free(*sptr);
+        *sptr = NULL;
         return (void)(*status = MEM_ALLOC);
     }
 
@@ -460,13 +462,7 @@ void ser_open_view(serfile** sptr, uint8_t* data, size_t size, bool has_trailer,
     sf->io_context = ser_data;
     sf->reader = ser_memory_read;
     sf->writer = ser_memory_write;
-
-    if (mode != READWRITE) {
-        mode = READONLY;
-    }
-    sf->access_mode = mode;
-
-    /* parse file metadata after validating header existence */
+    sf->access_mode = mode == READWRITE ? READWRITE : READONLY;
     ser_get_key_record(*sptr, sf->file_id, FILEID_KEY, status);
     ser_get_key_record(*sptr, &sf->lu_id, LUID_KEY, status);
     ser_get_key_record(*sptr, &sf->color_id, COLORID_KEY, status);
@@ -480,50 +476,40 @@ void ser_open_view(serfile** sptr, uint8_t* data, size_t size, bool has_trailer,
     ser_get_key_record(*sptr, sf->telescope, TELESCOPE_KEY, status);
     ser_get_key_record(*sptr, &sf->date_time, DATETIME_KEY, status);
     ser_get_key_record(*sptr, &sf->date_time_utc, DATETIMEUTC_KEY, status);
-
-    /* determine validity of image data section */
-    size_t image_frame_byte_size = 0;
-    ser_get_frame_byte_size(*sptr, &image_frame_byte_size, status);
-    if (*status) {
-        return;
-    }
-    size_t image_data_size = sf->frame_count * image_frame_byte_size;
-    if (size < HDR_SIZE + image_data_size) {
-        return (void)(*status = INVALID_STRUCTURE);
-    }
-
-    /* default trailer setup */
     sf->has_trailer = false;
     sf->timestamps = NULL;
     sf->timestamp_count = 0;
 
-    /* Apply trailer option if no data section */
-    if (image_data_size == 0) {
-        if (has_trailer) {
-            sf->has_trailer = has_trailer;
-            sf->timestamps = (int64_t*)realloc(sf->timestamps, 0);
-            sf->timestamp_count = sf->frame_count;
-        }
+    /* determine if valid hdr + data or hdr + data + trailer */
+    size_t frame_byte_size = 0;
+    ser_get_frame_byte_size(*sptr, &frame_byte_size, status);
+    size_t hdr_data_size = HDR_SIZE + sf->frame_count * frame_byte_size;
+
+    /* hdr + data */
+    if (size == hdr_data_size) {
         return;
     }
 
-    size_t trailer_offset = HDR_SIZE + image_data_size;
-    if (size > trailer_offset) {
+    /* hdr + data + trailer */
+    if ((size - hdr_data_size) == sf->frame_count * sizeof(uint64_t)) {
         sf->has_trailer = true;
-
-        /* determine validity of trailer */
-        size_t trailer_size = size - trailer_offset;
-        if (trailer_size != sf->frame_count * sizeof(uint64_t)) {
-            return (void)(*status = INVALID_TRAILER);
-        }
-
-        /* parse trailer */
-        sf->timestamps = (int64_t*)realloc(sf->timestamps, trailer_size);
+        sf->timestamps = (int64_t*)realloc(sf->timestamps, sf->frame_count * sizeof(uint64_t));
         sf->timestamp_count = sf->frame_count;
-        sf->reader(sf->io_context, sf->timestamps, trailer_size, trailer_offset);
+        sf->reader(
+                sf->io_context,
+                sf->timestamps,
+                sf->frame_count * sizeof(uint64_t),
+                hdr_data_size
+        );
+        return;
     }
 
-    return;
+    /* if reached, invalid structure */
+    free(((serMem*)(*sptr)->SER_file->io_context));
+    free((*sptr)->SER_file);
+    free((*sptr));
+    *sptr = NULL;
+    return (void)(*status = INVALID_STRUCTURE);
 }
 
 /*  @brief  Opens/Copies in-memory SER file.
@@ -539,7 +525,7 @@ void ser_open_view(serfile** sptr, uint8_t* data, size_t size, bool has_trailer,
  *  @param  status      (IO)    - Error status.
  *  @return Void.
  */
-void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, bool has_trailer, int mode, int* status) {
+void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode, int* status) {
     if (!sptr) {
         return (void)(*status = NULL_SPTR);
     }
@@ -548,20 +534,21 @@ void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, bool has_
         return (void)(*status = NULL_PARAM);
     }
 
-    /* determine existence of header */
+    /* determine validity of header */
     if (size < HDR_SIZE) {
-        return (void)(*status = INVALID_FILE);
+        return (void)(*status = INVALID_STRUCTURE);
     }
 
     /* allocate memory for serfile */
     *sptr = (serfile*)malloc(sizeof(serfile));
-    if (!*sptr) {
+    if (!(*sptr)) {
         return (void)(*status = MEM_ALLOC);
     }
 
     (*sptr)->SER_file = (SERfile*)malloc(sizeof(SERfile));
     if (!(*sptr)->SER_file) {
         free(*sptr);
+        *sptr = NULL;
         return (void)(*status = MEM_ALLOC);
     }
 
@@ -579,13 +566,7 @@ void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, bool has_
     sf->io_context = ser_data;
     sf->reader = ser_memory_read;
     sf->writer = ser_memory_write;
-
-    if (mode != READWRITE) {
-        mode = READONLY;
-    }
-    sf->access_mode = mode;
-
-    /* parse file metadata after validating header existence */
+    sf->access_mode = mode == READWRITE ? READWRITE : READONLY;
     ser_get_key_record(*sptr, sf->file_id, FILEID_KEY, status);
     ser_get_key_record(*sptr, &sf->lu_id, LUID_KEY, status);
     ser_get_key_record(*sptr, &sf->color_id, COLORID_KEY, status);
@@ -599,49 +580,41 @@ void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, bool has_
     ser_get_key_record(*sptr, sf->telescope, TELESCOPE_KEY, status);
     ser_get_key_record(*sptr, &sf->date_time, DATETIME_KEY, status);
     ser_get_key_record(*sptr, &sf->date_time_utc, DATETIMEUTC_KEY, status);
-
-    /* determine validity of image data section */
-    size_t image_frame_byte_size = 0;
-    ser_get_frame_byte_size(*sptr, &image_frame_byte_size, status);
-    if (*status) {
-        return;
-    }
-    size_t image_data_size = sf->frame_count * image_frame_byte_size;
-    if (size < HDR_SIZE + image_data_size) {
-        return (void)(*status = INVALID_STRUCTURE);
-    }
-
-    /* default trailer setup */
     sf->has_trailer = false;
     sf->timestamps = NULL;
     sf->timestamp_count = 0;
-    
-    /* Apply trailer option if no data section */
-    if (image_data_size == 0) {
-        if (has_trailer) {
-            sf->has_trailer = has_trailer;
-        }
+
+    /* determine if valid hdr + data or hdr + data + trailer */
+    size_t frame_byte_size = 0;
+    ser_get_frame_byte_size(*sptr, &frame_byte_size, status);
+    size_t hdr_data_size = HDR_SIZE + sf->frame_count * frame_byte_size;
+
+    /* hdr + data */
+    if (size == hdr_data_size) {
         return;
     }
 
-    /* determine existence of trailer */
-    size_t trailer_offset = HDR_SIZE + image_data_size;
-    if (size > trailer_offset) {
+    /* hdr + data + trailer */
+    if ((size - hdr_data_size) == sf->frame_count * sizeof(uint64_t)) {
         sf->has_trailer = true;
-
-        /* determine validity of trailer */
-        size_t trailer_size = size - trailer_offset;
-        if (trailer_size != sf->frame_count * sizeof(uint64_t)) {
-            return (void)(*status = INVALID_TRAILER);
-        }
-
-        /* parse trailer */
-        sf->timestamps = (int64_t*)realloc(sf->timestamps, trailer_size);
+        sf->timestamps = (int64_t*)realloc(sf->timestamps, sf->frame_count * sizeof(uint64_t));
         sf->timestamp_count = sf->frame_count;
-        sf->reader(sf->io_context, sf->timestamps, trailer_size, trailer_offset);
+        sf->reader(
+                sf->io_context,
+                sf->timestamps,
+                sf->frame_count * sizeof(uint64_t),
+                hdr_data_size
+        );
+        return;
     }
 
-    return;
+    /* if reached, invalid structure */
+    free(((serMem*)(*sptr)->SER_file->io_context)->data);
+    free(((serMem*)(*sptr)->SER_file->io_context));
+    free((*sptr)->SER_file);
+    free((*sptr));
+    *sptr = NULL;
+    return (void)(*status = INVALID_STRUCTURE);
 }
 
 /*  @brief  Close in-memory SER file
@@ -666,9 +639,6 @@ void ser_close_memory(serfile* sptr, int* status) {
     if (sptr->SER_file->timestamps && sptr->SER_file->access_mode == READWRITE) {
         size_t image_frame_byte_size = 0;
         ser_get_frame_byte_size(sptr, &image_frame_byte_size, status);
-        if (*status) {
-            return;
-        }
         size_t image_data_size = sptr->SER_file->frame_count * image_frame_byte_size;
 
         size_t trailer_offset = HDR_SIZE + image_data_size;
@@ -700,7 +670,7 @@ void ser_close_memory(serfile* sptr, int* status) {
  *  @param  status      (IO)    - Error status.
  *  @return Void.
  */
-void ser_create_file(serfile** sptr, const char* path, bool has_trailer, int* status) {
+void ser_create_file(serfile** sptr, const char* path, int* status) {
     if (!sptr) {
         return (void)(*status = NULL_SPTR);
     }
@@ -730,6 +700,7 @@ void ser_create_file(serfile** sptr, const char* path, bool has_trailer, int* st
     if (!(*sptr)->SER_file) {
         fclose(file);
         free(*sptr);
+        *sptr = NULL;
         return (void)(*status = MEM_ALLOC);
     }
 
@@ -753,7 +724,7 @@ void ser_create_file(serfile** sptr, const char* path, bool has_trailer, int* st
     sf->date_time = 0;
     sf->date_time_utc = 0;
 
-    sf->has_trailer = has_trailer;
+    sf->has_trailer = false;
     sf->timestamps = NULL;
     sf->timestamp_count = 0;
 
@@ -796,10 +767,10 @@ void ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
     size_t file_size = ftell(file);
     fseek(file, 0, SEEK_SET);
 
-    /* determine existence of header */
+    /* determine validity of header */
     if (file_size < HDR_SIZE) {
         fclose(file);
-        return (void)(*status = INVALID_FILE);
+        return (void)(*status = INVALID_STRUCTURE);
     }
 
     /* allocate memory for serfile */
@@ -813,6 +784,7 @@ void ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
     if (!(*sptr)->SER_file) {
         fclose(file);
         free(*sptr);
+        *sptr = NULL;
         return (void)(*status = MEM_ALLOC);
     }
 
@@ -821,13 +793,7 @@ void ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
     sf->io_context = file;
     sf->reader = ser_file_read;
     sf->writer = ser_file_write;
-
-    if (mode != READWRITE) {
-        mode = READONLY;
-    }
-    sf->access_mode = mode;
-
-    /* parse file metadata after validating header existence */
+    sf->access_mode = mode == READWRITE ? READWRITE : READONLY;
     ser_get_key_record(*sptr, sf->file_id, FILEID_KEY, status);
     ser_get_key_record(*sptr, &sf->lu_id, LUID_KEY, status);
     ser_get_key_record(*sptr, &sf->color_id, COLORID_KEY, status);
@@ -841,40 +807,40 @@ void ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
     ser_get_key_record(*sptr, sf->telescope, TELESCOPE_KEY, status);
     ser_get_key_record(*sptr, &sf->date_time, DATETIME_KEY, status);
     ser_get_key_record(*sptr, &sf->date_time_utc, DATETIMEUTC_KEY, status);
-
-    /* determine validity of image data section */
-    size_t image_frame_byte_size = 0;
-    ser_get_frame_byte_size(*sptr, &image_frame_byte_size, status);
-    if (*status) {
-        return;
-    }
-    size_t image_data_size = sf->frame_count * image_frame_byte_size;
-    if (file_size < HDR_SIZE + image_data_size) {
-        return (void)(*status = INVALID_STRUCTURE);
-    }
-
-    /* determine existence of trailer */
     sf->has_trailer = false;
     sf->timestamps = NULL;
     sf->timestamp_count = 0;
 
-    size_t trailer_offset = HDR_SIZE + image_data_size;
-    if (file_size > trailer_offset) {
-        sf->has_trailer = true;
+    /* determine if valid hdr + data or hdr + data + trailer */
+    size_t frame_byte_size = 0;
+    ser_get_frame_byte_size(*sptr, &frame_byte_size, status);
+    size_t hdr_data_size = HDR_SIZE + sf->frame_count * frame_byte_size;
 
-        /* determine validity of trailer */
-        size_t trailer_size = file_size - trailer_offset;
-        if (trailer_size != sf->frame_count * sizeof(uint64_t)) {
-            return (void)(*status = INVALID_TRAILER);
-        }
-
-        /* parse trailer */
-        sf->timestamps = (int64_t*)realloc(sf->timestamps, trailer_size);
-        sf->timestamp_count = sf->frame_count;
-        sf->reader(sf->io_context, sf->timestamps, trailer_size, trailer_offset);
+    /* hdr + data */
+    if (file_size == hdr_data_size) {
+        return;
     }
 
-    return;
+    /* hdr + data + trailer */
+    if ((file_size - hdr_data_size) == sf->frame_count * sizeof(uint64_t)) {
+        sf->has_trailer = true;
+        sf->timestamps = (int64_t*)realloc(sf->timestamps, sf->frame_count * sizeof(uint64_t));
+        sf->timestamp_count = sf->frame_count;
+        sf->reader(
+                sf->io_context,
+                sf->timestamps,
+                sf->frame_count * sizeof(uint64_t),
+                hdr_data_size
+        );
+        return;
+    }
+
+    /* if reached, invalid structure */
+    fclose(file);
+    free((*sptr)->SER_file);
+    free((*sptr));
+    *sptr = NULL;
+    return (void)(*status = INVALID_STRUCTURE);
 }
 
 /*  @brief  Close SER file
@@ -891,16 +857,9 @@ void ser_close_file(serfile* sptr, int* status) {
         return (void)(*status = NULL_SPTR); 
     }
 
-    if (!sptr->SER_file->io_context || fclose((FILE*)sptr->SER_file->io_context)) {
-        *status = FILE_CLOSE_ERROR;
-    }
-
     if (sptr->SER_file->timestamps && sptr->SER_file->access_mode == READWRITE) {
         size_t image_frame_byte_size = 0;
         ser_get_frame_byte_size(sptr, &image_frame_byte_size, status);
-        if (*status) {
-            return;
-        }
         size_t image_data_size = sptr->SER_file->frame_count * image_frame_byte_size;
 
         size_t trailer_offset = HDR_SIZE + image_data_size;
@@ -916,6 +875,10 @@ void ser_close_file(serfile* sptr, int* status) {
             *status = TRAILER_CLOSE_WARN;
         }
         free(sptr->SER_file->timestamps);
+    }
+
+    if (!sptr->SER_file->io_context || fclose((FILE*)sptr->SER_file->io_context)) {
+        *status = FILE_CLOSE_ERROR;
     }
 
     free(sptr->SER_file);
@@ -1753,6 +1716,31 @@ void ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* 
 }
 
 /*-------------------- Trailer Routines --------------------*/
+
+/*  @brief Enable the optional timestamp trailer.
+ *
+ *  Note that this may only be called in the case that there
+ *  is no image data present in the SER. Attempts to call
+ *  this method after data has been written with no associated
+ *  timestamps will result in an error.
+ *
+ *  @param  sptr    (I)     - Pointer to serfile.
+ *  @param  status  (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_enable_trailer(serfile* sptr, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    if (sptr->SER_file->frame_count != 0 && !sptr->SER_file->has_trailer) {
+        return (void)(*status = TRAILER_INVALID_ENABLE);
+    }
+
+    sptr->SER_file->has_trailer = true;
+
+    return;
+}
 
 /*  @brief  Read trailer time stamp at index.
  *  @param  sptr    (I)     - Pointer to serfile.
