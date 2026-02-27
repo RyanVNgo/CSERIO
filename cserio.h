@@ -1589,10 +1589,10 @@ void ser_set_color_id(serfile* sptr, const int32_t color_id, int* status) {
 
     /* check for switch between 1 byte and 3 byte color ids */
     if (sptr->SER_file->color_id < 100 && color_id >= 100) {
-            return (void)(*status = INVALID_SET_VALUE);
+            return (void)(*status = INVALID_SET_STATE);
     }
     if (sptr->SER_file->color_id >= 100 && color_id < 100) {
-            return (void)(*status = INVALID_SET_VALUE);
+            return (void)(*status = INVALID_SET_STATE);
     }
 
     sptr->SER_file->color_id = color_id;

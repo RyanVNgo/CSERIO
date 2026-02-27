@@ -126,13 +126,215 @@ START_TEST(header_set_success) {
     destroy_temp_ser(filepath, dir);
 } END_TEST
 
-START_TEST(header_set_invalid_set) {
+START_TEST(header_set_invalid_set_value) {
+    char dir[] = "/tmp/cserio_testXXXXXX";
+    char filepath[512];
+    SERHdrStructure test_data = test_data_3x50.hdr;
+    test_data.frame_count = 0;
+    create_temp_ser(
+            filepath,
+            dir,
+            &test_data,
+            sizeof(test_data)
+    );
+    /* <- File Setup */
+
+    int status = 0;
+    serfile* test_ser = NULL;
+    ser_open_file(&test_ser, filepath, READWRITE, &status);
+    ck_assert_int_eq(status, NO_ERROR);
+
+    /* invalid color id */
+    status = 0;
+    ser_set_color_id(test_ser, 1, &status);
+    ck_assert_int_eq(status, INVALID_SET_VALUE);
+
+    /* invalid little endian flag */
+    status = 0;
+    ser_set_little_endian(test_ser, 2, &status);
+    ck_assert_int_eq(status, INVALID_SET_VALUE);
+
+    /* invalid pdpp > 16 */
+    status = 0;
+    ser_set_pixel_depth_per_plane(test_ser, 17, &status);
+    ck_assert_int_eq(status, INVALID_SET_VALUE);
+
+    /* invalid pdpp == 0 */
+    status = 0;
+    ser_set_pixel_depth_per_plane(test_ser, 0, &status);
+    ck_assert_int_eq(status, INVALID_SET_VALUE);
+
+    status = 0;
+    ser_close_file(test_ser, &status);
+    ck_assert_int_eq(status, NO_ERROR);
+
+    /* retrieve file details */
+    FILE* test_file = fopen(filepath, "rb");
+    if (!test_file) {
+        ck_abort_msg("Failed to open test SER");
+    }
+    fseek(test_file, 0, SEEK_END);
+    size_t file_size = ftell(test_file);
+
+    uint8_t* check_buff = malloc(file_size);
+    fseek(test_file, 0, SEEK_SET);
+    fread(check_buff, 1, file_size, test_file);
+
+    fclose(test_file);
+
+    /* header should be unchanged */
+    ck_assert_mem_eq(check_buff, &test_data, file_size);
+
+    /* Teardown -> */
+    free(check_buff);
+    destroy_temp_ser(filepath, dir);
+} END_TEST
+
+START_TEST(header_set_invalid_set_state) {
+    char dir[] = "/tmp/cserio_testXXXXXX";
+    char filepath[512];
+    create_temp_ser(filepath, dir, &test_data_3x50, sizeof(test_data_3x50));
+    /* <- File Setup */
+
+    int status = 0;
+    serfile* test_ser = NULL;
+    ser_open_file(&test_ser, filepath, READWRITE, &status);
+
+    /* changing to different byte width color id */
+    status = 0;
+    ser_set_color_id(test_ser, RGB, &status);
+    ck_assert_int_eq(status, INVALID_SET_STATE);
+
+    /* changing width with image data present */
+    status = 0;
+    ser_set_image_width(test_ser, 10, &status);
+    ck_assert_int_eq(status, INVALID_SET_STATE);
+
+    /* changing height with image data present */
+    status = 0;
+    ser_set_image_height(test_ser, 10, &status);
+    ck_assert_int_eq(status, INVALID_SET_STATE);
+
+    /* changing to different byte width pdpp */
+    status = 0;
+    ser_set_pixel_depth_per_plane(test_ser, 16, &status);
+    ck_assert_int_eq(status, INVALID_SET_STATE);
+
+    status = 0;
+    ser_close_file(test_ser, &status);
+    ck_assert_int_eq(status, NO_ERROR);
+
+    /* retrieve file details */
+    FILE* test_file = fopen(filepath, "rb");
+    if (!test_file) {
+        ck_abort_msg("Failed to open test SER");
+    }
+    fseek(test_file, 0, SEEK_END);
+    size_t file_size = ftell(test_file);
+
+    uint8_t* check_buff = malloc(file_size);
+    fseek(test_file, 0, SEEK_SET);
+    fread(check_buff, 1, file_size, test_file);
+
+    fclose(test_file);
+
+    /* header should be unchanged */
+    ck_assert_mem_eq(check_buff, &test_data_3x50, file_size);
+
+    /* Teardown -> */
+    free(check_buff);
+    destroy_temp_ser(filepath, dir);
 } END_TEST
 
 START_TEST(header_set_null_data) {
+    char dir[] = "/tmp/cserio_testXXXXXX";
+    char filepath[512];
+    SERHdrStructure test_data = test_data_3x50.hdr;
+    test_data.frame_count = 0;
+    create_temp_ser(
+            filepath,
+            dir,
+            &test_data,
+            sizeof(test_data)
+    );
+    /* <- File Setup */
+
+    int status = 0;
+    serfile* test_ser = NULL;
+    ser_open_file(&test_ser, filepath, READWRITE, &status);
+    ck_assert_int_eq(status, NO_ERROR);
+
+    status = 0;
+    ser_set_file_id(test_ser, NULL, &status);
+    ck_assert_int_eq(status, NULL_PARAM);
+
+    status = 0;
+    ser_set_observer(test_ser, NULL, &status);
+    ck_assert_int_eq(status, NULL_PARAM);
+
+    status = 0;
+    ser_set_instrument(test_ser, NULL, &status);
+    ck_assert_int_eq(status, NULL_PARAM);
+
+    status = 0;
+    ser_set_telescope(test_ser, NULL, &status);
+    ck_assert_int_eq(status, NULL_PARAM);
+
+    status = 0;
+    ser_close_file(test_ser, &status);
+    ck_assert_int_eq(status, NO_ERROR);
+
+    /* retrieve file details */
+    FILE* test_file = fopen(filepath, "rb");
+    if (!test_file) {
+        ck_abort_msg("Failed to open test SER");
+    }
+    fseek(test_file, 0, SEEK_END);
+    size_t file_size = ftell(test_file);
+
+    uint8_t* check_buff = malloc(file_size);
+    fseek(test_file, 0, SEEK_SET);
+    fread(check_buff, 1, file_size, test_file);
+
+    fclose(test_file);
+
+    /* header should be unchanged */
+    ck_assert_mem_eq(check_buff, &test_data, file_size);
+
+    /* Teardown -> */
+    free(check_buff);
+    destroy_temp_ser(filepath, dir);
 } END_TEST
 
 START_TEST(header_set_null_ser) {
+    int status = 0;
+    SERHdrStructure test_data = test_data_3x50.hdr;
+
+    ser_set_file_id(NULL, test_data.file_id, &status);
+    ck_assert_int_eq(status, NULL_SPTR);
+    ser_set_lu_id(NULL, test_data.lu_id, &status);
+    ck_assert_int_eq(status, NULL_SPTR);
+    ser_set_color_id(NULL, test_data.color_id, &status);
+    ck_assert_int_eq(status, NULL_SPTR);
+    ser_set_little_endian(NULL, test_data.little_endian, &status);
+    ck_assert_int_eq(status, NULL_SPTR);
+    ser_set_image_width(NULL, test_data.image_width, &status);
+    ck_assert_int_eq(status, NULL_SPTR);
+    ser_set_image_height(NULL, test_data.image_height, &status);
+    ck_assert_int_eq(status, NULL_SPTR);
+    ser_set_pixel_depth_per_plane(NULL, test_data.pixel_depth_per_plane, &status);
+    ck_assert_int_eq(status, NULL_SPTR);
+    ser_set_observer(NULL, test_data.observer, &status);
+    ck_assert_int_eq(status, NULL_SPTR);
+    ser_set_instrument(NULL, test_data.instrument, &status);
+    ck_assert_int_eq(status, NULL_SPTR);
+    ser_set_telescope(NULL, test_data.telescope, &status);
+    ck_assert_int_eq(status, NULL_SPTR);
+    ser_set_date_time(NULL, test_data.date_time, &status);
+    ck_assert_int_eq(status, NULL_SPTR);
+    ser_set_date_time_utc(NULL, test_data.date_time_utc, &status);
+    ck_assert_int_eq(status, NULL_SPTR);
+
 } END_TEST
 
 Suite* header_set_suite() {
@@ -142,7 +344,8 @@ Suite* header_set_suite() {
     TCase* tc_header_set;
     tc_header_set = tcase_create("header_set");
     tcase_add_test(tc_header_set, header_set_success);
-    tcase_add_test(tc_header_set, header_set_invalid_set);
+    tcase_add_test(tc_header_set, header_set_invalid_set_value);
+    tcase_add_test(tc_header_set, header_set_invalid_set_state);
     tcase_add_test(tc_header_set, header_set_null_data);
     tcase_add_test(tc_header_set, header_set_null_ser);
     suite_add_tcase(s, tc_header_set);
