@@ -250,10 +250,6 @@ void ser_get_timestamp(serfile* sptr, int64_t* dest, size_t idx, int* status);
 /* CSERIO Implementation */ 
 /*------------------------------------------------------------------*/
 
-/*
-*/
-#define CSERIO_IMPLEMENTATION
-
 #if defined(CSERIO_IMPLEMENTATION)
 
 /*-------------------- Internal Implementation --------------------*/
