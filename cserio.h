@@ -644,6 +644,22 @@ void ser_close_memory(serfile* sptr, int* status) {
         return (void)(*status = NULL_SPTR); 
     }
 
+    if (sptr->SER_file->access_mode == READWRITE) {
+		ser_write_key_record(sptr, &sptr->SER_file->file_id, FILEID_KEY, FILEID_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->lu_id, LUID_KEY, LUID_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->color_id, COLORID_KEY, COLORID_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->little_endian, LITTLEENDIAN_KEY, LITTLEENDIAN_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->image_width, IMAGEWIDTH_KEY, IMAGEWIDTH_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->image_height, IMAGEHEIGHT_KEY, IMAGEHEIGHT_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->pixel_depth_per_plane, PIXELDEPTHPERPLANE_KEY, PIXELDEPTHPERPLANE_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->frame_count, FRAMECOUNT_KEY, FRAMECOUNT_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->observer, OBSERVER_KEY, OBSERVER_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->instrument, INSTRUMENT_KEY, INSTRUMENT_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->telescope, TELESCOPE_KEY, TELESCOPE_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->date_time, DATETIME_KEY, DATETIME_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->date_time_utc, DATETIMEUTC_KEY, DATETIMEUTC_LEN, status);
+    }
+
     if (sptr->SER_file->timestamps && sptr->SER_file->access_mode == READWRITE) {
         size_t image_frame_byte_size = 0;
         ser_get_frame_byte_size(sptr, &image_frame_byte_size, status);
