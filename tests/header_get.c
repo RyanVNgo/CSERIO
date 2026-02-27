@@ -8,7 +8,7 @@
 #include "../cserio.h"
 
 
-void get_metadata_setup() {
+void header_get_setup() {
     int status = 0;
     ser_open_view(
             &test_ser_3x50,
@@ -19,12 +19,12 @@ void get_metadata_setup() {
     );
 }
 
-void get_metadata_teardown() {
+void header_get_teardown() {
     int status = 0;
     ser_close_memory(test_ser_3x50, &status);
 }
 
-START_TEST(get_metadata_success) {
+START_TEST(header_get_success) {
     int status = 0;
 
     SERHdrStructureNonPacked check_hdr;
@@ -73,7 +73,7 @@ START_TEST(get_metadata_success) {
 
 } END_TEST
 
-START_TEST(get_metadata_null_data) {
+START_TEST(header_get_null_data) {
     int status = 0;
 
     ser_get_file_id(test_ser_3x50, NULL, &status);
@@ -105,7 +105,7 @@ START_TEST(get_metadata_null_data) {
 
 } END_TEST
 
-START_TEST(get_metadata_null_ser) {
+START_TEST(header_get_null_ser) {
     int status = 0;
 
     SERHdrStructureNonPacked baseline_hdr;
@@ -156,17 +156,17 @@ START_TEST(get_metadata_null_ser) {
 
 } END_TEST
 
-Suite* get_metadata_suite() {
+Suite* header_get_suite() {
     Suite* s;
-    s = suite_create("Get Metadata");
+    s = suite_create("Header Get");
 
-    TCase* tc_get_metadata;
-    tc_get_metadata = tcase_create("get_metadata");
-    tcase_add_checked_fixture(tc_get_metadata, get_metadata_setup, get_metadata_teardown);
-    tcase_add_test(tc_get_metadata, get_metadata_success);
-    tcase_add_test(tc_get_metadata, get_metadata_null_data);
-    tcase_add_test(tc_get_metadata, get_metadata_null_ser);
-    suite_add_tcase(s, tc_get_metadata);
+    TCase* tc_header_get;
+    tc_header_get = tcase_create("header_get");
+    tcase_add_checked_fixture(tc_header_get, header_get_setup, header_get_teardown);
+    tcase_add_test(tc_header_get, header_get_success);
+    tcase_add_test(tc_header_get, header_get_null_data);
+    tcase_add_test(tc_header_get, header_get_null_ser);
+    suite_add_tcase(s, tc_header_get);
 
     return s;
 }

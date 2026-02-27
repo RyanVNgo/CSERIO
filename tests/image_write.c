@@ -101,9 +101,11 @@ START_TEST(append_frame_success_no_trailer) {
     );
 
     /* is data before frame (hdr) intact */
+    SERHdrStructure new_hdr = test_data_3x50.hdr;
+    new_hdr.frame_count += 1;
     ck_assert_mem_eq(
             check_buff,
-            &test_data_3x50.hdr,
+            &new_hdr,
             sizeof(test_data_3x50.hdr)
     );
 
@@ -177,9 +179,11 @@ START_TEST(append_frame_success_with_trailer) {
     );
 
     /* is data before frame (hdr) intact */
+    SERHdrStructure new_hdr = test_data_3x50.hdr;
+    new_hdr.frame_count += 1;
     ck_assert_mem_eq(
             check_buff,
-            &test_data_3x50.hdr,
+            &new_hdr,
             sizeof(test_data_3x50.hdr)
     );
 
@@ -256,10 +260,12 @@ START_TEST(append_frame_success_empty_no_trailer) {
     );
 
     /* is data before frame (hdr) intact */
+    SERHdrStructure new_hdr = test_hdr;
+    new_hdr.frame_count += 1;
     ck_assert_mem_eq(
             check_buff,
-            &test_hdr,
-            sizeof(test_hdr)
+            &new_hdr,
+            sizeof(test_data_3x50.hdr)
     );
 
     /* Teardown -> */
@@ -329,10 +335,12 @@ START_TEST(append_frame_success_empty_with_trailer) {
     );
 
     /* is data before frame (hdr) intact */
+    SERHdrStructure new_hdr = test_hdr;
+    new_hdr.frame_count += 1;
     ck_assert_mem_eq(
             check_buff,
-            &test_hdr,
-            sizeof(test_hdr)
+            &new_hdr,
+            sizeof(test_data_3x50.hdr)
     );
 
     /* was timestamp written */
