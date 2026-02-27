@@ -67,8 +67,8 @@
 
 #define TRAILER_DNE                         501
 
-#define TRAILER_INVALID_ENABLE              511
-#define INVALID_TRLR_IDX                    512
+#define INVALID_TRAILER_ENABLE              511
+#define INVALID_TRAILER_IDX                 512
 
 #define TRAILER_CLOSE_WARN                  521
 
@@ -241,7 +241,7 @@ void ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* 
 /*-------------------- Trailer Routines --------------------*/
 
 void ser_enable_trailer(serfile* sptr, int* status);
-void ser_get_trlr_record(serfile* sptr, int64_t* dest, size_t idx, int* status);
+void ser_get_timestamp(serfile* sptr, int64_t* dest, size_t idx, int* status);
 
 
 /*------------------------------------------------------------------*/
@@ -1734,7 +1734,7 @@ void ser_enable_trailer(serfile* sptr, int* status) {
     }
 
     if (sptr->SER_file->frame_count != 0 && !sptr->SER_file->has_trailer) {
-        return (void)(*status = TRAILER_INVALID_ENABLE);
+        return (void)(*status = INVALID_TRAILER_ENABLE);
     }
 
     sptr->SER_file->has_trailer = true;
@@ -1749,13 +1749,13 @@ void ser_enable_trailer(serfile* sptr, int* status) {
  *  @param  status  (IO)    - Error status.
  *  @return Void.
  */
-void ser_get_trlr_record(serfile* sptr, int64_t* dest, size_t idx, int* status) {
+void ser_get_timestamp(serfile* sptr, int64_t* dest, size_t idx, int* status) {
     if (!sptr) { 
         return (void)(*status = NULL_SPTR); 
     }
 
     if (!dest) { 
-        return (void)(*status = NULL_PARAM); 
+        return (void)(*status = NULL_DEST_BUFF); 
     }
 
     if (!sptr->SER_file->has_trailer) {
@@ -1763,7 +1763,7 @@ void ser_get_trlr_record(serfile* sptr, int64_t* dest, size_t idx, int* status) 
     }
 
     if (idx >= sptr->SER_file->timestamp_count) {
-        return (void)(*status = INVALID_TRLR_IDX); 
+        return (void)(*status = INVALID_TRAILER_IDX); 
     }
 
     *dest = sptr->SER_file->timestamps[idx];
