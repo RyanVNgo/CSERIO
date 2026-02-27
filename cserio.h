@@ -1,4 +1,4 @@
-/** @file   cserio.h
+/*  @file   cserio.h
  *  @brief  Library definitions and function implementations.
  *
  *  This file contains all library definitions and function 
@@ -82,11 +82,8 @@
 #define HDR_UNIT_COUNT                      13
 #define HDR_SIZE                            178
 
-/*  These constants represent the byte length of each header component
- *  for V3 SER files.
- *
- *  Note that these values represent the byte length as they are in the
- *  SER file.
+/* 
+ *  Constants that represent the byte length of each header component.
  */
 #define FILEID_LEN                          14
 #define LUID_LEN                            4
@@ -102,8 +99,8 @@
 #define DATETIME_LEN                        8 
 #define DATETIMEUTC_LEN                     8 
 
-/*  The following functionally operate as the byte index position 
- *  within the SER file.
+/*  
+ *  Byte index position of each header component.
  */
 #define FILEID_KEY                          0
 #define LUID_KEY                            14
@@ -119,7 +116,9 @@
 #define DATETIME_KEY                        162
 #define DATETIMEUTC_KEY                     170
 
-/* Color ID types */
+/* 
+ * Color ID types.
+ */
 #define MONO                                0
 #define BAYER_RGGB                          8
 #define BAYER_GRBG                          9
@@ -132,7 +131,9 @@
 #define RGB                                 100
 #define BGR                                 101
 
-/* Little Endian types */
+/* 
+ * Little Endian types.
+ */
 #define LITTLEENDIAN_TRUE                   1
 #define LITTLEENDIAN_FALSE                  0
 
@@ -146,9 +147,11 @@ typedef int DIM_TYPE;
 
 /*-------------------- SER Structure --------------------*/
 
-/*  SERfile is the core data structure that permits the access and
- *  modification of SER files. This structure should not be directly
- *  utilized by the user.
+/*  SERfile is the internal structure CSERIO uses to manage 
+ *  information and control of SER files.
+ *
+ *  This structure should not be directly interacted with by 
+ *  the user.
  */
 typedef struct SERfile {
     void*       io_context;
@@ -176,9 +179,8 @@ typedef struct SERfile {
 } SERfile;
 
 
-/*  serfile is the primary data structure that users should utilize
- *  to interact with SER files. This structure should only be utilized
- *  and modified by methods provided in this library.
+/*  serfile is the primary structure used to interact with nearly all
+ *  CSERIO routines. 
  */
 typedef struct serfile {
     SERfile* SER_file;
@@ -249,12 +251,12 @@ void ser_get_timestamp(serfile* sptr, int64_t* dest, size_t idx, int* status);
 /*------------------------------------------------------------------*/
 
 /*
-#define CSERIO_IMPLEMENTATION
 */
+#define CSERIO_IMPLEMENTATION
 
 #if defined(CSERIO_IMPLEMENTATION)
 
-/*-------------------- Internal Helpers --------------------*/
+/*-------------------- Internal Implementation --------------------*/
 
 typedef struct {
     uint8_t* data;
@@ -330,9 +332,9 @@ static size_t ser_file_write(void* io_context, const void* data, size_t size, si
 
 /*  @brief  Provides the Major, Minor, and Micro numbers for
  *          the current version of CSERIO.
- *  @param  major     (IO)  - Pointer to Major int.
- *  @param  minor     (IO)  - Pointer to Minor int.
- *  @param  micro     (IO)  - Pointer to Micro int.
+ *  @param  major       (IO)    - Pointer to Major int.
+ *  @param  minor       (IO)    - Pointer to Minor int.
+ *  @param  micro       (IO)    - Pointer to Micro int.
  *  @return Void.
  */
 void cserio_version_number(int* major, int* minor, int* micro) {
@@ -353,7 +355,6 @@ void cserio_version_number(int* major, int* minor, int* micro) {
 
 /*  @brief  Opens new in-memory SER file.
  *  @param  sptr        (IO)    - Pointer to a pointer of a serfile.
- *  @param  has_trailer (I)     - Should file have a trailer.
  *  @param  status      (IO)    - Error status.
  *  @return Void.
  */
@@ -420,7 +421,7 @@ void ser_create_memory(serfile** sptr, int* status) {
  *  @param  sptr      (IO)  - Pointer to a pointer of a serfile.
  *  @param  data      (I)   - Pointer to data.
  *  @param  size      (I)   - Size of data view.
- *  @param  mode      (I)   - Access type, either READONLY or READWRITE.
+ *  @param  mode      (I)   - Access type (READONLY or READWRITE).
  *  @param  status    (IO)  - Error status.
  *  @return Void.
  */
@@ -520,8 +521,7 @@ void ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* st
  *  @param  sptr        (IO)    - Pointer to a pointer of a serfile.
  *  @param  data        (I)     - Pointer to data.
  *  @param  size        (I)     - Size to initially allocate / copy over.
- *  @param  has_trailer (I)     - Should file have a trailer.
- *  @param  mode        (I)     - Access type, either READONLY or READWRITE.
+ *  @param  mode        (I)     - Access type (READONLY or READWRITE).
  *  @param  status      (IO)    - Error status.
  *  @return Void.
  */
@@ -622,8 +622,8 @@ void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode,
  *  Closes the serfile and frees the structure. Parameter sptr will
  *  be set to NULL.
  *
- *  @param  sptr      (IO)  - Pointer to a serfile.
- *  @param  status    (IO)  - Error status.
+ *  @param  sptr        (IO)    - Pointer to a serfile.
+ *  @param  status      (IO)    - Error status.
  *  @return Void.
  */
 void ser_close_memory(serfile* sptr, int* status) {
@@ -666,7 +666,6 @@ void ser_close_memory(serfile* sptr, int* status) {
  *
  *  @param  sptr        (IO)    - Pointer to pointer of a serfile.
  *  @param  path        (I)     - File path.
- *  @param  has_trailer (I)     - Should file have a trailer.
  *  @param  status      (IO)    - Error status.
  *  @return Void.
  */
@@ -733,10 +732,10 @@ void ser_create_file(serfile** sptr, const char* path, int* status) {
 
 /*  @brief  Opens existing SER file
  *
- *  @param  sptr      (IO)  - Pointer to a pointer of a serfile.
- *  @param  path      (I)   - SER file path.
- *  @param  mode      (I)   - Access type, either READONLY or READWRITE.
- *  @param  status    (IO)  - Error status.
+ *  @param  sptr        (IO)    - Pointer to a pointer of a serfile.
+ *  @param  path        (I)     - SER file path.
+ *  @param  mode        (I)     - Access type (READONLY or READWRITE).
+ *  @param  status      (IO)    - Error status.
  *  @return Void.
  */
 void ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
@@ -1500,7 +1499,7 @@ void ser_write_key_record(serfile* sptr, const void* data, int key, size_t size,
 #define MIN_DIM_IDX         0
 #define MAX_DIM_IDX         2
 
-#define DATA_START_SET 178
+#define DATA_START_SET      178
 
 /*-------------------- Image Routines --------------------*/
 
