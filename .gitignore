@@ -1,11 +1,10 @@
-# default install directories
-include
-lib
-
 # object files
 obj
 obj/*.o
 
 # tests
 tests/*.o
-tests/test-runner
+tests/build/
+
+# extra
+*.json
