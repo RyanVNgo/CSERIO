@@ -21,7 +21,7 @@
 
 #define CSERIO_MAJOR                        2
 #define CSERIO_MINOR                        1
-#define CSERIO_MICRO                        0
+#define CSERIO_MICRO                        1
 
 /*-------------------- Core Errors --------------------*/
 

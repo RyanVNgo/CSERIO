@@ -7,7 +7,6 @@
 
 #include "ser_test_data.h"
 
-#define CSERIO_IMPLEMENTATION
 #include "../cserio.h"
 
 
