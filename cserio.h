@@ -20,7 +20,7 @@
 /*-------------------- CSERIO Version --------------------*/
 
 #define CSERIO_MAJOR                        2
-#define CSERIO_MINOR                        0
+#define CSERIO_MINOR                        1
 #define CSERIO_MICRO                        0
 
 /*-------------------- Core Errors --------------------*/
@@ -55,6 +55,9 @@
 #define INVALID_HDR_KEY                     302
 
 #define HDR_WRITE_WARN                      311
+
+#define INVALID_SET_STATE                   321
+#define INVALID_SET_VALUE                   322
 
 /*-------------------- Image Routine Errors --------------------*/
 
@@ -229,6 +232,20 @@ void ser_get_instrument(const serfile* sptr, char* instrument, int* status);
 void ser_get_telescope(const serfile* sptr, char* telescope, int* status);
 void ser_get_date_time(const serfile* sptr, int64_t* date_time, int* status);
 void ser_get_date_time_utc(const serfile* sptr, int64_t* date_time_utc, int* status);
+
+void ser_set_file_id(serfile* sptr, const char* file_id, int* status);
+void ser_set_lu_id(serfile* sptr, const int32_t lu_id, int* status);
+void ser_set_color_id(serfile* sptr, const int32_t color_id, int* status);
+void ser_set_little_endian(serfile* sptr, const int32_t little_endian, int* status);
+void ser_set_image_width(serfile* sptr, const uint32_t image_width, int* status);
+void ser_set_image_height(serfile* sptr, const uint32_t image_height, int* status);
+void ser_set_pixel_depth_per_plane(serfile* sptr, const int32_t pixel_depth_per_plane, int* status);
+// void ser_set_frame_count(serfile* sptr, const int32_t frame_count, int* status);
+void ser_set_observer(serfile* sptr, const char* observer, int* status);
+void ser_set_instrument(serfile* sptr, const char* instrument, int* status);
+void ser_set_telescope(serfile* sptr, const char* telescope, int* status);
+void ser_set_date_time(serfile* sptr, const int64_t date_time, int* status);
+void ser_set_date_time_utc(serfile* sptr, const int64_t date_time_utc, int* status);
 
 /*-------------------- Image Routines --------------------*/
 
@@ -627,6 +644,22 @@ void ser_close_memory(serfile* sptr, int* status) {
         return (void)(*status = NULL_SPTR); 
     }
 
+    if (sptr->SER_file->access_mode == READWRITE) {
+		ser_write_key_record(sptr, &sptr->SER_file->file_id, FILEID_KEY, FILEID_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->lu_id, LUID_KEY, LUID_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->color_id, COLORID_KEY, COLORID_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->little_endian, LITTLEENDIAN_KEY, LITTLEENDIAN_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->image_width, IMAGEWIDTH_KEY, IMAGEWIDTH_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->image_height, IMAGEHEIGHT_KEY, IMAGEHEIGHT_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->pixel_depth_per_plane, PIXELDEPTHPERPLANE_KEY, PIXELDEPTHPERPLANE_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->frame_count, FRAMECOUNT_KEY, FRAMECOUNT_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->observer, OBSERVER_KEY, OBSERVER_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->instrument, INSTRUMENT_KEY, INSTRUMENT_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->telescope, TELESCOPE_KEY, TELESCOPE_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->date_time, DATETIME_KEY, DATETIME_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->date_time_utc, DATETIMEUTC_KEY, DATETIMEUTC_LEN, status);
+    }
+
     if (sptr->SER_file->timestamps && sptr->SER_file->access_mode == READWRITE) {
         size_t image_frame_byte_size = 0;
         ser_get_frame_byte_size(sptr, &image_frame_byte_size, status);
@@ -850,6 +883,22 @@ void ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
 void ser_close_file(serfile* sptr, int* status) {
     if (!sptr) { 
         return (void)(*status = NULL_SPTR); 
+    }
+
+    if (sptr->SER_file->access_mode == READWRITE) {
+		ser_write_key_record(sptr, &sptr->SER_file->file_id, FILEID_KEY, FILEID_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->lu_id, LUID_KEY, LUID_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->color_id, COLORID_KEY, COLORID_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->little_endian, LITTLEENDIAN_KEY, LITTLEENDIAN_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->image_width, IMAGEWIDTH_KEY, IMAGEWIDTH_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->image_height, IMAGEHEIGHT_KEY, IMAGEHEIGHT_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->pixel_depth_per_plane, PIXELDEPTHPERPLANE_KEY, PIXELDEPTHPERPLANE_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->frame_count, FRAMECOUNT_KEY, FRAMECOUNT_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->observer, OBSERVER_KEY, OBSERVER_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->instrument, INSTRUMENT_KEY, INSTRUMENT_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->telescope, TELESCOPE_KEY, TELESCOPE_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->date_time, DATETIME_KEY, DATETIME_LEN, status);
+		ser_write_key_record(sptr, &sptr->SER_file->date_time_utc, DATETIMEUTC_KEY, DATETIMEUTC_LEN, status);
     }
 
     if (sptr->SER_file->timestamps && sptr->SER_file->access_mode == READWRITE) {
@@ -1488,6 +1537,267 @@ void ser_write_key_record(serfile* sptr, const void* data, int key, size_t size,
 
     return;
 }
+
+/*  @brief  Set File ID.
+ *  @param  sptr                (I)     - Pointer to serfile.
+ *  @param  file_id             (I)     - New File ID (char* string).
+ *  @param  status              (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_set_file_id(serfile* sptr, const char* file_id, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    if (!file_id) {
+        return (void)(*status = NULL_PARAM);
+    }
+
+    memcpy(sptr->SER_file->file_id, file_id, FILEID_LEN);
+
+    return;
+}
+
+/*  @brief  Set LU ID.
+ *  @param  sptr                (I)     - Pointer to serfile.
+ *  @param  lu_id               (I)     - New LU ID.
+ *  @param  status              (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_set_lu_id(serfile* sptr, const int32_t lu_id, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    sptr->SER_file->lu_id = lu_id;
+
+    return;
+}
+
+/*  @brief  Set Color ID.
+ *  @param  sptr                (I)     - Pointer to serfile.
+ *  @param  color_id            (I)     - New Color ID
+ *  @param  status              (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_set_color_id(serfile* sptr, const int32_t color_id, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    /* valid color id value */
+    switch (color_id) {
+		case MONO:
+		case BAYER_RGGB:
+		case BAYER_GRBG:
+		case BAYER_GBRG:
+		case BAYER_BGGR:
+		case BAYER_CYYM:
+		case BAYER_YCMY:
+		case BAYER_YMCY:
+		case BAYER_MYYC:
+		case RGB:
+		case BGR:
+            break;
+        default:
+            return (void)(*status = INVALID_SET_VALUE);
+    }
+
+    /* check for switch between 1 byte and 3 byte color ids */
+    if (sptr->SER_file->color_id < 100 && color_id >= 100) {
+            return (void)(*status = INVALID_SET_STATE);
+    }
+    if (sptr->SER_file->color_id >= 100 && color_id < 100) {
+            return (void)(*status = INVALID_SET_STATE);
+    }
+
+    sptr->SER_file->color_id = color_id;
+
+    return;
+}
+
+/*  @brief  Set Little Endian.
+ *  @param  sptr                (I)     - Pointer to serfile.
+ *  @param  little_endian       (I)     - New Little Endian
+ *  @param  status              (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_set_little_endian(serfile* sptr, const int32_t little_endian, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+    
+    if (little_endian == LITTLEENDIAN_TRUE || little_endian == LITTLEENDIAN_FALSE) {
+        sptr->SER_file->little_endian = little_endian;
+        return;
+    }
+
+    return (void)(*status = INVALID_SET_VALUE);
+}
+
+/*  @brief  Set Image Width.
+ *  @param  sptr                (I)     - Pointer to serfile.
+ *  @param  image_width         (I)     - New Image Width.
+ *  @param  status              (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_set_image_width(serfile* sptr, const uint32_t image_width, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    if (sptr->SER_file->frame_count > 0) {
+        return (void)(*status = INVALID_SET_STATE);
+    }
+
+    sptr->SER_file->image_width = image_width;
+
+    return;
+}
+
+/*  @brief  Set Image Height. 
+ *  @param  sptr                (I)     - Pointer to serfile.
+ *  @param  image_height        (I)     - New Image Height.
+ *  @param  status              (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_set_image_height(serfile* sptr, const uint32_t image_height, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    if (sptr->SER_file->frame_count > 0) {
+        return (void)(*status = INVALID_SET_STATE);
+    }
+
+    sptr->SER_file->image_height = image_height;
+
+    return;
+}
+
+/*  @brief  Set Pixel Depth Per Plane.  
+ *  @param  sptr                    (I)     - Pointer to serfile.
+ *  @param  pixel_depth_per_plane   (I)     - New Pixel Depth Per Plane.  
+ *  @param  status                  (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_set_pixel_depth_per_plane(serfile* sptr, const int32_t pixel_depth_per_plane, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    /* pdpp must between a value from 1 - 16 */
+    if (16 < pixel_depth_per_plane || pixel_depth_per_plane <= 0) {
+        return (void)(*status = INVALID_SET_VALUE);
+    }
+
+    /* if frames present, pdpp cannot switch between 1 and 2 bytes */
+    if (sptr->SER_file->frame_count > 0) {
+        if (sptr->SER_file->pixel_depth_per_plane <= 8 && pixel_depth_per_plane > 8) {
+            return (void)(*status = INVALID_SET_STATE);
+        }
+        if (sptr->SER_file->pixel_depth_per_plane > 8 && pixel_depth_per_plane <= 8) {
+            return (void)(*status = INVALID_SET_STATE);
+        }
+    }
+
+    sptr->SER_file->pixel_depth_per_plane = pixel_depth_per_plane;
+
+    return;
+}
+
+/*  @brief  Set Observer.
+ *  @param  sptr                (I)     - Pointer to serfile.
+ *  @param  observer            (I)     - New Observer (char* string).
+ *  @param  status              (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_set_observer(serfile* sptr, const char* observer, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    if (!observer) {
+        return (void)(*status = NULL_PARAM);
+    }
+
+    memcpy(sptr->SER_file->observer, observer, OBSERVER_LEN);
+
+    return;
+}
+
+/*  @brief  Set Instrument. 
+ *  @param  sptr                (I)     - Pointer to serfile.
+ *  @param  instrument          (I)     - New Instrument (char* string).
+ *  @param  status              (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_set_instrument(serfile* sptr, const char* instrument, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    if (!instrument) {
+        return (void)(*status = NULL_PARAM);
+    }
+
+    memcpy(sptr->SER_file->instrument, instrument, INSTRUMENT_LEN);
+
+    return;
+}
+
+/*  @brief  Set Telescope. 
+ *  @param  sptr                (I)     - Pointer to serfile.
+ *  @param  telescope           (I)     - New Telescope (char* string).
+ *  @param  status              (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_set_telescope(serfile* sptr, const char* telescope, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    if (!telescope) {
+        return (void)(*status = NULL_PARAM);
+    }
+
+    memcpy(sptr->SER_file->telescope, telescope, TELESCOPE_LEN);
+
+    return;
+}
+
+/*  @brief  Set Date Time. 
+ *  @param  sptr                (I)     - Pointer to serfile.
+ *  @param  date_time           (I)     - New Date Time.
+ *  @param  status              (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_set_date_time(serfile* sptr, const int64_t date_time, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    sptr->SER_file->date_time = date_time;
+
+    return;
+}
+
+/*  @brief  Set Date Time. 
+ *  @param  sptr                (I)     - Pointer to serfile.
+ *  @param  date_time_utc       (I)     - New Date Time UTC.
+ *  @param  status              (IO)    - Error status.
+ *  @return Void.
+ */
+void ser_set_date_time_utc(serfile* sptr, const int64_t date_time_utc, int* status) {
+    if (!sptr) {
+        return (void)(*status = NULL_SPTR);
+    }
+
+    sptr->SER_file->date_time_utc = date_time_utc;
+
+    return;
+}
+
 
 /*-------------------- Image Symbolic Constants --------------------*/
 
