@@ -55,7 +55,6 @@ START_TEST(open_file_success) {
             &status
     );
     ck_assert_int_eq(status, NO_ERROR);
-    ck_assert(test_ser->SER_file->has_trailer);
 
     status = 0;
     ser_close_file(test_ser, &status);
@@ -80,7 +79,6 @@ START_TEST(open_file_no_trailer) {
             &status
     );
     ck_assert_int_eq(status, NO_ERROR);
-    ck_assert(!test_ser->SER_file->has_trailer);
 
     status = 0;
     ser_close_file(test_ser, &status);

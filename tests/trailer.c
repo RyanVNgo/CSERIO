@@ -46,7 +46,6 @@ START_TEST(enable_trailer_success) {
 
     ser_enable_trailer(test_ser, &status);
     ck_assert_int_eq(status, NO_ERROR);
-    ck_assert(test_ser->SER_file->has_trailer);
 
     ser_close_memory(test_ser, &status);
     ck_assert_int_eq(status, NO_ERROR);
@@ -66,7 +65,6 @@ START_TEST(enable_trailer_invalid_state) {
 
     ser_enable_trailer(test_ser, &status);
     ck_assert_int_eq(status, INVALID_TRAILER_ENABLE);
-    ck_assert(test_ser->SER_file->has_trailer == false);
 
     status = 0;
     ser_close_memory(test_ser, &status);

@@ -39,7 +39,6 @@ START_TEST(open_view_hdr_only) {
             &status
     );
     ck_assert_int_eq(status, NO_ERROR);
-    ck_assert_int_eq(test_ser->SER_file->has_trailer, false);
 
     ser_close_memory(test_ser, &status);
     ck_assert_int_eq(status, NO_ERROR);

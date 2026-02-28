@@ -146,10 +146,6 @@ START_TEST(append_frame_success_with_trailer) {
             &status
     );
     ck_assert_int_eq(status, NO_ERROR);
-    ck_assert_int_eq(
-            test_ser->SER_file->timestamp_count,
-            sizeof(test_data_3x50.trlr) / sizeof(test_data_3x50.trlr[0]) + 1
-    );
     ser_close_file(test_ser, &status);
     ck_assert_int_eq(status, NO_ERROR);
 
@@ -295,7 +291,8 @@ START_TEST(append_frame_success_empty_with_trailer) {
             &status
     );
     ck_assert_int_eq(status, NO_ERROR);
-    test_ser->SER_file->has_trailer = true;
+    ser_enable_trailer(test_ser, &status);
+    ck_assert_int_eq(status, NO_ERROR);
 
     /* TEST */
     uint8_t test_data[10 * 10] = {0};
@@ -376,7 +373,6 @@ START_TEST(append_frame_null_data) {
             &status
     );
     ck_assert_int_eq(status, NO_ERROR);
-    test_ser->SER_file->has_trailer = true;
 
     /* TEST */
     ser_append_frame(
