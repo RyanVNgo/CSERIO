@@ -170,67 +170,66 @@ void cserio_version_number(int* major, int* minor, int* micro);
 
 /*-------------------- SER Access Routines --------------------*/
 
-void ser_create_memory(serfile** sptr, int* status);
-void ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* status);
-void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode, int* status);
-void ser_close_memory(serfile* sptr, int* status);
+int ser_create_memory(serfile** sptr, int* status);
+int ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* status);
+int ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode, int* status);
+int ser_close_memory(serfile* sptr, int* status);
 
-void ser_create_file(serfile** sptr, const char* path, int* status);
-void ser_open_file(serfile** sptr, const char* path, int mode, int* status);
-void ser_close_file(serfile* sptr, int* status);
+int ser_create_file(serfile** sptr, const char* path, int* status);
+int ser_open_file(serfile** sptr, const char* path, int mode, int* status);
+int ser_close_file(serfile* sptr, int* status);
 
 /*-------------------- Header Routines --------------------*/
 
-void ser_get_rec_count(serfile* sptr, int* rec_count, int* status);
+int ser_get_rec_count(serfile* sptr, int* rec_count, int* status);
 
-void ser_get_idx_record(serfile* sptr, void* dest, size_t idx, int* status);
-void ser_get_key_record(serfile* sptr, void* dest, int key, int* status);
+int ser_get_idx_record(serfile* sptr, void* dest, size_t idx, int* status);
+int ser_get_key_record(serfile* sptr, void* dest, int key, int* status);
 
-void ser_write_idx_record(serfile* sptr, const void* data, size_t idx, size_t size, int* status);
-void ser_write_key_record(serfile* sptr, const void* data, int key, size_t size, int* status);
+int ser_write_idx_record(serfile* sptr, const void* data, size_t idx, size_t size, int* status);
+int ser_write_key_record(serfile* sptr, const void* data, int key, size_t size, int* status);
 
-void ser_get_file_id(const serfile* sptr, char* file_id, int* status);
-void ser_get_lu_id(const serfile* sptr, int32_t* lu_id, int* status);
-void ser_get_color_id(const serfile* sptr, int32_t* color_id, int* status);
-void ser_get_little_endian(const serfile* sptr, int32_t* little_endian, int* status);
-void ser_get_image_width(const serfile* sptr, int32_t* image_width, int* status);
-void ser_get_image_height(const serfile* sptr, int32_t* image_height, int* status);
-void ser_get_pixel_depth_per_plane(const serfile* sptr, int32_t* pixel_depth_per_plane, int* status);
-void ser_get_frame_count(const serfile* sptr, int32_t* frame_count, int* status);
-void ser_get_observer(const serfile* sptr, char* observer, int* status);
-void ser_get_instrument(const serfile* sptr, char* instrument, int* status);
-void ser_get_telescope(const serfile* sptr, char* telescope, int* status);
-void ser_get_date_time(const serfile* sptr, int64_t* date_time, int* status);
-void ser_get_date_time_utc(const serfile* sptr, int64_t* date_time_utc, int* status);
+int ser_get_file_id(const serfile* sptr, char* file_id, int* status);
+int ser_get_lu_id(const serfile* sptr, int32_t* lu_id, int* status);
+int ser_get_color_id(const serfile* sptr, int32_t* color_id, int* status);
+int ser_get_little_endian(const serfile* sptr, int32_t* little_endian, int* status);
+int ser_get_image_width(const serfile* sptr, int32_t* image_width, int* status);
+int ser_get_image_height(const serfile* sptr, int32_t* image_height, int* status);
+int ser_get_pixel_depth_per_plane(const serfile* sptr, int32_t* pixel_depth_per_plane, int* status);
+int ser_get_frame_count(const serfile* sptr, int32_t* frame_count, int* status);
+int ser_get_observer(const serfile* sptr, char* observer, int* status);
+int ser_get_instrument(const serfile* sptr, char* instrument, int* status);
+int ser_get_telescope(const serfile* sptr, char* telescope, int* status);
+int ser_get_date_time(const serfile* sptr, int64_t* date_time, int* status);
+int ser_get_date_time_utc(const serfile* sptr, int64_t* date_time_utc, int* status);
 
-void ser_set_file_id(serfile* sptr, const char* file_id, int* status);
-void ser_set_lu_id(serfile* sptr, const int32_t lu_id, int* status);
-void ser_set_color_id(serfile* sptr, const int32_t color_id, int* status);
-void ser_set_little_endian(serfile* sptr, const int32_t little_endian, int* status);
-void ser_set_image_width(serfile* sptr, const uint32_t image_width, int* status);
-void ser_set_image_height(serfile* sptr, const uint32_t image_height, int* status);
-void ser_set_pixel_depth_per_plane(serfile* sptr, const int32_t pixel_depth_per_plane, int* status);
-// void ser_set_frame_count(serfile* sptr, const int32_t frame_count, int* status);
-void ser_set_observer(serfile* sptr, const char* observer, int* status);
-void ser_set_instrument(serfile* sptr, const char* instrument, int* status);
-void ser_set_telescope(serfile* sptr, const char* telescope, int* status);
-void ser_set_date_time(serfile* sptr, const int64_t date_time, int* status);
-void ser_set_date_time_utc(serfile* sptr, const int64_t date_time_utc, int* status);
+int ser_set_file_id(serfile* sptr, const char* file_id, int* status);
+int ser_set_lu_id(serfile* sptr, const int32_t lu_id, int* status);
+int ser_set_color_id(serfile* sptr, const int32_t color_id, int* status);
+int ser_set_little_endian(serfile* sptr, const int32_t little_endian, int* status);
+int ser_set_image_width(serfile* sptr, const uint32_t image_width, int* status);
+int ser_set_image_height(serfile* sptr, const uint32_t image_height, int* status);
+int ser_set_pixel_depth_per_plane(serfile* sptr, const int32_t pixel_depth_per_plane, int* status);
+int ser_set_observer(serfile* sptr, const char* observer, int* status);
+int ser_set_instrument(serfile* sptr, const char* instrument, int* status);
+int ser_set_telescope(serfile* sptr, const char* telescope, int* status);
+int ser_set_date_time(serfile* sptr, const int64_t date_time, int* status);
+int ser_set_date_time_utc(serfile* sptr, const int64_t date_time_utc, int* status);
 
 /*-------------------- Image Routines --------------------*/
 
-void ser_get_frame_dim_size(serfile* sptr, int* size, int dim, int* status);
+int ser_get_frame_dim_size(serfile* sptr, int* size, int dim, int* status);
 
-void ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int* status); 
-void ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* status);
+int ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int* status); 
+int ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* status);
 
-void ser_read_frame(serfile* sptr, void* dest, size_t idx, int* status);
-void ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* status);
+int ser_read_frame(serfile* sptr, void* dest, size_t idx, int* status);
+int ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* status);
 
 /*-------------------- Trailer Routines --------------------*/
 
-void ser_enable_trailer(serfile* sptr, int* status);
-void ser_get_timestamp(serfile* sptr, int64_t* dest, size_t idx, int* status);
+int ser_enable_trailer(serfile* sptr, int* status);
+int ser_get_timestamp(serfile* sptr, int64_t* dest, size_t idx, int* status);
 
 
 /*------------------------------------------------------------------*/
@@ -367,17 +366,21 @@ void cserio_version_number(int* major, int* minor, int* micro) {
 /*  @brief  Opens new in-memory SER file.
  *  @param  sptr        (IO)    - Pointer to a pointer of a serfile.
  *  @param  status      (IO)    - Error status.
- *  @return Void.
+ *  @return Error status.
  */
-void ser_create_memory(serfile** sptr, int* status) {
+int ser_create_memory(serfile** sptr, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     /* allocate memory for serfile */
     *sptr = (serfile*)malloc(sizeof(serfile));
     if (!*sptr) {
-        return (void)(*status = MEM_ALLOC);
+        return (*status = MEM_ALLOC);
     }
 
     /* allocate data reference */
@@ -412,7 +415,7 @@ void ser_create_memory(serfile** sptr, int* status) {
     (*sptr)->timestamps = NULL;
     (*sptr)->timestamp_count = 0;
 
-    return;
+    return (*status);
 }
 
 /*  @brief  Opens in-memory SER file.
@@ -427,26 +430,30 @@ void ser_create_memory(serfile** sptr, int* status) {
  *  @param  size      (I)   - Size of data view.
  *  @param  mode      (I)   - Access type (READONLY or READWRITE).
  *  @param  status    (IO)  - Error status.
- *  @return Void.
+ *  @return Error status.
  */
-void ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* status) {
+int ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     if (!data) {
-        return (void)(*status = NULL_PARAM);
+        return (*status = NULL_PARAM);
     }
 
     /* determine validity of header */
     if (size < HDR_SIZE) {
-        return (void)(*status = INVALID_STRUCTURE);
+        return (*status = INVALID_STRUCTURE);
     }
 
     /* allocate memory for serfile */
     *sptr = (serfile*)malloc(sizeof(serfile));
     if (!(*sptr)) {
-        return (void)(*status = MEM_ALLOC);
+        return (*status = MEM_ALLOC);
     }
 
     /* allocate data reference */
@@ -484,7 +491,7 @@ void ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* st
 
     /* hdr + data */
     if (size == hdr_data_size) {
-        return;
+        return (*status);
     }
 
     /* hdr + data + trailer */
@@ -498,14 +505,14 @@ void ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* st
                 (*sptr)->frame_count * sizeof(uint64_t),
                 hdr_data_size
         );
-        return;
+        return (*status);
     }
 
     /* if reached, invalid structure */
     free(((serMem*)(*sptr)->io_context));
     free((*sptr));
     *sptr = NULL;
-    return (void)(*status = INVALID_STRUCTURE);
+    return (*status = INVALID_STRUCTURE);
 }
 
 /*  @brief  Opens/Copies in-memory SER file.
@@ -518,26 +525,30 @@ void ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* st
  *  @param  size        (I)     - Size to initially allocate / copy over.
  *  @param  mode        (I)     - Access type (READONLY or READWRITE).
  *  @param  status      (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode, int* status) {
+int ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     if (!data) {
-        return (void)(*status = NULL_PARAM);
+        return (*status = NULL_PARAM);
     }
 
     /* determine validity of header */
     if (size < HDR_SIZE) {
-        return (void)(*status = INVALID_STRUCTURE);
+        return (*status = INVALID_STRUCTURE);
     }
 
     /* allocate memory for serfile */
     *sptr = (serfile*)malloc(sizeof(serfile));
     if (!(*sptr)) {
-        return (void)(*status = MEM_ALLOC);
+        return (*status = MEM_ALLOC);
     }
 
     /* allocate data reference */
@@ -578,7 +589,7 @@ void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode,
 
     /* hdr + data */
     if (size == hdr_data_size) {
-        return;
+        return (*status);
     }
 
     /* hdr + data + trailer */
@@ -592,7 +603,7 @@ void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode,
                 (*sptr)->frame_count * sizeof(uint64_t),
                 hdr_data_size
         );
-        return;
+        return (*status);
     }
 
     /* if reached, invalid structure */
@@ -600,7 +611,7 @@ void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode,
     free(((serMem*)(*sptr)->io_context));
     free((*sptr));
     *sptr = NULL;
-    return (void)(*status = INVALID_STRUCTURE);
+    return (*status = INVALID_STRUCTURE);
 }
 
 /*  @brief  Close in-memory SER file
@@ -610,11 +621,11 @@ void ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode,
  *
  *  @param  sptr        (IO)    - Pointer to a serfile.
  *  @param  status      (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_close_memory(serfile* sptr, int* status) {
+int ser_close_memory(serfile* sptr, int* status) {
     if (!sptr) { 
-        return (void)(*status = NULL_SPTR); 
+        return (*status = NULL_SPTR); 
     }
 
     if (sptr->access_mode == READWRITE) {
@@ -661,7 +672,7 @@ void ser_close_memory(serfile* sptr, int* status) {
     free(sptr->io_context);
     free(sptr);
     sptr = NULL;
-    return;
+    return (*status);
 }
 
 /*  @brief  Create a new SER file.
@@ -669,32 +680,36 @@ void ser_close_memory(serfile* sptr, int* status) {
  *  @param  sptr        (IO)    - Pointer to pointer of a serfile.
  *  @param  path        (I)     - File path.
  *  @param  status      (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_create_file(serfile** sptr, const char* path, int* status) {
+int ser_create_file(serfile** sptr, const char* path, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     if (!path) {
-        return (void)(*status = NULL_PATH);
+        return (*status = NULL_PATH);
     }
 
     FILE* file;
     if ((file = fopen(path, "r"))) {
         fclose(file);
-        return (void)(*status = FILE_EXISTS);
+        return (*status = FILE_EXISTS);
     }
 
     file = fopen(path, "w+b");
     if (!file) {
-        return (void)(*status = FILE_OPEN_ERROR);
+        return (*status = FILE_OPEN_ERROR);
     }
 
     *sptr = (serfile*)malloc(sizeof(serfile));
     if (!*sptr) {
         fclose(file);
-        return (void)(*status = MEM_ALLOC);
+        return (*status = MEM_ALLOC);
     }
 
     (*sptr)->io_context = file;
@@ -720,7 +735,7 @@ void ser_create_file(serfile** sptr, const char* path, int* status) {
     (*sptr)->timestamps = NULL;
     (*sptr)->timestamp_count = 0;
 
-    return;
+    return (*status);
 }
 
 /*  @brief  Opens existing SER file
@@ -729,15 +744,19 @@ void ser_create_file(serfile** sptr, const char* path, int* status) {
  *  @param  path        (I)     - SER file path.
  *  @param  mode        (I)     - Access type (READONLY or READWRITE).
  *  @param  status      (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
+int ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     if (!path) {
-        return (void)(*status = NULL_PATH);
+        return (*status = NULL_PATH);
     }
 
     FILE* file;
@@ -751,7 +770,7 @@ void ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
     }
     
     if (!file) {
-        return (void)(*status = FILE_DNE);
+        return (*status = FILE_DNE);
     }
 
     /* retrieve size of file and return to start */
@@ -762,14 +781,14 @@ void ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
     /* determine validity of header */
     if (file_size < HDR_SIZE) {
         fclose(file);
-        return (void)(*status = INVALID_STRUCTURE);
+        return (*status = INVALID_STRUCTURE);
     }
 
     /* allocate memory for serfile */
     *sptr = (serfile*)malloc(sizeof(serfile));
     if (!*sptr) {
         fclose(file);
-        return (void)(*status = MEM_ALLOC);
+        return (*status = MEM_ALLOC);
     }
 
     /* general setup */
@@ -801,7 +820,7 @@ void ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
 
     /* hdr + data */
     if (file_size == hdr_data_size) {
-        return;
+        return (*status);
     }
 
     /* hdr + data + trailer */
@@ -815,14 +834,14 @@ void ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
                 (*sptr)->frame_count * sizeof(uint64_t),
                 hdr_data_size
         );
-        return;
+        return (*status);
     }
 
     /* if reached, invalid structure */
     fclose(file);
     free((*sptr));
     *sptr = NULL;
-    return (void)(*status = INVALID_STRUCTURE);
+    return (*status = INVALID_STRUCTURE);
 }
 
 /*  @brief  Close SER file
@@ -832,11 +851,11 @@ void ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
  *
  *  @param  sptr      (IO)  - Pointer to a serfile.
  *  @param  status    (IO)  - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_close_file(serfile* sptr, int* status) {
+int ser_close_file(serfile* sptr, int* status) {
     if (!sptr) { 
-        return (void)(*status = NULL_SPTR); 
+        return (*status = NULL_SPTR); 
     }
 
     if (sptr->access_mode == READWRITE) {
@@ -881,7 +900,7 @@ void ser_close_file(serfile* sptr, int* status) {
 
     free(sptr);
     sptr = NULL;
-    return;
+    return (*status);
 }
 
 /*-------------------- Header Routines --------------------*/
@@ -894,19 +913,24 @@ void ser_close_file(serfile* sptr, int* status) {
  *  @param  sptr        (I)   - Pointer to serfile.
  *  @param  rec_count   (IO)  - Number of records.
  *  @param  status      (IO)  - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_get_rec_count(serfile* sptr, int* rec_count, int* status) {
+int ser_get_rec_count(serfile* sptr, int* rec_count, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) { 
-        return (void)(*status = NULL_SPTR); 
+        return (*status = NULL_SPTR); 
     }
 
     if (!rec_count) { 
-        return (void)(*status = NULL_PARAM); 
+        return (*status = NULL_PARAM); 
     }
 
     *rec_count = HDR_UNIT_COUNT;
-    return;
+    
+    return (*status);
 }
 
 /*  @brief  Return data at header idx 
@@ -918,13 +942,22 @@ void ser_get_rec_count(serfile* sptr, int* rec_count, int* status) {
  *  @param  dest    (IO)  - Destination buffer.
  *  @param  idx     (I)   - Record index.
  *  @param  status  (IO)  - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_get_idx_record(serfile* sptr, void* dest, size_t idx, int* status) {
-    if (!sptr) { return (void)(*status = NULL_SPTR); }
-    if (!dest) { return (void)(*status = NULL_DEST_BUFF); }
+int ser_get_idx_record(serfile* sptr, void* dest, size_t idx, int* status) {
+    if (*status) {
+        return (*status);
+    }
 
-    if (idx >= HDR_UNIT_COUNT) { return (void)(*status = INVALID_HDR_IDX); }
+    if (!sptr) {
+        return (*status = NULL_SPTR);
+    }
+
+    if (!dest) {
+        return (*status = NULL_DEST_BUFF);
+    }
+
+    if (idx >= HDR_UNIT_COUNT) { return (*status = INVALID_HDR_IDX); }
 
     int byte_len = 0;
     int fpos = 0;
@@ -988,7 +1021,7 @@ void ser_get_idx_record(serfile* sptr, void* dest, size_t idx, int* status) {
         *status = READ_ERROR;
     }
 
-    return;
+    return (*status);
 }
 
 /*  @brief  Return data at header key
@@ -1000,15 +1033,19 @@ void ser_get_idx_record(serfile* sptr, void* dest, size_t idx, int* status) {
  *  @param  dest    (IO)  - Destination buffer.
  *  @param  key     (I)   - Record key.
  *  @param  status  (IO)  - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_get_key_record(serfile* sptr, void* dest, int key, int* status) {
+int ser_get_key_record(serfile* sptr, void* dest, int key, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) { 
-        return (void)(*status = NULL_SPTR); 
+        return (*status = NULL_SPTR); 
     }
 
     if (!dest) { 
-        return (void)(*status = NULL_DEST_BUFF); 
+        return (*status = NULL_DEST_BUFF); 
     }
 
     int byte_len = 0;
@@ -1057,7 +1094,7 @@ void ser_get_key_record(serfile* sptr, void* dest, int key, int* status) {
     }
 
     if (byte_len == 0) { 
-        return (void)(*status = INVALID_HDR_KEY); 
+        return (*status = INVALID_HDR_KEY); 
     }
 
     int bytes_read = sptr->reader(sptr->io_context, dest, byte_len, key);
@@ -1066,40 +1103,46 @@ void ser_get_key_record(serfile* sptr, void* dest, int key, int* status) {
         *status = READ_ERROR;
     }
 
-    return;
+    return (*status);
 }
 
 /*  @brief  Get File ID
  *  @param  sptr        (I)     - Pointer to serfile.
  *  @param  file_id     (IO)    - Destination buffer.
  *  @param  status      (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_get_file_id(const serfile* sptr, char* file_id, int* status) {
+int ser_get_file_id(const serfile* sptr, char* file_id, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) { 
-        return (void)(*status = NULL_SPTR); 
+        return (*status = NULL_SPTR); 
     }
 
     if (!file_id) { 
-        return (void)(*status = NULL_DEST_BUFF); 
+        return (*status = NULL_DEST_BUFF); 
     }
 
     memcpy(file_id, sptr->file_id, FILEID_LEN);
+
+    return (*status);
 }
 
 /*  @brief  Get LU ID
  *  @param  sptr        (I)     - Pointer to serfile.
  *  @param  lu_id       (IO)    - Destination buffer.
  *  @param  status      (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_get_lu_id(const serfile* sptr, int32_t* lu_id, int* status) {
+int ser_get_lu_id(const serfile* sptr, int32_t* lu_id, int* status) {
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     if (!lu_id) {
-        return (void)(*status = NULL_DEST_BUFF);
+        return (*status = NULL_DEST_BUFF);
     }
 
     *lu_id = sptr->lu_id;
@@ -1109,198 +1152,264 @@ void ser_get_lu_id(const serfile* sptr, int32_t* lu_id, int* status) {
  *  @param  sptr        (I)     - Pointer to serfile.
  *  @param  color_id    (IO)    - Destination buffer.
  *  @param  status      (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_get_color_id(const serfile* sptr, int32_t* color_id, int* status) {
+int ser_get_color_id(const serfile* sptr, int32_t* color_id, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     if (!color_id) {
-        return (void)(*status = NULL_DEST_BUFF);
+        return (*status = NULL_DEST_BUFF);
     }
 
     *color_id = sptr->color_id;
+
+    return (*status);
 }
 
 /*  @brief  Get Litte Endian
  *  @param  sptr            (I)     - Pointer to serfile.
  *  @param  little_endian   (IO)    - Destination buffer.
  *  @param  status          (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_get_little_endian(const serfile* sptr, int32_t* little_endian, int* status) {
+int ser_get_little_endian(const serfile* sptr, int32_t* little_endian, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     if (!little_endian) {
-        return (void)(*status = NULL_DEST_BUFF);
+        return (*status = NULL_DEST_BUFF);
     }
 
     *little_endian = sptr->little_endian;
+
+    return (*status);
 }
 
 /*  @brief  Get Image Width
  *  @param  sptr            (I)     - Pointer to serfile.
  *  @param  image_width     (IO)    - Destination buffer.
  *  @param  status          (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_get_image_width(const serfile* sptr, int32_t* image_width, int* status) {
+int ser_get_image_width(const serfile* sptr, int32_t* image_width, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     if (!image_width) {
-        return (void)(*status = NULL_DEST_BUFF);
+        return (*status = NULL_DEST_BUFF);
     }
 
     *image_width = sptr->image_width;
+
+    return (*status);
 }
 
 /*  @brief  Get Image Height 
  *  @param  sptr            (I)     - Pointer to serfile.
  *  @param  image_height    (IO)    - Destination buffer.
  *  @param  status          (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_get_image_height(const serfile* sptr, int32_t* image_height, int* status) {
+int ser_get_image_height(const serfile* sptr, int32_t* image_height, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     if (!image_height) {
-        return (void)(*status = NULL_DEST_BUFF);
+        return (*status = NULL_DEST_BUFF);
     }
 
     *image_height= sptr->image_height;
+
+    return (*status);
 }
 
 /*  @brief  Get Pixel Depth Per Plane
  *  @param  sptr                    (I)     - Pointer to serfile.
  *  @param  pixel_depth_per_plane   (IO)    - Destination buffer.
  *  @param  status                  (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_get_pixel_depth_per_plane(const serfile* sptr, int32_t* pixel_depth_per_plane, int* status) {
+int ser_get_pixel_depth_per_plane(const serfile* sptr, int32_t* pixel_depth_per_plane, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     if (!pixel_depth_per_plane) {
-        return (void)(*status = NULL_DEST_BUFF);
+        return (*status = NULL_DEST_BUFF);
     }
 
     *pixel_depth_per_plane = sptr->pixel_depth_per_plane;
+
+    return (*status);
 }
 
 /*  @brief  Get Frame Count
  *  @param  sptr        (I)     - Pointer to serfile.
  *  @param  frame_count (IO)    - Destination buffer.
  *  @param  status      (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_get_frame_count(const serfile* sptr, int32_t* frame_count, int* status) {
+int ser_get_frame_count(const serfile* sptr, int32_t* frame_count, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     if (!frame_count) {
-        return (void)(*status = NULL_DEST_BUFF);
+        return (*status = NULL_DEST_BUFF);
     }
 
     *frame_count = sptr->frame_count;
+
+    return (*status);
 }
 
 /*  @brief  Get Observer
  *  @param  sptr        (I)     - Pointer to serfile.
  *  @param  observer    (IO)    - Destination buffer.
  *  @param  status      (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_get_observer(const serfile* sptr, char* observer, int* status) {
+int ser_get_observer(const serfile* sptr, char* observer, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     if (!observer) {
-        return (void)(*status = NULL_DEST_BUFF);
+        return (*status = NULL_DEST_BUFF);
     }
 
     memcpy(observer, sptr->observer, OBSERVER_LEN);
+
+    return (*status);
 }
 
 /*  @brief  Get Instrument 
  *  @param  sptr        (I)     - Pointer to serfile.
  *  @param  instrument  (IO)    - Destination buffer.
  *  @param  status      (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_get_instrument(const serfile* sptr, char* instrument, int* status) {
+int ser_get_instrument(const serfile* sptr, char* instrument, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     if (!instrument) {
-        return (void)(*status = NULL_DEST_BUFF);
+        return (*status = NULL_DEST_BUFF);
     }
 
     memcpy(instrument, sptr->instrument, INSTRUMENT_LEN);
+
+    return (*status);
 }
 
 /*  @brief  Get Telescope
  *  @param  sptr        (I)     - Pointer to serfile.
  *  @param  telescope   (IO)    - Destination buffer.
  *  @param  status      (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_get_telescope(const serfile* sptr, char* telescope, int* status) {
+int ser_get_telescope(const serfile* sptr, char* telescope, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     if (!telescope) {
-        return (void)(*status = NULL_DEST_BUFF);
+        return (*status = NULL_DEST_BUFF);
     }
 
     memcpy(telescope, sptr->telescope, TELESCOPE_LEN);
+
+    return (*status);
 }
 
 /*  @brief  Get Date Time
  *  @param  sptr        (I)     - Pointer to serfile.
  *  @param  date_time   (IO)    - Destination buffer.
  *  @param  status      (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_get_date_time(const serfile* sptr, int64_t* date_time, int* status) {
+int ser_get_date_time(const serfile* sptr, int64_t* date_time, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     if (!date_time) {
-        return (void)(*status = NULL_DEST_BUFF);
+        return (*status = NULL_DEST_BUFF);
     }
 
     *date_time = sptr->date_time;
+
+    return (*status);
 }
 
 /*  @brief  Get Date Time UTC
  *  @param  sptr            (I)     - Pointer to serfile.
  *  @param  date_time_utc   (IO)    - Destination buffer.
  *  @param  status          (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_get_date_time_utc(const serfile* sptr, int64_t* date_time_utc, int* status) {
+int ser_get_date_time_utc(const serfile* sptr, int64_t* date_time_utc, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     if (!date_time_utc) {
-        return (void)(*status = NULL_DEST_BUFF);
+        return (*status = NULL_DEST_BUFF);
     }
 
     *date_time_utc = sptr->date_time_utc;
+
+    return (*status);
 }
 
 /*  @brief  Write data to header idx 
@@ -1315,21 +1424,25 @@ void ser_get_date_time_utc(const serfile* sptr, int64_t* date_time_utc, int* sta
  *  @param  status  (IO)    - Error status.
  *  @return Error status.
  */
-void ser_write_idx_record(serfile* sptr, const void* data, size_t idx, size_t size, int* status) {
+int ser_write_idx_record(serfile* sptr, const void* data, size_t idx, size_t size, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) { 
-        return (void)(*status = NULL_SPTR); 
+        return (*status = NULL_SPTR); 
     }
 
     if (!data) { 
-        return (void)(*status = NULL_PARAM); 
+        return (*status = NULL_PARAM); 
     }
 
     if (idx >= HDR_UNIT_COUNT) { 
-        return (void)(*status = INVALID_HDR_IDX); 
+        return (*status = INVALID_HDR_IDX); 
     }
 
     if (sptr->access_mode != READWRITE) { 
-        return (void)(*status = WRITE_ON_READONLY); 
+        return (*status = WRITE_ON_READONLY); 
     }
 
     size_t max_byte_len = 0;
@@ -1398,7 +1511,7 @@ void ser_write_idx_record(serfile* sptr, const void* data, size_t idx, size_t si
         *status = HDR_WRITE_WARN;
     }
 
-    return;
+    return (*status);
 }
 
 /*  @brief  Write data to header key
@@ -1411,19 +1524,23 @@ void ser_write_idx_record(serfile* sptr, const void* data, size_t idx, size_t si
  *  @param  key     (I)     - Record key.
  *  @param  size    (I)     - Size of data in bytes.
  *  @param  status  (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_write_key_record(serfile* sptr, const void* data, int key, size_t size, int* status) {
+int ser_write_key_record(serfile* sptr, const void* data, int key, size_t size, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) { 
-        return (void)(*status = NULL_SPTR); 
+        return (*status = NULL_SPTR); 
     }
 
     if (!data) { 
-        return (void)(*status = NULL_PARAM); 
+        return (*status = NULL_PARAM); 
     }
 
     if (sptr->access_mode != READWRITE) { 
-        return (void)(*status = WRITE_ON_READONLY); 
+        return (*status = WRITE_ON_READONLY); 
     }
 
     size_t max_byte_len = 0;
@@ -1472,7 +1589,7 @@ void ser_write_key_record(serfile* sptr, const void* data, int key, size_t size,
     }
 
     if (max_byte_len == 0) { 
-        return (void)(*status = INVALID_HDR_KEY); 
+        return (*status = INVALID_HDR_KEY); 
     }
 
     if (size > max_byte_len) {
@@ -1484,54 +1601,66 @@ void ser_write_key_record(serfile* sptr, const void* data, int key, size_t size,
         *status = HDR_WRITE_WARN;
     }
 
-    return;
+    return (*status);
 }
 
 /*  @brief  Set File ID.
  *  @param  sptr                (I)     - Pointer to serfile.
  *  @param  file_id             (I)     - New File ID (char* string).
  *  @param  status              (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_set_file_id(serfile* sptr, const char* file_id, int* status) {
+int ser_set_file_id(serfile* sptr, const char* file_id, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     if (!file_id) {
-        return (void)(*status = NULL_PARAM);
+        return (*status = NULL_PARAM);
     }
 
     memcpy(sptr->file_id, file_id, FILEID_LEN);
 
-    return;
+    return (*status);
 }
 
 /*  @brief  Set LU ID.
  *  @param  sptr                (I)     - Pointer to serfile.
  *  @param  lu_id               (I)     - New LU ID.
  *  @param  status              (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_set_lu_id(serfile* sptr, const int32_t lu_id, int* status) {
+int ser_set_lu_id(serfile* sptr, const int32_t lu_id, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     sptr->lu_id = lu_id;
 
-    return;
+    return (*status);
 }
 
 /*  @brief  Set Color ID.
  *  @param  sptr                (I)     - Pointer to serfile.
  *  @param  color_id            (I)     - New Color ID
  *  @param  status              (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_set_color_id(serfile* sptr, const int32_t color_id, int* status) {
+int ser_set_color_id(serfile* sptr, const int32_t color_id, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     /* valid color id value */
@@ -1549,202 +1678,238 @@ void ser_set_color_id(serfile* sptr, const int32_t color_id, int* status) {
 		case BGR:
             break;
         default:
-            return (void)(*status = INVALID_SET_VALUE);
+            return (*status = INVALID_SET_VALUE);
     }
 
     /* check for switch between 1 byte and 3 byte color ids */
     if (sptr->color_id < 100 && color_id >= 100) {
-            return (void)(*status = INVALID_SET_STATE);
+            return (*status = INVALID_SET_STATE);
     }
     if (sptr->color_id >= 100 && color_id < 100) {
-            return (void)(*status = INVALID_SET_STATE);
+            return (*status = INVALID_SET_STATE);
     }
 
     sptr->color_id = color_id;
 
-    return;
+    return (*status);
 }
 
 /*  @brief  Set Little Endian.
  *  @param  sptr                (I)     - Pointer to serfile.
  *  @param  little_endian       (I)     - New Little Endian
  *  @param  status              (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_set_little_endian(serfile* sptr, const int32_t little_endian, int* status) {
+int ser_set_little_endian(serfile* sptr, const int32_t little_endian, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
     
     if (little_endian == LITTLEENDIAN_TRUE || little_endian == LITTLEENDIAN_FALSE) {
         sptr->little_endian = little_endian;
-        return;
+        return (*status);
     }
 
-    return (void)(*status = INVALID_SET_VALUE);
+    return (*status = INVALID_SET_VALUE);
 }
 
 /*  @brief  Set Image Width.
  *  @param  sptr                (I)     - Pointer to serfile.
  *  @param  image_width         (I)     - New Image Width.
  *  @param  status              (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_set_image_width(serfile* sptr, const uint32_t image_width, int* status) {
+int ser_set_image_width(serfile* sptr, const uint32_t image_width, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     if (sptr->frame_count > 0) {
-        return (void)(*status = INVALID_SET_STATE);
+        return (*status = INVALID_SET_STATE);
     }
 
     sptr->image_width = image_width;
 
-    return;
+    return (*status);
 }
 
 /*  @brief  Set Image Height. 
  *  @param  sptr                (I)     - Pointer to serfile.
  *  @param  image_height        (I)     - New Image Height.
  *  @param  status              (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_set_image_height(serfile* sptr, const uint32_t image_height, int* status) {
+int ser_set_image_height(serfile* sptr, const uint32_t image_height, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     if (sptr->frame_count > 0) {
-        return (void)(*status = INVALID_SET_STATE);
+        return (*status = INVALID_SET_STATE);
     }
 
     sptr->image_height = image_height;
 
-    return;
+    return (*status);
 }
 
 /*  @brief  Set Pixel Depth Per Plane.  
  *  @param  sptr                    (I)     - Pointer to serfile.
  *  @param  pixel_depth_per_plane   (I)     - New Pixel Depth Per Plane.  
  *  @param  status                  (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_set_pixel_depth_per_plane(serfile* sptr, const int32_t pixel_depth_per_plane, int* status) {
+int ser_set_pixel_depth_per_plane(serfile* sptr, const int32_t pixel_depth_per_plane, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     /* pdpp must between a value from 1 - 16 */
     if (16 < pixel_depth_per_plane || pixel_depth_per_plane <= 0) {
-        return (void)(*status = INVALID_SET_VALUE);
+        return (*status = INVALID_SET_VALUE);
     }
 
     /* if frames present, pdpp cannot switch between 1 and 2 bytes */
     if (sptr->frame_count > 0) {
         if (sptr->pixel_depth_per_plane <= 8 && pixel_depth_per_plane > 8) {
-            return (void)(*status = INVALID_SET_STATE);
+            return (*status = INVALID_SET_STATE);
         }
         if (sptr->pixel_depth_per_plane > 8 && pixel_depth_per_plane <= 8) {
-            return (void)(*status = INVALID_SET_STATE);
+            return (*status = INVALID_SET_STATE);
         }
     }
 
     sptr->pixel_depth_per_plane = pixel_depth_per_plane;
 
-    return;
+    return (*status);
 }
 
 /*  @brief  Set Observer.
  *  @param  sptr                (I)     - Pointer to serfile.
  *  @param  observer            (I)     - New Observer (char* string).
  *  @param  status              (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_set_observer(serfile* sptr, const char* observer, int* status) {
+int ser_set_observer(serfile* sptr, const char* observer, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     if (!observer) {
-        return (void)(*status = NULL_PARAM);
+        return (*status = NULL_PARAM);
     }
 
     memcpy(sptr->observer, observer, OBSERVER_LEN);
 
-    return;
+    return (*status);
 }
 
 /*  @brief  Set Instrument. 
  *  @param  sptr                (I)     - Pointer to serfile.
  *  @param  instrument          (I)     - New Instrument (char* string).
  *  @param  status              (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_set_instrument(serfile* sptr, const char* instrument, int* status) {
+int ser_set_instrument(serfile* sptr, const char* instrument, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     if (!instrument) {
-        return (void)(*status = NULL_PARAM);
+        return (*status = NULL_PARAM);
     }
 
     memcpy(sptr->instrument, instrument, INSTRUMENT_LEN);
 
-    return;
+    return (*status);
 }
 
 /*  @brief  Set Telescope. 
  *  @param  sptr                (I)     - Pointer to serfile.
  *  @param  telescope           (I)     - New Telescope (char* string).
  *  @param  status              (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_set_telescope(serfile* sptr, const char* telescope, int* status) {
+int ser_set_telescope(serfile* sptr, const char* telescope, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     if (!telescope) {
-        return (void)(*status = NULL_PARAM);
+        return (*status = NULL_PARAM);
     }
 
     memcpy(sptr->telescope, telescope, TELESCOPE_LEN);
 
-    return;
+    return (*status);
 }
 
 /*  @brief  Set Date Time. 
  *  @param  sptr                (I)     - Pointer to serfile.
  *  @param  date_time           (I)     - New Date Time.
  *  @param  status              (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_set_date_time(serfile* sptr, const int64_t date_time, int* status) {
+int ser_set_date_time(serfile* sptr, const int64_t date_time, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     sptr->date_time = date_time;
 
-    return;
+    return (*status);
 }
 
 /*  @brief  Set Date Time. 
  *  @param  sptr                (I)     - Pointer to serfile.
  *  @param  date_time_utc       (I)     - New Date Time UTC.
  *  @param  status              (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_set_date_time_utc(serfile* sptr, const int64_t date_time_utc, int* status) {
+int ser_set_date_time_utc(serfile* sptr, const int64_t date_time_utc, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     sptr->date_time_utc = date_time_utc;
 
-    return;
+    return (*status);
 }
 
 
@@ -1763,19 +1928,23 @@ void ser_set_date_time_utc(serfile* sptr, const int64_t date_time_utc, int* stat
  *  @param  size    (IO)  - Pointer to int.
  *  @param  dim     (I)   - Dimension to get size of.
  *  @param  status  (IO)  - Error status. 
- *  @return Void
+ *  @return Error Status
  */
-void ser_get_frame_dim_size(serfile* sptr, int* size, DIM_TYPE dim, int* status) {
+int ser_get_frame_dim_size(serfile* sptr, int* size, DIM_TYPE dim, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) { 
-        return (void)(*status = NULL_SPTR); 
+        return (*status = NULL_SPTR); 
     }
 
     if (!size) { 
-        return (void)(*status = NULL_PARAM); 
+        return (*status = NULL_PARAM); 
     }
 
     if (dim < MIN_DIM_IDX || dim > MAX_DIM_IDX) { 
-        return (void)(*status = INVALID_DIM_IDX); 
+        return (*status = INVALID_DIM_IDX); 
     }
 
     int key = 0;
@@ -1795,7 +1964,7 @@ void ser_get_frame_dim_size(serfile* sptr, int* size, DIM_TYPE dim, int* status)
     int temp_size = 0;
     ser_get_key_record(sptr, &temp_size, key, status);
     if (*status) { 
-        return;
+        return (*status);
     }
     *size = temp_size;
 
@@ -1808,7 +1977,7 @@ void ser_get_frame_dim_size(serfile* sptr, int* size, DIM_TYPE dim, int* status)
         *size = *size < 100 ? 1 : 3;
     }
 
-    return;
+    return (*status);
 }
 
 /*  @brief  Returns the number of bytes representing each pixel.
@@ -1822,13 +1991,17 @@ void ser_get_frame_dim_size(serfile* sptr, int* size, DIM_TYPE dim, int* status)
  *  @param  status          (IO)  - Error status.
  *  @return Error status.
  */
-void ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int* status) {
+int ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) { 
-        return (void)(*status = NULL_SPTR); 
+        return (*status = NULL_SPTR); 
     }
 
     if (!bytes_per_pixel) { 
-        return (void)(*status = NULL_PARAM); 
+        return (*status = NULL_PARAM); 
     }
 
     int number_of_planes = sptr->color_id < 100 ? 1 : 3;
@@ -1840,7 +2013,7 @@ void ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int*
         *bytes_per_pixel = number_of_planes * 2; /* 2 bytes per pixel */
     }
 
-    return;
+    return (*status);
 }
 
 /*  @brief  Returns the byte size of a single frame
@@ -1849,19 +2022,23 @@ void ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int*
  *  @param  status      (IO)  - Error status.
  *  @return Error status.
  */
-void ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* status) {
+int ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) { 
-        return (void)(*status = NULL_SPTR); 
+        return (*status = NULL_SPTR); 
     }
 
     if (!byte_size) { 
-        return (void)(*status = NULL_PARAM); 
+        return (*status = NULL_PARAM); 
     }
 
     unsigned long bytes_per_pixel = 0;
     ser_get_bytes_per_pixel(sptr, &bytes_per_pixel, status);
     if (*status) { 
-        return;
+        return (*status);
     }
 
     int32_t width = sptr->image_width;
@@ -1869,7 +2046,7 @@ void ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* statu
 
     *byte_size = bytes_per_pixel * width * height;
 
-    return;
+    return (*status);
 }
 
 /*  @brief  Read the image frame at the index.
@@ -1882,27 +2059,31 @@ void ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* statu
  *  @param  dest    (IO)  - Pointer to destination buffer.
  *  @param  idx     (I)   - Index of the frame.
  *  @param  status  (IO)  - Error status. 
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_read_frame(serfile* sptr, void* dest, size_t idx, int* status) {
+int ser_read_frame(serfile* sptr, void* dest, size_t idx, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) { 
-        return (void)(*status = NULL_SPTR); 
+        return (*status = NULL_SPTR); 
     }
 
     if (!dest) { 
-        return (void)(*status = NULL_DEST_BUFF); 
+        return (*status = NULL_DEST_BUFF); 
     }
 
     size_t frame_count = sptr->frame_count;
 
     if (idx >= frame_count) {
-        return (void)(*status = INVALID_FRAME_IDX); 
+        return (*status = INVALID_FRAME_IDX); 
     }
 
     unsigned long frame_byte_size = 0;
     ser_get_frame_byte_size(sptr, &frame_byte_size, status);
     if (*status) { 
-        return; 
+        return (*status); 
     }
 
     unsigned long frame_offset = DATA_START_SET + (frame_byte_size * idx);
@@ -1912,7 +2093,7 @@ void ser_read_frame(serfile* sptr, void* dest, size_t idx, int* status) {
         *status = READ_ERROR;
     }
 
-    return;
+    return (*status);
 }
 
 /*  @brief  Write image frame at the index.
@@ -1925,15 +2106,19 @@ void ser_read_frame(serfile* sptr, void* dest, size_t idx, int* status) {
  *  @param  data        (I)   - Pointer to data buffer.
  *  @param  timestamp   (I)   - Timestamp.
  *  @param  status      (IO)  - Error status. 
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* status) {
+int ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) { 
-        return (void)(*status = NULL_SPTR); 
+        return (*status = NULL_SPTR); 
     }
 
     if (!data) { 
-        return (void)(*status = NULL_PARAM); 
+        return (*status = NULL_PARAM); 
     }
 
     size_t frame_count = sptr->frame_count;
@@ -1941,7 +2126,7 @@ void ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* 
     size_t frame_byte_size = 0;
     ser_get_frame_byte_size(sptr, &frame_byte_size, status);
     if (*status) { 
-        return; 
+        return (*status); 
     }
 
     unsigned long frame_offset = DATA_START_SET + (frame_byte_size * frame_count);
@@ -1953,7 +2138,7 @@ void ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* 
             frame_offset
     );
     if (bytes_written < frame_byte_size) {
-        return (void)(*status = IMAGE_WRITE_WARN);
+        return (*status = IMAGE_WRITE_WARN);
     }
     sptr->frame_count += 1;
 
@@ -1964,7 +2149,7 @@ void ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* 
         sptr->timestamps[sptr->timestamp_count - 1] = timestamp;
     }
 
-    return;
+    return (*status);
 }
 
 /*-------------------- Trailer Routines --------------------*/
@@ -1978,20 +2163,24 @@ void ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* 
  *
  *  @param  sptr    (I)     - Pointer to serfile.
  *  @param  status  (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_enable_trailer(serfile* sptr, int* status) {
+int ser_enable_trailer(serfile* sptr, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
-        return (void)(*status = NULL_SPTR);
+        return (*status = NULL_SPTR);
     }
 
     if (sptr->frame_count != 0 && !sptr->has_trailer) {
-        return (void)(*status = INVALID_TRAILER_ENABLE);
+        return (*status = INVALID_TRAILER_ENABLE);
     }
 
     sptr->has_trailer = true;
 
-    return;
+    return (*status);
 }
 
 /*  @brief  Read trailer time stamp at index.
@@ -1999,28 +2188,32 @@ void ser_enable_trailer(serfile* sptr, int* status) {
  *  @param  dest    (IO)    - Pointer to data buffer.
  *  @param  idx     (I)     - Index of time stamp.
  *  @param  status  (IO)    - Error status.
- *  @return Void.
+ *  @return Error Status.
  */
-void ser_get_timestamp(serfile* sptr, int64_t* dest, size_t idx, int* status) {
+int ser_get_timestamp(serfile* sptr, int64_t* dest, size_t idx, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) { 
-        return (void)(*status = NULL_SPTR); 
+        return (*status = NULL_SPTR); 
     }
 
     if (!dest) { 
-        return (void)(*status = NULL_DEST_BUFF); 
+        return (*status = NULL_DEST_BUFF); 
     }
 
     if (!sptr->has_trailer) {
-        return (void)(*status = TRAILER_DNE);
+        return (*status = TRAILER_DNE);
     }
 
     if (idx >= sptr->timestamp_count) {
-        return (void)(*status = INVALID_TRAILER_IDX); 
+        return (*status = INVALID_TRAILER_IDX); 
     }
 
     *dest = sptr->timestamps[idx];
 
-    return;
+    return (*status);
 }
 
 
