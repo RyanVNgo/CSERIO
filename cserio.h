@@ -218,8 +218,7 @@ int ser_set_date_time_utc(serfile* sptr, const int64_t date_time_utc, int* statu
 
 /*-------------------- Image Routines --------------------*/
 
-int ser_get_frame_dim_size(serfile* sptr, int* size, int dim, int* status);
-
+int ser_get_number_of_planes(serfile* sptr, int* nop, int* status);
 int ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int* status); 
 int ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* status);
 
@@ -1913,69 +1912,30 @@ int ser_set_date_time_utc(serfile* sptr, const int64_t date_time_utc, int* statu
 }
 
 
-/*-------------------- Image Symbolic Constants --------------------*/
-
-/* Currently, all SER file frames have just 3 dimensions. */
-#define MIN_DIM_IDX         0
-#define MAX_DIM_IDX         2
+/*-------------------- Image Routines --------------------*/
 
 #define DATA_START_SET      178
 
-/*-------------------- Image Routines --------------------*/
-
-/*  @brief Get the size of a target dimension.
- *  @param  sptr    (I)   - Pointer to serfile.
- *  @param  size    (IO)  - Pointer to int.
- *  @param  dim     (I)   - Dimension to get size of.
- *  @param  status  (IO)  - Error status. 
- *  @return Error Status
+/*  @brief  Get number of planes per frame.
+ *  @param  sptr    (I)     - Pointer to serfile.
+ *  @param  nop     (IO)    - Destination buffer.
+ *  @param  status  (IO)    - Error status.
+ *  @return Error status.
  */
-int ser_get_frame_dim_size(serfile* sptr, int* size, DIM_TYPE dim, int* status) {
+int ser_get_number_of_planes(serfile* sptr, int* nop, int* status) {
     if (*status) {
         return (*status);
     }
 
-    if (!sptr) { 
-        return (*status = NULL_SPTR); 
+    if (!sptr) {
+        return (*status = NULL_SPTR);
     }
 
-    if (!size) { 
-        return (*status = NULL_PARAM); 
+    if (!nop) {
+        return (*status = NULL_PARAM);
     }
 
-    if (dim < MIN_DIM_IDX || dim > MAX_DIM_IDX) { 
-        return (*status = INVALID_DIM_IDX); 
-    }
-
-    int key = 0;
-    switch (dim) {
-        case 0:
-            key = COLORID_KEY;
-            break;
-        case 1:
-            key = IMAGEWIDTH_KEY;
-            break;
-        case 2:
-            key = IMAGEHEIGHT_KEY;
-            break;
-    }
-
-    /* get size from header */
-    int temp_size = 0;
-    ser_get_key_record(sptr, &temp_size, key, status);
-    if (*status) { 
-        return (*status);
-    }
-    *size = temp_size;
-
-    /*  If the first dimension is called, then size will
-     *  be set to the color ID of the SER, the size of the
-     *  dimension is derived from the color ID by the
-     *  following case.
-     */
-    if (key == COLORID_KEY) {
-        *size = *size < 100 ? 1 : 3;
-    }
+    *nop = sptr->color_id < 100 ? 1 : 3;
 
     return (*status);
 }
