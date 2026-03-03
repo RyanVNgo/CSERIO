@@ -183,12 +183,6 @@ int ser_close_file(serfile* sptr, int* status);
 
 int ser_get_rec_count(serfile* sptr, int* rec_count, int* status);
 
-int ser_get_idx_record(serfile* sptr, void* dest, size_t idx, int* status);
-int ser_get_key_record(serfile* sptr, void* dest, int key, int* status);
-
-int ser_write_idx_record(serfile* sptr, const void* data, size_t idx, size_t size, int* status);
-int ser_write_key_record(serfile* sptr, const void* data, int key, size_t size, int* status);
-
 int ser_get_file_id(const serfile* sptr, char* file_id, int* status);
 int ser_get_lu_id(const serfile* sptr, int32_t* lu_id, int* status);
 int ser_get_color_id(const serfile* sptr, int32_t* color_id, int* status);
@@ -466,19 +460,19 @@ int ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* sta
     (*sptr)->reader = ser_memory_read;
     (*sptr)->writer = ser_memory_write;
     (*sptr)->access_mode = mode == READWRITE ? READWRITE : READONLY;
-    ser_get_key_record(*sptr, (*sptr)->file_id, FILEID_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->lu_id, LUID_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->color_id, COLORID_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->little_endian, LITTLEENDIAN_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->image_width, IMAGEWIDTH_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->image_height, IMAGEHEIGHT_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->pixel_depth_per_plane, PIXELDEPTHPERPLANE_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->frame_count, FRAMECOUNT_KEY, status);
-    ser_get_key_record(*sptr, (*sptr)->observer, OBSERVER_KEY, status);
-    ser_get_key_record(*sptr, (*sptr)->instrument, INSTRUMENT_KEY, status);
-    ser_get_key_record(*sptr, (*sptr)->telescope, TELESCOPE_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->date_time, DATETIME_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->date_time_utc, DATETIMEUTC_KEY, status);
+    (*sptr)->reader(ser_data, (*sptr)->file_id, FILEID_LEN, FILEID_KEY);
+    (*sptr)->reader(ser_data, &(*sptr)->lu_id, LUID_LEN, LUID_KEY);
+    (*sptr)->reader(ser_data, &(*sptr)->color_id, COLORID_LEN, COLORID_KEY);
+    (*sptr)->reader(ser_data, &(*sptr)->little_endian, LITTLEENDIAN_LEN, LITTLEENDIAN_KEY);
+    (*sptr)->reader(ser_data, &(*sptr)->image_width, IMAGEWIDTH_LEN, IMAGEWIDTH_KEY);
+    (*sptr)->reader(ser_data, &(*sptr)->image_height, IMAGEHEIGHT_LEN, IMAGEHEIGHT_KEY);
+    (*sptr)->reader(ser_data, &(*sptr)->pixel_depth_per_plane, PIXELDEPTHPERPLANE_LEN, PIXELDEPTHPERPLANE_KEY);
+    (*sptr)->reader(ser_data, &(*sptr)->frame_count, FRAMECOUNT_LEN, FRAMECOUNT_KEY);
+    (*sptr)->reader(ser_data, (*sptr)->observer, OBSERVER_LEN, OBSERVER_KEY);
+    (*sptr)->reader(ser_data, (*sptr)->instrument, INSTRUMENT_LEN, INSTRUMENT_KEY);
+    (*sptr)->reader(ser_data, (*sptr)->telescope, TELESCOPE_LEN, TELESCOPE_KEY);
+    (*sptr)->reader(ser_data, &(*sptr)->date_time, DATETIME_LEN, DATETIME_KEY);
+    (*sptr)->reader(ser_data, &(*sptr)->date_time_utc, DATETIMEUTC_LEN, DATETIMEUTC_KEY);
     (*sptr)->has_trailer = false;
     (*sptr)->timestamps = NULL;
     (*sptr)->timestamp_count = 0;
@@ -564,19 +558,19 @@ int ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode, 
     (*sptr)->reader = ser_memory_read;
     (*sptr)->writer = ser_memory_write;
     (*sptr)->access_mode = mode == READWRITE ? READWRITE : READONLY;
-    ser_get_key_record(*sptr, (*sptr)->file_id, FILEID_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->lu_id, LUID_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->color_id, COLORID_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->little_endian, LITTLEENDIAN_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->image_width, IMAGEWIDTH_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->image_height, IMAGEHEIGHT_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->pixel_depth_per_plane, PIXELDEPTHPERPLANE_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->frame_count, FRAMECOUNT_KEY, status);
-    ser_get_key_record(*sptr, (*sptr)->observer, OBSERVER_KEY, status);
-    ser_get_key_record(*sptr, (*sptr)->instrument, INSTRUMENT_KEY, status);
-    ser_get_key_record(*sptr, (*sptr)->telescope, TELESCOPE_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->date_time, DATETIME_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->date_time_utc, DATETIMEUTC_KEY, status);
+    (*sptr)->reader(ser_data, (*sptr)->file_id, FILEID_LEN, FILEID_KEY);
+    (*sptr)->reader(ser_data, &(*sptr)->lu_id, LUID_LEN, LUID_KEY);
+    (*sptr)->reader(ser_data, &(*sptr)->color_id, COLORID_LEN, COLORID_KEY);
+    (*sptr)->reader(ser_data, &(*sptr)->little_endian, LITTLEENDIAN_LEN, LITTLEENDIAN_KEY);
+    (*sptr)->reader(ser_data, &(*sptr)->image_width, IMAGEWIDTH_LEN, IMAGEWIDTH_KEY);
+    (*sptr)->reader(ser_data, &(*sptr)->image_height, IMAGEHEIGHT_LEN, IMAGEHEIGHT_KEY);
+    (*sptr)->reader(ser_data, &(*sptr)->pixel_depth_per_plane, PIXELDEPTHPERPLANE_LEN, PIXELDEPTHPERPLANE_KEY);
+    (*sptr)->reader(ser_data, &(*sptr)->frame_count, FRAMECOUNT_LEN, FRAMECOUNT_KEY);
+    (*sptr)->reader(ser_data, (*sptr)->observer, OBSERVER_LEN, OBSERVER_KEY);
+    (*sptr)->reader(ser_data, (*sptr)->instrument, INSTRUMENT_LEN, INSTRUMENT_KEY);
+    (*sptr)->reader(ser_data, (*sptr)->telescope, TELESCOPE_LEN, TELESCOPE_KEY);
+    (*sptr)->reader(ser_data, &(*sptr)->date_time, DATETIME_LEN, DATETIME_KEY);
+    (*sptr)->reader(ser_data, &(*sptr)->date_time_utc, DATETIMEUTC_LEN, DATETIMEUTC_KEY);
     (*sptr)->has_trailer = false;
     (*sptr)->timestamps = NULL;
     (*sptr)->timestamp_count = 0;
@@ -628,19 +622,19 @@ int ser_close_memory(serfile* sptr, int* status) {
     }
 
     if (sptr->access_mode == READWRITE) {
-		ser_write_key_record(sptr, &sptr->file_id, FILEID_KEY, FILEID_LEN, status);
-		ser_write_key_record(sptr, &sptr->lu_id, LUID_KEY, LUID_LEN, status);
-		ser_write_key_record(sptr, &sptr->color_id, COLORID_KEY, COLORID_LEN, status);
-		ser_write_key_record(sptr, &sptr->little_endian, LITTLEENDIAN_KEY, LITTLEENDIAN_LEN, status);
-		ser_write_key_record(sptr, &sptr->image_width, IMAGEWIDTH_KEY, IMAGEWIDTH_LEN, status);
-		ser_write_key_record(sptr, &sptr->image_height, IMAGEHEIGHT_KEY, IMAGEHEIGHT_LEN, status);
-		ser_write_key_record(sptr, &sptr->pixel_depth_per_plane, PIXELDEPTHPERPLANE_KEY, PIXELDEPTHPERPLANE_LEN, status);
-		ser_write_key_record(sptr, &sptr->frame_count, FRAMECOUNT_KEY, FRAMECOUNT_LEN, status);
-		ser_write_key_record(sptr, &sptr->observer, OBSERVER_KEY, OBSERVER_LEN, status);
-		ser_write_key_record(sptr, &sptr->instrument, INSTRUMENT_KEY, INSTRUMENT_LEN, status);
-		ser_write_key_record(sptr, &sptr->telescope, TELESCOPE_KEY, TELESCOPE_LEN, status);
-		ser_write_key_record(sptr, &sptr->date_time, DATETIME_KEY, DATETIME_LEN, status);
-		ser_write_key_record(sptr, &sptr->date_time_utc, DATETIMEUTC_KEY, DATETIMEUTC_LEN, status);
+        sptr->writer(sptr->io_context, sptr->file_id, FILEID_LEN, FILEID_KEY);
+        sptr->writer(sptr->io_context, &sptr->lu_id, LUID_LEN, LUID_KEY);
+        sptr->writer(sptr->io_context, &sptr->color_id, COLORID_LEN, COLORID_KEY);
+        sptr->writer(sptr->io_context, &sptr->little_endian, LITTLEENDIAN_LEN, LITTLEENDIAN_KEY);
+        sptr->writer(sptr->io_context, &sptr->image_width, IMAGEWIDTH_LEN, IMAGEWIDTH_KEY);
+        sptr->writer(sptr->io_context, &sptr->image_height, IMAGEHEIGHT_LEN, IMAGEHEIGHT_KEY);
+        sptr->writer(sptr->io_context, &sptr->pixel_depth_per_plane, PIXELDEPTHPERPLANE_LEN, PIXELDEPTHPERPLANE_KEY);
+        sptr->writer(sptr->io_context, &sptr->frame_count, FRAMECOUNT_LEN, FRAMECOUNT_KEY);
+        sptr->writer(sptr->io_context, sptr->observer, OBSERVER_LEN, OBSERVER_KEY);
+        sptr->writer(sptr->io_context, sptr->instrument, INSTRUMENT_LEN, INSTRUMENT_KEY);
+        sptr->writer(sptr->io_context, sptr->telescope, TELESCOPE_LEN, TELESCOPE_KEY);
+        sptr->writer(sptr->io_context, &sptr->date_time, DATETIME_LEN, DATETIME_KEY);
+        sptr->writer(sptr->io_context, &sptr->date_time_utc, DATETIMEUTC_LEN, DATETIMEUTC_KEY);
     }
 
     if (sptr->timestamps && sptr->access_mode == READWRITE) {
@@ -795,19 +789,19 @@ int ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
     (*sptr)->reader = ser_file_read;
     (*sptr)->writer = ser_file_write;
     (*sptr)->access_mode = mode == READWRITE ? READWRITE : READONLY;
-    ser_get_key_record(*sptr, (*sptr)->file_id, FILEID_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->lu_id, LUID_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->color_id, COLORID_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->little_endian, LITTLEENDIAN_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->image_width, IMAGEWIDTH_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->image_height, IMAGEHEIGHT_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->pixel_depth_per_plane, PIXELDEPTHPERPLANE_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->frame_count, FRAMECOUNT_KEY, status);
-    ser_get_key_record(*sptr, (*sptr)->observer, OBSERVER_KEY, status);
-    ser_get_key_record(*sptr, (*sptr)->instrument, INSTRUMENT_KEY, status);
-    ser_get_key_record(*sptr, (*sptr)->telescope, TELESCOPE_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->date_time, DATETIME_KEY, status);
-    ser_get_key_record(*sptr, &(*sptr)->date_time_utc, DATETIMEUTC_KEY, status);
+    (*sptr)->reader(file, (*sptr)->file_id, FILEID_LEN, FILEID_KEY);
+    (*sptr)->reader(file, &(*sptr)->lu_id, LUID_LEN, LUID_KEY);
+    (*sptr)->reader(file, &(*sptr)->color_id, COLORID_LEN, COLORID_KEY);
+    (*sptr)->reader(file, &(*sptr)->little_endian, LITTLEENDIAN_LEN, LITTLEENDIAN_KEY);
+    (*sptr)->reader(file, &(*sptr)->image_width, IMAGEWIDTH_LEN, IMAGEWIDTH_KEY);
+    (*sptr)->reader(file, &(*sptr)->image_height, IMAGEHEIGHT_LEN, IMAGEHEIGHT_KEY);
+    (*sptr)->reader(file, &(*sptr)->pixel_depth_per_plane, PIXELDEPTHPERPLANE_LEN, PIXELDEPTHPERPLANE_KEY);
+    (*sptr)->reader(file, &(*sptr)->frame_count, FRAMECOUNT_LEN, FRAMECOUNT_KEY);
+    (*sptr)->reader(file, (*sptr)->observer, OBSERVER_LEN, OBSERVER_KEY);
+    (*sptr)->reader(file, (*sptr)->instrument, INSTRUMENT_LEN, INSTRUMENT_KEY);
+    (*sptr)->reader(file, (*sptr)->telescope, TELESCOPE_LEN, TELESCOPE_KEY);
+    (*sptr)->reader(file, &(*sptr)->date_time, DATETIME_LEN, DATETIME_KEY);
+    (*sptr)->reader(file, &(*sptr)->date_time_utc, DATETIMEUTC_LEN, DATETIMEUTC_KEY);
     (*sptr)->has_trailer = false;
     (*sptr)->timestamps = NULL;
     (*sptr)->timestamp_count = 0;
@@ -858,19 +852,19 @@ int ser_close_file(serfile* sptr, int* status) {
     }
 
     if (sptr->access_mode == READWRITE) {
-		ser_write_key_record(sptr, &sptr->file_id, FILEID_KEY, FILEID_LEN, status);
-		ser_write_key_record(sptr, &sptr->lu_id, LUID_KEY, LUID_LEN, status);
-		ser_write_key_record(sptr, &sptr->color_id, COLORID_KEY, COLORID_LEN, status);
-		ser_write_key_record(sptr, &sptr->little_endian, LITTLEENDIAN_KEY, LITTLEENDIAN_LEN, status);
-		ser_write_key_record(sptr, &sptr->image_width, IMAGEWIDTH_KEY, IMAGEWIDTH_LEN, status);
-		ser_write_key_record(sptr, &sptr->image_height, IMAGEHEIGHT_KEY, IMAGEHEIGHT_LEN, status);
-		ser_write_key_record(sptr, &sptr->pixel_depth_per_plane, PIXELDEPTHPERPLANE_KEY, PIXELDEPTHPERPLANE_LEN, status);
-		ser_write_key_record(sptr, &sptr->frame_count, FRAMECOUNT_KEY, FRAMECOUNT_LEN, status);
-		ser_write_key_record(sptr, &sptr->observer, OBSERVER_KEY, OBSERVER_LEN, status);
-		ser_write_key_record(sptr, &sptr->instrument, INSTRUMENT_KEY, INSTRUMENT_LEN, status);
-		ser_write_key_record(sptr, &sptr->telescope, TELESCOPE_KEY, TELESCOPE_LEN, status);
-		ser_write_key_record(sptr, &sptr->date_time, DATETIME_KEY, DATETIME_LEN, status);
-		ser_write_key_record(sptr, &sptr->date_time_utc, DATETIMEUTC_KEY, DATETIMEUTC_LEN, status);
+        sptr->writer(sptr->io_context, sptr->file_id, FILEID_LEN, FILEID_KEY);
+        sptr->writer(sptr->io_context, &sptr->lu_id, LUID_LEN, LUID_KEY);
+        sptr->writer(sptr->io_context, &sptr->color_id, COLORID_LEN, COLORID_KEY);
+        sptr->writer(sptr->io_context, &sptr->little_endian, LITTLEENDIAN_LEN, LITTLEENDIAN_KEY);
+        sptr->writer(sptr->io_context, &sptr->image_width, IMAGEWIDTH_LEN, IMAGEWIDTH_KEY);
+        sptr->writer(sptr->io_context, &sptr->image_height, IMAGEHEIGHT_LEN, IMAGEHEIGHT_KEY);
+        sptr->writer(sptr->io_context, &sptr->pixel_depth_per_plane, PIXELDEPTHPERPLANE_LEN, PIXELDEPTHPERPLANE_KEY);
+        sptr->writer(sptr->io_context, &sptr->frame_count, FRAMECOUNT_LEN, FRAMECOUNT_KEY);
+        sptr->writer(sptr->io_context, sptr->observer, OBSERVER_LEN, OBSERVER_KEY);
+        sptr->writer(sptr->io_context, sptr->instrument, INSTRUMENT_LEN, INSTRUMENT_KEY);
+        sptr->writer(sptr->io_context, sptr->telescope, TELESCOPE_LEN, TELESCOPE_KEY);
+        sptr->writer(sptr->io_context, &sptr->date_time, DATETIME_LEN, DATETIME_KEY);
+        sptr->writer(sptr->io_context, &sptr->date_time_utc, DATETIMEUTC_LEN, DATETIMEUTC_KEY);
     }
 
     if (sptr->timestamps && sptr->access_mode == READWRITE) {
@@ -931,180 +925,6 @@ int ser_get_rec_count(serfile* sptr, int* rec_count, int* status) {
     
     return (*status);
 }
-
-/*  @brief  Return data at header idx 
- *  
- *  Ensure the dest buffer is large enough to store the data.
- *  Data of size [key]_LEN will be copied over.
- *
- *  @param  sptr    (I)   - Pointer to serfile.
- *  @param  dest    (IO)  - Destination buffer.
- *  @param  idx     (I)   - Record index.
- *  @param  status  (IO)  - Error status.
- *  @return Error Status.
- */
-int ser_get_idx_record(serfile* sptr, void* dest, size_t idx, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (!dest) {
-        return (*status = NULL_DEST_BUFF);
-    }
-
-    if (idx >= HDR_UNIT_COUNT) { return (*status = INVALID_HDR_IDX); }
-
-    int byte_len = 0;
-    int fpos = 0;
-    switch (idx) {
-        case 0:
-            byte_len = FILEID_LEN;
-            fpos = FILEID_KEY;
-            break;
-        case 1:
-            byte_len = LUID_LEN;
-            fpos = LUID_KEY;
-            break;
-        case 2:
-            byte_len = COLORID_LEN;
-            fpos = COLORID_KEY;
-            break;
-        case 3:
-            byte_len = LITTLEENDIAN_LEN;
-            fpos = LITTLEENDIAN_KEY;
-            break;
-        case 4:
-            byte_len = IMAGEWIDTH_LEN;
-            fpos = IMAGEWIDTH_KEY;
-            break;
-        case 5:
-            byte_len = IMAGEHEIGHT_LEN;
-            fpos = IMAGEHEIGHT_KEY;
-            break;
-        case 6:
-            byte_len = PIXELDEPTHPERPLANE_LEN;
-            fpos = PIXELDEPTHPERPLANE_KEY;
-            break;
-        case 7:
-            byte_len = FRAMECOUNT_LEN;
-            fpos = FRAMECOUNT_KEY;
-            break;
-        case 8:
-            byte_len = OBSERVER_LEN;
-            fpos = OBSERVER_KEY;
-            break;
-        case 9:
-            byte_len = INSTRUMENT_LEN;
-            fpos = INSTRUMENT_KEY;
-            break;
-        case 10:
-            byte_len = TELESCOPE_LEN;
-            fpos = TELESCOPE_KEY;
-            break;
-        case 11:
-            byte_len = DATETIME_LEN;
-            fpos = DATETIME_KEY;
-            break;
-        case 12:
-            byte_len = DATETIMEUTC_LEN;
-            fpos = DATETIMEUTC_KEY;
-            break;
-    }
-
-    int bytes_read = sptr->reader(sptr->io_context, dest, byte_len, fpos);
-    if (bytes_read < byte_len) {
-        *status = READ_ERROR;
-    }
-
-    return (*status);
-}
-
-/*  @brief  Return data at header key
- *
- *  Ensure the dest buffer is large enough to store the data.
- *  Data of size [key]_LEN will be copied over.
- *
- *  @param  sptr    (I)   - Pointer to serfile.
- *  @param  dest    (IO)  - Destination buffer.
- *  @param  key     (I)   - Record key.
- *  @param  status  (IO)  - Error status.
- *  @return Error Status.
- */
-int ser_get_key_record(serfile* sptr, void* dest, int key, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) { 
-        return (*status = NULL_SPTR); 
-    }
-
-    if (!dest) { 
-        return (*status = NULL_DEST_BUFF); 
-    }
-
-    int byte_len = 0;
-    switch (key) {
-        case FILEID_KEY:
-            byte_len = FILEID_LEN;
-            break;
-        case LUID_KEY:
-            byte_len = LUID_LEN;
-            break;
-        case COLORID_KEY:
-            byte_len = COLORID_LEN;
-            break;
-        case LITTLEENDIAN_KEY:
-            byte_len = LITTLEENDIAN_LEN;
-            break;
-        case IMAGEWIDTH_KEY:
-            byte_len = IMAGEWIDTH_LEN;
-            break;
-        case IMAGEHEIGHT_KEY:
-            byte_len = IMAGEHEIGHT_LEN;
-            break;
-        case PIXELDEPTHPERPLANE_KEY:
-            byte_len = PIXELDEPTHPERPLANE_LEN;
-            break;
-        case FRAMECOUNT_KEY:
-            byte_len = FRAMECOUNT_LEN;
-            break;
-        case OBSERVER_KEY:
-            byte_len = OBSERVER_LEN;
-            break;
-        case INSTRUMENT_KEY:
-            byte_len = INSTRUMENT_LEN;
-            break;
-        case TELESCOPE_KEY:
-            byte_len = TELESCOPE_LEN;
-            break;
-        case DATETIME_KEY:
-            byte_len = DATETIME_LEN;
-            break;
-        case DATETIMEUTC_KEY:
-            byte_len = DATETIMEUTC_LEN;
-            break;
-        default:
-            byte_len = 0;
-    }
-
-    if (byte_len == 0) { 
-        return (*status = INVALID_HDR_KEY); 
-    }
-
-    int bytes_read = sptr->reader(sptr->io_context, dest, byte_len, key);
-
-    if (bytes_read < byte_len) {
-        *status = READ_ERROR;
-    }
-
-    return (*status);
-}
-
 /*  @brief  Get File ID
  *  @param  sptr        (I)     - Pointer to serfile.
  *  @param  file_id     (IO)    - Destination buffer.
@@ -1407,198 +1227,6 @@ int ser_get_date_time_utc(const serfile* sptr, int64_t* date_time_utc, int* stat
     }
 
     *date_time_utc = sptr->date_time_utc;
-
-    return (*status);
-}
-
-/*  @brief  Write data to header idx 
- *  
- *  This write routine is capped such that it will write less
- *  than or up to the maximum size of the record space.
- *
- *  @param  sptr    (I)     - Pointer to serfile.
- *  @param  data    (IO)    - Pointer to data.
- *  @param  idx     (I)     - Header record index.
- *  @param  size    (I)     - Size of data in bytes.
- *  @param  status  (IO)    - Error status.
- *  @return Error status.
- */
-int ser_write_idx_record(serfile* sptr, const void* data, size_t idx, size_t size, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) { 
-        return (*status = NULL_SPTR); 
-    }
-
-    if (!data) { 
-        return (*status = NULL_PARAM); 
-    }
-
-    if (idx >= HDR_UNIT_COUNT) { 
-        return (*status = INVALID_HDR_IDX); 
-    }
-
-    if (sptr->access_mode != READWRITE) { 
-        return (*status = WRITE_ON_READONLY); 
-    }
-
-    size_t max_byte_len = 0;
-    int fpos = 0;
-    switch (idx) {
-        case 0:
-            max_byte_len = FILEID_LEN;
-            fpos = FILEID_KEY;
-            break;
-        case 1:
-            max_byte_len = LUID_LEN;
-            fpos = LUID_KEY;
-            break;
-        case 2:
-            max_byte_len = COLORID_LEN;
-            fpos = COLORID_KEY;
-            break;
-        case 3:
-            max_byte_len = LITTLEENDIAN_LEN;
-            fpos = LITTLEENDIAN_KEY;
-            break;
-        case 4:
-            max_byte_len = IMAGEWIDTH_LEN;
-            fpos = IMAGEWIDTH_KEY;
-            break;
-        case 5:
-            max_byte_len = IMAGEHEIGHT_LEN;
-            fpos = IMAGEHEIGHT_KEY;
-            break;
-        case 6:
-            max_byte_len = PIXELDEPTHPERPLANE_LEN;
-            fpos = PIXELDEPTHPERPLANE_KEY;
-            break;
-        case 7:
-            max_byte_len = FRAMECOUNT_LEN;
-            fpos = FRAMECOUNT_KEY;
-            break;
-        case 8:
-            max_byte_len = OBSERVER_LEN;
-            fpos = OBSERVER_KEY;
-            break;
-        case 9:
-            max_byte_len = INSTRUMENT_LEN;
-            fpos = INSTRUMENT_KEY;
-            break;
-        case 10:
-            max_byte_len = TELESCOPE_LEN;
-            fpos = TELESCOPE_KEY;
-            break;
-        case 11:
-            max_byte_len = DATETIME_LEN;
-            fpos = DATETIME_KEY;
-            break;
-        case 12:
-            max_byte_len = DATETIMEUTC_LEN;
-            fpos = DATETIMEUTC_KEY;
-            break;
-    }
-
-    if (size > max_byte_len) {
-        size = max_byte_len;
-    }
-
-    size_t bytes_written = sptr->writer(sptr->io_context, data, size, fpos);
-    if (bytes_written != size) {
-        *status = HDR_WRITE_WARN;
-    }
-
-    return (*status);
-}
-
-/*  @brief  Write data to header key
- *  
- *  This write routine is capped such that it will write less
- *  than or up to the maximum size of the record space.
- *
- *  @param  sptr    (I)     - Pointer to serfile.
- *  @param  data    (IO)    - Pointer to data.
- *  @param  key     (I)     - Record key.
- *  @param  size    (I)     - Size of data in bytes.
- *  @param  status  (IO)    - Error status.
- *  @return Error Status.
- */
-int ser_write_key_record(serfile* sptr, const void* data, int key, size_t size, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) { 
-        return (*status = NULL_SPTR); 
-    }
-
-    if (!data) { 
-        return (*status = NULL_PARAM); 
-    }
-
-    if (sptr->access_mode != READWRITE) { 
-        return (*status = WRITE_ON_READONLY); 
-    }
-
-    size_t max_byte_len = 0;
-    switch (key) {
-        case FILEID_KEY:
-            max_byte_len = FILEID_LEN;
-            break;
-        case LUID_KEY:
-            max_byte_len = LUID_LEN;
-            break;
-        case COLORID_KEY:
-            max_byte_len = COLORID_LEN;
-            break;
-        case LITTLEENDIAN_KEY:
-            max_byte_len = LITTLEENDIAN_LEN;
-            break;
-        case IMAGEWIDTH_KEY:
-            max_byte_len = IMAGEWIDTH_LEN;
-            break;
-        case IMAGEHEIGHT_KEY:
-            max_byte_len = IMAGEHEIGHT_LEN;
-            break;
-        case PIXELDEPTHPERPLANE_KEY:
-            max_byte_len = PIXELDEPTHPERPLANE_LEN;
-            break;
-        case FRAMECOUNT_KEY:
-            max_byte_len = FRAMECOUNT_LEN;
-            break;
-        case OBSERVER_KEY:
-            max_byte_len = OBSERVER_LEN;
-            break;
-        case INSTRUMENT_KEY:
-            max_byte_len = INSTRUMENT_LEN;
-            break;
-        case TELESCOPE_KEY:
-            max_byte_len = TELESCOPE_LEN;
-            break;
-        case DATETIME_KEY:
-            max_byte_len = DATETIME_LEN;
-            break;
-        case DATETIMEUTC_KEY:
-            max_byte_len = DATETIMEUTC_LEN;
-            break;
-        default:
-            max_byte_len = 0;
-    }
-
-    if (max_byte_len == 0) { 
-        return (*status = INVALID_HDR_KEY); 
-    }
-
-    if (size > max_byte_len) {
-        size = max_byte_len;
-    }
-
-    size_t bytes_written = sptr->writer(sptr->io_context, data, size, key);
-    if (bytes_written != size) {
-        *status = HDR_WRITE_WARN;
-    }
 
     return (*status);
 }

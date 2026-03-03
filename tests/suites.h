@@ -12,8 +12,6 @@ Suite* open_memory_suite();
 Suite* create_file_suite();
 Suite* open_file_suite();
 
-Suite* header_read_suite();
-Suite* header_write_suite();
 Suite* header_get_suite();
 Suite* header_set_suite();
 

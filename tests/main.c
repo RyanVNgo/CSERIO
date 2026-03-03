@@ -58,20 +58,6 @@ int main() {
     number_failed = srunner_ntests_failed(open_file_sr);
     srunner_free(open_file_sr);
 
-    Suite* hdr_read_s; 
-    hdr_read_s = header_read_suite();
-    SRunner* hdr_read_sr = srunner_create(hdr_read_s);
-    srunner_run_all(hdr_read_sr, OUTPUT_MODE);
-    number_failed = srunner_ntests_failed(hdr_read_sr);
-    srunner_free(hdr_read_sr);
-
-    Suite* hdr_write_s; 
-    hdr_write_s = header_write_suite();
-    SRunner* hdr_write_sr = srunner_create(hdr_write_s);
-    srunner_run_all(hdr_write_sr, OUTPUT_MODE);
-    number_failed = srunner_ntests_failed(hdr_write_sr);
-    srunner_free(hdr_write_sr);
-
     Suite* header_get_s; 
     header_get_s = header_get_suite();
     SRunner* header_get_sr = srunner_create(header_get_s);
