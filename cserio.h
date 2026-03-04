@@ -17,11 +17,18 @@
 #include <stdbool.h>
 
 
-/*-------------------- CSERIO Version --------------------*/
+/*------------------------------------------------------------------*/
+/* CSERIO Version */ 
+/*------------------------------------------------------------------*/
 
-#define CSERIO_MAJOR                        2
-#define CSERIO_MINOR                        1
-#define CSERIO_MICRO                        1
+#define CSERIO_MAJOR                        3
+#define CSERIO_MINOR                        0
+#define CSERIO_MICRO                        0
+
+
+/*------------------------------------------------------------------*/
+/* CSERIO Errors */ 
+/*------------------------------------------------------------------*/
 
 /*-------------------- Core Errors --------------------*/
 
@@ -74,6 +81,11 @@
 #define INVALID_TRAILER_IDX                 512
 
 #define TRAILER_CLOSE_WARN                  521
+
+
+/*------------------------------------------------------------------*/
+/* CSERIO Constants */ 
+/*------------------------------------------------------------------*/
 
 /*-------------------- SER File IO Modes --------------------*/
 
@@ -141,15 +153,11 @@
 #define LITTLEENDIAN_FALSE                  0
 
 
-/*-------------------- Image Symbolic Constants --------------------*/
-
-typedef int DIM_TYPE;
-#define DIM_LAYER                           0
-#define DIM_WIDTH                           1
-#define DIM_HEIGHT                          2
+/*------------------------------------------------------------------*/
+/* CSERIO SER Structure and Routines */ 
+/*------------------------------------------------------------------*/
 
 /*-------------------- SER Structure --------------------*/
-
 
 /*  serfile is the primary structure used to interact with nearly all
  *  CSERIO routines. 
@@ -159,10 +167,6 @@ typedef int DIM_TYPE;
  */
 typedef struct serfile serfile;
 
-
-/*------------------------------------------------------------------*/
-/* CSERIO Definitions */ 
-/*------------------------------------------------------------------*/
 
 /*-------------------- Core Routines --------------------*/
 
@@ -559,7 +563,8 @@ int ser_get_timestamp(serfile* sptr, int64_t* dest, size_t idx, int* status);
 
 #if defined(CSERIO_IMPLEMENTATION)
 
-/*-------------------- Internal Implementation --------------------*/
+
+/*-------------------- Structure Implementation --------------------*/
 
 /*  
  *  serfile implementation.
@@ -595,6 +600,9 @@ typedef struct {
     size_t view_size;
     bool owns_buffer;
 } serMem;
+
+
+/*-------------------- Internal Routines --------------------*/
 
 static size_t ser_memory_read(void* io_context, void* buffer, size_t size, size_t offset) {
     serMem* memory_io = (serMem*)(io_context);
