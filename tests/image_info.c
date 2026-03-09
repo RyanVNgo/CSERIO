@@ -67,132 +67,44 @@ START_TEST(frame_count_null_ser) {
 
 } END_TEST
 
-START_TEST(frame_dim_size_success) {
+START_TEST(number_of_planes_success) {
     int status = 0;
 
-    int layer = 0;
-    ser_get_frame_dim_size(
+    int nop = 0;
+    ser_get_number_of_planes(
             test_ser_3x50,
-            &layer,
-            DIM_LAYER,
+            &nop,
             &status
     );
     ck_assert_int_eq(status, NO_ERROR);
-    ck_assert_int_ne(layer, 0);
-
-    int width = 0;
-    ser_get_frame_dim_size(
-            test_ser_3x50,
-            &width,
-            DIM_WIDTH,
-            &status
-    );
-    ck_assert_int_eq(status, NO_ERROR);
-    ck_assert_int_eq(width, test_data_3x50.hdr.image_width);
-
-    int height = 0;
-    ser_get_frame_dim_size(
-            test_ser_3x50,
-            &height,
-            DIM_HEIGHT,
-            &status
-    );
-    ck_assert_int_eq(status, NO_ERROR);
-    ck_assert_int_eq(height, test_data_3x50.hdr.image_height);
+    ck_assert_int_eq(nop, test_data_3x50.hdr.color_id < 100 ? 1 : 3);
 
 } END_TEST
 
-START_TEST(frame_dim_size_invalid_dim) {
-    int status = 0;
-    int size = 0;
-
-    status = 0;
-    ser_get_frame_dim_size(
-            test_ser_3x50,
-            &size,
-            -1,
-            &status
-    );
-    ck_assert_int_ne(status, NO_ERROR);
-    ck_assert_int_eq(size, 0);
-
-    status = 0;
-    ser_get_frame_dim_size(
-            test_ser_3x50,
-            &size,
-            5,
-            &status
-    );
-    ck_assert_int_ne(status, NO_ERROR);
-    ck_assert_int_eq(size, 0);
-
-} END_TEST
-
-START_TEST(frame_dim_size_null_data) {
+START_TEST(number_of_planes_null_data) {
     int status = 0; 
 
     status = 0;
-    ser_get_frame_dim_size(
+    ser_get_number_of_planes(
             test_ser_3x50,
             NULL,
-            DIM_LAYER,
             &status
     );
-    ck_assert_int_ne(status, NO_ERROR);
-
-    status = 0;
-    ser_get_frame_dim_size(
-            test_ser_3x50,
-            NULL,
-            DIM_WIDTH,
-            &status
-    );
-    ck_assert_int_ne(status, NO_ERROR);
-
-    status = 0;
-    ser_get_frame_dim_size(
-            test_ser_3x50,
-            NULL,
-            DIM_HEIGHT,
-            &status
-    );
-    ck_assert_int_ne(status, NO_ERROR);
+    ck_assert_int_eq(status, NULL_PARAM);
 
 } END_TEST
 
-START_TEST(frame_dim_size_null_ser) {
+START_TEST(number_of_planes_null_ser) {
     int status = 0; 
-    int size = 0;
 
-    status = 0;
-    ser_get_frame_dim_size(
+    int nop = 0;
+    ser_get_number_of_planes(
             NULL,
-            &size,
-            DIM_LAYER,
+            &nop,
             &status
     );
-    ck_assert_int_ne(status, NO_ERROR);
-    ck_assert_int_eq(size, 0);
-
-    status = 0;
-    ser_get_frame_dim_size(
-            NULL,
-            &size,
-            DIM_WIDTH,
-            &status
-    );
-    ck_assert_int_ne(status, NO_ERROR);
-    ck_assert_int_eq(size, 0);
-
-    status = 0;
-    ser_get_frame_dim_size(
-            NULL,
-            &size,
-            DIM_HEIGHT,
-            &status
-    );
-    ck_assert_int_ne(status, NO_ERROR);
-    ck_assert_int_eq(size, 0);
+    ck_assert_int_eq(status, NULL_SPTR);
+    ck_assert_int_eq(nop, 0);
 
 } END_TEST
 
@@ -288,14 +200,13 @@ Suite* image_info_suite() {
     tcase_add_test(tc_frame_count, frame_count_null_ser);
     suite_add_tcase(s, tc_frame_count);
 
-    TCase* tc_frame_dim_size;
-    tc_frame_dim_size = tcase_create("frame_dim_size");
-    tcase_add_checked_fixture(tc_frame_dim_size, image_info_setup, image_info_teardown);
-    tcase_add_test(tc_frame_dim_size, frame_dim_size_success);
-    tcase_add_test(tc_frame_dim_size, frame_dim_size_invalid_dim);
-    tcase_add_test(tc_frame_dim_size, frame_dim_size_null_data);
-    tcase_add_test(tc_frame_dim_size, frame_dim_size_null_ser);
-    suite_add_tcase(s, tc_frame_dim_size);
+    TCase* tc_number_of_planes;
+    tc_number_of_planes = tcase_create("number_of_planes");
+    tcase_add_checked_fixture(tc_number_of_planes, image_info_setup, image_info_teardown);
+    tcase_add_test(tc_number_of_planes, number_of_planes_success);
+    tcase_add_test(tc_number_of_planes, number_of_planes_null_data);
+    tcase_add_test(tc_number_of_planes, number_of_planes_null_ser);
+    suite_add_tcase(s, tc_number_of_planes);
 
     TCase* tc_bytes_per_pixel;
     tc_bytes_per_pixel = tcase_create("bytes_per_pixel");
