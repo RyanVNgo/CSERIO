@@ -70,6 +70,7 @@
 
 #define INVALID_DIM_IDX                     401
 #define INVALID_FRAME_IDX                   402
+#define INVALID_FRAME_SIZE                  403
 
 #define IMAGE_WRITE_WARN                    411
 
@@ -206,8 +207,7 @@ int ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* sta
 
 /*  @brief  Opens/Copies in-memory SER file.
  *
- *  Memory is allocated and managed by the serfile. If data is not
- *  NULL, the data of length size is copied over.
+ *  Memory is allocated and managed by the serfile.
  *
  *  @param  sptr        (IO)    - Pointer to a pointer of a serfile.
  *  @param  data        (I)     - Pointer to data.
@@ -1200,6 +1200,10 @@ int ser_get_file_id(const serfile* sptr, char* file_id, int* status) {
 }
 
 int ser_get_lu_id(const serfile* sptr, int32_t* lu_id, int* status) {
+    if (*status) {
+        return (*status);
+    }
+
     if (!sptr) {
         return (*status = NULL_SPTR);
     }
@@ -1209,6 +1213,8 @@ int ser_get_lu_id(const serfile* sptr, int32_t* lu_id, int* status) {
     }
 
     *lu_id = sptr->lu_id;
+
+    return (*status);
 }
 
 int ser_get_color_id(const serfile* sptr, int32_t* color_id, int* status) {
@@ -1733,9 +1739,7 @@ int ser_read_frame(serfile* sptr, void* dest, size_t idx, int* status) {
         return (*status = NULL_DEST_BUFF); 
     }
 
-    size_t frame_count = sptr->frame_count;
-
-    if (idx >= frame_count) {
+    if (idx >= sptr->frame_count) {
         return (*status = INVALID_FRAME_IDX); 
     }
 
@@ -1774,6 +1778,10 @@ int ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* s
     ser_get_frame_byte_size(sptr, &frame_byte_size, status);
     if (*status) { 
         return (*status); 
+    }
+
+    if (frame_byte_size == 0) {
+        return (*status = INVALID_FRAME_SIZE);
     }
 
     unsigned long frame_offset = DATA_START_SET + (frame_byte_size * frame_count);
@@ -1849,3 +1857,4 @@ int ser_get_timestamp(serfile* sptr, int64_t* dest, size_t idx, int* status) {
 #endif /* CSERIO_IMPLEMENTATION */
 
 #endif /* CSERIO_H */
+
