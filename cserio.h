@@ -23,7 +23,7 @@
 
 #define CSERIO_MAJOR                        3
 #define CSERIO_MINOR                        0
-#define CSERIO_MICRO                        0
+#define CSERIO_MICRO                        1
 
 
 /*------------------------------------------------------------------*/
@@ -1158,6 +1158,10 @@ int ser_set_file_id(serfile* sptr, const char* file_id, int* status) {
         return (*status = NULL_PARAM);
     }
 
+    if (sptr->access_mode == READONLY) {
+        return (*status = WRITE_ON_READONLY);
+    }
+
     memcpy(sptr->file_id, file_id, FILEID_LEN);
 
     return (*status);
@@ -1172,6 +1176,10 @@ int ser_set_lu_id(serfile* sptr, const int32_t lu_id, int* status) {
         return (*status = NULL_SPTR);
     }
 
+    if (sptr->access_mode == READONLY) {
+        return (*status = WRITE_ON_READONLY);
+    }
+
     sptr->lu_id = lu_id;
 
     return (*status);
@@ -1184,6 +1192,10 @@ int ser_set_color_id(serfile* sptr, const int32_t color_id, int* status) {
 
     if (!sptr) {
         return (*status = NULL_SPTR);
+    }
+
+    if (sptr->access_mode == READONLY) {
+        return (*status = WRITE_ON_READONLY);
     }
 
     /* valid color id value */
@@ -1226,6 +1238,10 @@ int ser_set_little_endian(serfile* sptr, const int32_t little_endian, int* statu
         return (*status = NULL_SPTR);
     }
     
+    if (sptr->access_mode == READONLY) {
+        return (*status = WRITE_ON_READONLY);
+    }
+
     if (little_endian == LITTLEENDIAN_TRUE || little_endian == LITTLEENDIAN_FALSE) {
         sptr->little_endian = little_endian;
         return (*status);
@@ -1241,6 +1257,10 @@ int ser_set_image_width(serfile* sptr, const uint32_t image_width, int* status) 
 
     if (!sptr) {
         return (*status = NULL_SPTR);
+    }
+
+    if (sptr->access_mode == READONLY) {
+        return (*status = WRITE_ON_READONLY);
     }
 
     if (sptr->frame_count > 0) {
@@ -1261,6 +1281,10 @@ int ser_set_image_height(serfile* sptr, const uint32_t image_height, int* status
         return (*status = NULL_SPTR);
     }
 
+    if (sptr->access_mode == READONLY) {
+        return (*status = WRITE_ON_READONLY);
+    }
+
     if (sptr->frame_count > 0) {
         return (*status = INVALID_SET_STATE);
     }
@@ -1277,6 +1301,10 @@ int ser_set_pixel_depth_per_plane(serfile* sptr, const int32_t pixel_depth_per_p
 
     if (!sptr) {
         return (*status = NULL_SPTR);
+    }
+
+    if (sptr->access_mode == READONLY) {
+        return (*status = WRITE_ON_READONLY);
     }
 
     /* pdpp must between a value from 1 - 16 */
@@ -1308,6 +1336,10 @@ int ser_set_observer(serfile* sptr, const char* observer, int* status) {
         return (*status = NULL_SPTR);
     }
 
+    if (sptr->access_mode == READONLY) {
+        return (*status = WRITE_ON_READONLY);
+    }
+
     if (!observer) {
         return (*status = NULL_PARAM);
     }
@@ -1324,6 +1356,10 @@ int ser_set_instrument(serfile* sptr, const char* instrument, int* status) {
 
     if (!sptr) {
         return (*status = NULL_SPTR);
+    }
+
+    if (sptr->access_mode == READONLY) {
+        return (*status = WRITE_ON_READONLY);
     }
 
     if (!instrument) {
@@ -1344,6 +1380,10 @@ int ser_set_telescope(serfile* sptr, const char* telescope, int* status) {
         return (*status = NULL_SPTR);
     }
 
+    if (sptr->access_mode == READONLY) {
+        return (*status = WRITE_ON_READONLY);
+    }
+
     if (!telescope) {
         return (*status = NULL_PARAM);
     }
@@ -1362,6 +1402,10 @@ int ser_set_date_time(serfile* sptr, const int64_t date_time, int* status) {
         return (*status = NULL_SPTR);
     }
 
+    if (sptr->access_mode == READONLY) {
+        return (*status = WRITE_ON_READONLY);
+    }
+
     sptr->date_time = date_time;
 
     return (*status);
@@ -1374,6 +1418,10 @@ int ser_set_date_time_utc(serfile* sptr, const int64_t date_time_utc, int* statu
 
     if (!sptr) {
         return (*status = NULL_SPTR);
+    }
+
+    if (sptr->access_mode == READONLY) {
+        return (*status = WRITE_ON_READONLY);
     }
 
     sptr->date_time_utc = date_time_utc;
@@ -1496,6 +1544,10 @@ int ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* s
 
     if (!sptr) { 
         return (*status = NULL_SPTR); 
+    }
+
+    if (sptr->access_mode == READONLY) {
+        return (*status = WRITE_ON_READONLY);
     }
 
     if (!data) { 
