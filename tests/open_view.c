@@ -48,10 +48,12 @@ START_TEST(open_view_no_trailer) {
     serfile* test_ser = NULL;
     int status = 0;
 
+    SERTest3x50Structure test_data = test_data_3x50;
+    test_data.hdr.date_time = 0;
     ser_open_view(
             &test_ser,
-            (uint8_t*)&test_data_3x50,
-            sizeof(test_data_3x50) - sizeof(test_data_3x50.trlr),
+            (uint8_t*)&test_data,
+            sizeof(test_data) - sizeof(test_data.trlr),
             READONLY,
             &status
     );
@@ -109,6 +111,22 @@ START_TEST(open_view_short_header) {
     ck_assert_ptr_null(test_ser);
 } END_TEST
 
+START_TEST(open_view_ser_occupied) {
+    int status = 0;
+
+    int ptr_provide = 0;
+    serfile* test_ser = (serfile*)&ptr_provide;
+    ser_open_view(
+            &test_ser,
+            (uint8_t*)&test_data_3x50,
+            sizeof(test_data_3x50),
+            READONLY,
+            &status
+    );
+    ck_assert_int_eq(status, SPTR_OCCUPIED);
+
+} END_TEST
+
 START_TEST(open_view_null_ser) {
     int status = 0;
 
@@ -150,6 +168,7 @@ Suite* open_view_suite() {
     tcase_add_test(tc_open_view, open_view_short_trailer);
     tcase_add_test(tc_open_view, open_view_short_data_section);
     tcase_add_test(tc_open_view, open_view_short_header);
+    tcase_add_test(tc_open_view, open_view_ser_occupied);
     tcase_add_test(tc_open_view, open_view_null_ser);
     tcase_add_test(tc_open_view, open_view_null_data);
     suite_add_tcase(s, tc_open_view);

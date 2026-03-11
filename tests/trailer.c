@@ -47,10 +47,12 @@ START_TEST(get_timestamp_success) {
 START_TEST(get_timestamp_no_trailer) {
     int status = 0;
     serfile* test_ser = NULL;
+    SERTest3x50Structure test_data = test_data_3x50;
+    test_data.hdr.date_time = 0;
     ser_open_view(
             &test_ser, 
-            (uint8_t*)&test_data_3x50,
-            sizeof(test_data_3x50.hdr) + sizeof(test_data_3x50.data),
+            (uint8_t*)&test_data,
+            sizeof(test_data.hdr) + sizeof(test_data.data),
             READONLY,
             &status
     );

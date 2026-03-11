@@ -25,9 +25,9 @@ extern "C" {
 /* CSERIO Version */ 
 /*------------------------------------------------------------------*/
 
-#define CSERIO_MAJOR                        3
+#define CSERIO_MAJOR                        4
 #define CSERIO_MINOR                        0
-#define CSERIO_MICRO                        1
+#define CSERIO_MICRO                        0
 
 
 /*------------------------------------------------------------------*/
@@ -687,6 +687,10 @@ int ser_create_file(serfile** sptr, const char* path, int* status) {
 
     if (!sptr) {
         return (*status = NULL_SPTRPTR);
+    }
+
+    if ((*sptr)) {
+        return (*status = SPTR_OCCUPIED);
     }
 
     if (!path) {
@@ -1453,8 +1457,6 @@ int ser_write_date_time_utc(serfile* sptr, const int64_t date_time_utc, int* sta
 
 /*-------------------- Image Routines --------------------*/
 
-#define DATA_START_SET      178
-
 int ser_get_number_of_planes(serfile* sptr, int* nop, int* status) {
     if (*status) {
         return (*status);
@@ -1548,7 +1550,7 @@ int ser_read_frame(serfile* sptr, void* dest, size_t idx, int* status) {
         return (*status); 
     }
 
-    unsigned long frame_offset = DATA_START_SET + (frame_byte_size * idx);
+    unsigned long frame_offset = HDR_SIZE + (frame_byte_size * idx);
 
     size_t bytes_read = sptr->reader(sptr->io_context, dest, frame_byte_size, frame_offset);
     if (bytes_read < frame_byte_size) {
@@ -1587,7 +1589,7 @@ int ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* s
         return (*status = INVALID_FRAME_SIZE);
     }
 
-    unsigned long frame_offset = DATA_START_SET + (frame_byte_size * frame_count);
+    unsigned long frame_offset = HDR_SIZE + (frame_byte_size * frame_count);
 
     size_t bytes_written = sptr->writer(
             sptr->io_context,
@@ -1646,7 +1648,11 @@ int ser_create_memory(serfile** sptr, int* status) {
     }
 
     if (!sptr) {
-        return (*status = NULL_SPTR);
+        return (*status = NULL_SPTRPTR);
+    }
+
+    if ((*sptr)) {
+        return (*status = SPTR_OCCUPIED);
     }
 
     /* allocate memory for serfile */
@@ -1683,7 +1689,7 @@ int ser_create_memory(serfile** sptr, int* status) {
     (*sptr)->date_time_utc = 0;
 
     /* initialize trailer */
-    (*sptr)->has_trailer = false;
+    (*sptr)->has_trailer = (*sptr)->date_time <= 0 ? false : true;
     (*sptr)->timestamps = NULL;
     (*sptr)->timestamp_count = 0;
 
@@ -1697,6 +1703,10 @@ int ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* sta
 
     if (!sptr) {
         return (*status = NULL_SPTR);
+    }
+
+    if ((*sptr)) {
+        return (*status = SPTR_OCCUPIED);
     }
 
     if (!data) {
@@ -1738,32 +1748,31 @@ int ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* sta
     (*sptr)->reader(ser_data, (*sptr)->telescope, TELESCOPE_LEN, TELESCOPE_KEY);
     (*sptr)->reader(ser_data, &(*sptr)->date_time, DATETIME_LEN, DATETIME_KEY);
     (*sptr)->reader(ser_data, &(*sptr)->date_time_utc, DATETIMEUTC_LEN, DATETIMEUTC_KEY);
-    (*sptr)->has_trailer = false;
+    (*sptr)->has_trailer = (*sptr)->date_time <= 0 ? false : true;
     (*sptr)->timestamps = NULL;
     (*sptr)->timestamp_count = 0;
 
     /* determine if valid hdr + data or hdr + data + trailer */
     size_t frame_byte_size = 0;
     ser_get_frame_byte_size(*sptr, &frame_byte_size, status);
-    size_t hdr_data_size = HDR_SIZE + (*sptr)->frame_count * frame_byte_size;
+    size_t trailer_offset = HDR_SIZE + (*sptr)->frame_count * frame_byte_size;
 
-    /* hdr + data */
-    if (size == hdr_data_size) {
-        return (*status);
-    }
-
-    /* hdr + data + trailer */
-    if ((size - hdr_data_size) == (*sptr)->frame_count * sizeof(uint64_t)) {
-        (*sptr)->has_trailer = true;
-        (*sptr)->timestamps = (int64_t*)realloc((*sptr)->timestamps, (*sptr)->frame_count * sizeof(uint64_t));
-        (*sptr)->timestamp_count = (*sptr)->frame_count;
-        (*sptr)->reader(
-                (*sptr)->io_context,
-                (*sptr)->timestamps,
-                (*sptr)->frame_count * sizeof(uint64_t),
-                hdr_data_size
-        );
-        return (*status);
+    if ((*sptr)->has_trailer) {
+        if (size == trailer_offset + (*sptr)->frame_count * sizeof(uint64_t)) {
+            (*sptr)->timestamps = (int64_t*)realloc((*sptr)->timestamps, (*sptr)->frame_count * sizeof(uint64_t));
+            (*sptr)->timestamp_count = (*sptr)->frame_count;
+            (*sptr)->reader(
+                    (*sptr)->io_context,
+                    (*sptr)->timestamps,
+                    (*sptr)->frame_count * sizeof(uint64_t),
+                    trailer_offset
+            );
+            return (*status);
+        }
+    } else {
+        if (size == trailer_offset) {
+            return (*status);
+        }
     }
 
     /* if reached, invalid structure */
