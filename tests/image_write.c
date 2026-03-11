@@ -420,6 +420,71 @@ START_TEST(append_frame_invalid_size) {
     destroy_temp_ser(filepath, dir);
 }
 
+START_TEST(append_frame_readonly) {
+    SERHdrStructure test_hdr = {
+        .color_id = MONO,
+        .image_width = 10,
+        .image_height = 10,
+        .pixel_depth_per_plane = 8,
+        .frame_count = 0
+    };
+    char dir[] = "/tmp/cserio_testXXXXXX";
+    char filepath[512];
+    create_temp_ser(filepath, dir, &test_hdr, sizeof(test_hdr));
+    /* <- File Setup */
+
+    int status = 0;
+    serfile* test_ser = NULL;
+    ser_open_file(
+            &test_ser,
+            filepath,
+            READONLY,
+            &status
+    );
+    ck_assert_int_eq(status, NO_ERROR);
+
+    /* TEST */
+    ser_append_frame(
+            test_ser,
+            NULL,
+            TEST_TIMESTAMP_VALUE,
+            &status
+    );
+    ck_assert_int_eq(status, WRITE_ON_READONLY);
+
+    status = 0;
+    ser_close_file(test_ser, &status);
+    ck_assert_int_eq(status, NO_ERROR);
+
+    /* retrieve file details */
+    FILE* test_file = fopen(filepath, "rb");
+    if (!test_file) {
+        ck_abort_msg("Failed to open test SER");
+    }
+    fseek(test_file, 0, SEEK_END);
+    size_t file_size = ftell(test_file);
+
+    uint8_t* check_buff = malloc(file_size);
+    fseek(test_file, 0, SEEK_SET);
+    fread(check_buff, 1, file_size, test_file);
+
+    fclose(test_file);
+
+    /* file size check */
+    ck_assert_int_eq(file_size, sizeof(test_hdr));
+
+    /* is data before frame (hdr) intact */
+    ck_assert_mem_eq(
+            check_buff,
+            &test_hdr,
+            sizeof(test_hdr)
+    );
+
+    /* Teardown -> */
+    free(check_buff);
+    destroy_temp_ser(filepath, dir);
+} END_TEST
+
 START_TEST(append_frame_null_data) {
     SERHdrStructure test_hdr = {
         .color_id = MONO,
@@ -510,6 +575,7 @@ Suite* image_write_suite() {
     tcase_add_test(tc_append_frame, append_frame_success_with_trailer);
     tcase_add_test(tc_append_frame, append_frame_success_empty_no_trailer);
     tcase_add_test(tc_append_frame, append_frame_success_empty_with_trailer);
+    tcase_add_test(tc_append_frame, append_frame_readonly);
     tcase_add_test(tc_append_frame, append_frame_invalid_size);
     tcase_add_test(tc_append_frame, append_frame_null_data);
     tcase_add_test(tc_append_frame, append_frame_null_ser);

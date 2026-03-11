@@ -8,7 +8,7 @@
 #include "../cserio.h"
 
 
-void header_get_setup() {
+void header_read_setup() {
     int status = 0;
     ser_open_view(
             &test_ser_3x50,
@@ -19,12 +19,12 @@ void header_get_setup() {
     );
 }
 
-void header_get_teardown() {
+void header_read_teardown() {
     int status = 0;
     ser_close_memory(test_ser_3x50, &status);
 }
 
-START_TEST(header_get_success) {
+START_TEST(header_read_success) {
     int status = 0;
 
     SERHdrStructureNonPacked check_hdr;
@@ -73,7 +73,7 @@ START_TEST(header_get_success) {
 
 } END_TEST
 
-START_TEST(header_get_null_data) {
+START_TEST(header_read_null_data) {
     int status = 0;
 
     ser_read_file_id(test_ser_3x50, NULL, &status);
@@ -105,7 +105,7 @@ START_TEST(header_get_null_data) {
 
 } END_TEST
 
-START_TEST(header_get_null_ser) {
+START_TEST(header_read_null_ser) {
     int status = 0;
 
     SERHdrStructureNonPacked baseline_hdr;
@@ -156,17 +156,17 @@ START_TEST(header_get_null_ser) {
 
 } END_TEST
 
-Suite* header_get_suite() {
+Suite* header_read_suite() {
     Suite* s;
-    s = suite_create("Header Get");
+    s = suite_create("Header Read");
 
-    TCase* tc_header_get;
-    tc_header_get = tcase_create("header_get");
-    tcase_add_checked_fixture(tc_header_get, header_get_setup, header_get_teardown);
-    tcase_add_test(tc_header_get, header_get_success);
-    tcase_add_test(tc_header_get, header_get_null_data);
-    tcase_add_test(tc_header_get, header_get_null_ser);
-    suite_add_tcase(s, tc_header_get);
+    TCase* tc_header_read;
+    tc_header_read = tcase_create("header_read");
+    tcase_add_checked_fixture(tc_header_read, header_read_setup, header_read_teardown);
+    tcase_add_test(tc_header_read, header_read_success);
+    tcase_add_test(tc_header_read, header_read_null_data);
+    tcase_add_test(tc_header_read, header_read_null_ser);
+    suite_add_tcase(s, tc_header_read);
 
     return s;
 }

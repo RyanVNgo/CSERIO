@@ -58,19 +58,19 @@ int main() {
     number_failed = srunner_ntests_failed(open_file_sr);
     srunner_free(open_file_sr);
 
-    Suite* header_get_s; 
-    header_get_s = header_get_suite();
-    SRunner* header_get_sr = srunner_create(header_get_s);
-    srunner_run_all(header_get_sr, OUTPUT_MODE);
-    number_failed = srunner_ntests_failed(header_get_sr);
-    srunner_free(header_get_sr);
+    Suite* header_read_s; 
+    header_read_s = header_read_suite();
+    SRunner* header_read_sr = srunner_create(header_read_s);
+    srunner_run_all(header_read_sr, OUTPUT_MODE);
+    number_failed = srunner_ntests_failed(header_read_sr);
+    srunner_free(header_read_sr);
 
-    Suite* header_set_s; 
-    header_set_s = header_set_suite();
-    SRunner* header_set_sr = srunner_create(header_set_s);
-    srunner_run_all(header_set_sr, OUTPUT_MODE);
-    number_failed = srunner_ntests_failed(header_set_sr);
-    srunner_free(header_set_sr);
+    Suite* header_write_s; 
+    header_write_s = header_write_suite();
+    SRunner* header_write_sr = srunner_create(header_write_s);
+    srunner_run_all(header_write_sr, OUTPUT_MODE);
+    number_failed = srunner_ntests_failed(header_write_sr);
+    srunner_free(header_write_sr);
 
     Suite* image_info_s; 
     image_info_s = image_info_suite();

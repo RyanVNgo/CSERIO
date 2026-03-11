@@ -1677,7 +1677,7 @@ int ser_create_memory(serfile** sptr, int* status) {
     memset((*sptr)->file_id, 0, FILEID_LEN);
     (*sptr)->lu_id = 0;
     (*sptr)->color_id = MONO;
-    (*sptr)->little_endian = 1;
+    (*sptr)->little_endian = LITTLEENDIAN_TRUE;
     (*sptr)->image_width = 0;
     (*sptr)->image_height = 0;
     (*sptr)->pixel_depth_per_plane = 8;
