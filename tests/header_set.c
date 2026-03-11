@@ -68,29 +68,29 @@ START_TEST(header_set_success) {
 		.date_time_utc = TEST_TIMESTAMP_VALUE
     };
 
-    ser_set_file_id(test_ser, test_data.file_id, &status);
+    ser_write_file_id(test_ser, test_data.file_id, &status);
     ck_assert_int_eq(status, NO_ERROR);
-    ser_set_lu_id(test_ser, test_data.lu_id, &status);
+    ser_write_lu_id(test_ser, test_data.lu_id, &status);
     ck_assert_int_eq(status, NO_ERROR);
-    ser_set_color_id(test_ser, test_data.color_id, &status);
+    ser_write_color_id(test_ser, test_data.color_id, &status);
     ck_assert_int_eq(status, NO_ERROR);
-    ser_set_little_endian(test_ser, test_data.little_endian, &status);
+    ser_write_little_endian(test_ser, test_data.little_endian, &status);
     ck_assert_int_eq(status, NO_ERROR);
-    ser_set_image_width(test_ser, test_data.image_width, &status);
+    ser_write_image_width(test_ser, test_data.image_width, &status);
     ck_assert_int_eq(status, NO_ERROR);
-    ser_set_image_height(test_ser, test_data.image_height, &status);
+    ser_write_image_height(test_ser, test_data.image_height, &status);
     ck_assert_int_eq(status, NO_ERROR);
-    ser_set_pixel_depth_per_plane(test_ser, test_data.pixel_depth_per_plane, &status);
+    ser_write_pixel_depth_per_plane(test_ser, test_data.pixel_depth_per_plane, &status);
     ck_assert_int_eq(status, NO_ERROR);
-    ser_set_observer(test_ser, test_data.observer, &status);
+    ser_write_observer(test_ser, test_data.observer, &status);
     ck_assert_int_eq(status, NO_ERROR);
-    ser_set_instrument(test_ser, test_data.instrument, &status);
+    ser_write_instrument(test_ser, test_data.instrument, &status);
     ck_assert_int_eq(status, NO_ERROR);
-    ser_set_telescope(test_ser, test_data.telescope, &status);
+    ser_write_telescope(test_ser, test_data.telescope, &status);
     ck_assert_int_eq(status, NO_ERROR);
-    ser_set_date_time(test_ser, test_data.date_time, &status);
+    ser_write_date_time(test_ser, test_data.date_time, &status);
     ck_assert_int_eq(status, NO_ERROR);
-    ser_set_date_time_utc(test_ser, test_data.date_time_utc, &status);
+    ser_write_date_time_utc(test_ser, test_data.date_time_utc, &status);
     ck_assert_int_eq(status, NO_ERROR);
 
     ser_close_file(test_ser, &status);
@@ -146,22 +146,22 @@ START_TEST(header_set_invalid_set_value) {
 
     /* invalid color id */
     status = 0;
-    ser_set_color_id(test_ser, 1, &status);
+    ser_write_color_id(test_ser, 1, &status);
     ck_assert_int_eq(status, INVALID_SET_VALUE);
 
     /* invalid little endian flag */
     status = 0;
-    ser_set_little_endian(test_ser, 2, &status);
+    ser_write_little_endian(test_ser, 2, &status);
     ck_assert_int_eq(status, INVALID_SET_VALUE);
 
     /* invalid pdpp > 16 */
     status = 0;
-    ser_set_pixel_depth_per_plane(test_ser, 17, &status);
+    ser_write_pixel_depth_per_plane(test_ser, 17, &status);
     ck_assert_int_eq(status, INVALID_SET_VALUE);
 
     /* invalid pdpp == 0 */
     status = 0;
-    ser_set_pixel_depth_per_plane(test_ser, 0, &status);
+    ser_write_pixel_depth_per_plane(test_ser, 0, &status);
     ck_assert_int_eq(status, INVALID_SET_VALUE);
 
     status = 0;
@@ -202,22 +202,22 @@ START_TEST(header_set_invalid_set_state) {
 
     /* changing to different byte width color id */
     status = 0;
-    ser_set_color_id(test_ser, RGB, &status);
+    ser_write_color_id(test_ser, RGB, &status);
     ck_assert_int_eq(status, INVALID_SET_STATE);
 
     /* changing width with image data present */
     status = 0;
-    ser_set_image_width(test_ser, 10, &status);
+    ser_write_image_width(test_ser, 10, &status);
     ck_assert_int_eq(status, INVALID_SET_STATE);
 
     /* changing height with image data present */
     status = 0;
-    ser_set_image_height(test_ser, 10, &status);
+    ser_write_image_height(test_ser, 10, &status);
     ck_assert_int_eq(status, INVALID_SET_STATE);
 
     /* changing to different byte width pdpp */
     status = 0;
-    ser_set_pixel_depth_per_plane(test_ser, 16, &status);
+    ser_write_pixel_depth_per_plane(test_ser, 16, &status);
     ck_assert_int_eq(status, INVALID_SET_STATE);
 
     status = 0;
@@ -265,19 +265,19 @@ START_TEST(header_set_null_data) {
     ck_assert_int_eq(status, NO_ERROR);
 
     status = 0;
-    ser_set_file_id(test_ser, NULL, &status);
+    ser_write_file_id(test_ser, NULL, &status);
     ck_assert_int_eq(status, NULL_PARAM);
 
     status = 0;
-    ser_set_observer(test_ser, NULL, &status);
+    ser_write_observer(test_ser, NULL, &status);
     ck_assert_int_eq(status, NULL_PARAM);
 
     status = 0;
-    ser_set_instrument(test_ser, NULL, &status);
+    ser_write_instrument(test_ser, NULL, &status);
     ck_assert_int_eq(status, NULL_PARAM);
 
     status = 0;
-    ser_set_telescope(test_ser, NULL, &status);
+    ser_write_telescope(test_ser, NULL, &status);
     ck_assert_int_eq(status, NULL_PARAM);
 
     status = 0;
@@ -310,29 +310,29 @@ START_TEST(header_set_null_ser) {
     int status = 0;
     SERHdrStructure test_data = test_data_3x50.hdr;
 
-    ser_set_file_id(NULL, test_data.file_id, &status);
+    ser_write_file_id(NULL, test_data.file_id, &status);
     ck_assert_int_eq(status, NULL_SPTR);
-    ser_set_lu_id(NULL, test_data.lu_id, &status);
+    ser_write_lu_id(NULL, test_data.lu_id, &status);
     ck_assert_int_eq(status, NULL_SPTR);
-    ser_set_color_id(NULL, test_data.color_id, &status);
+    ser_write_color_id(NULL, test_data.color_id, &status);
     ck_assert_int_eq(status, NULL_SPTR);
-    ser_set_little_endian(NULL, test_data.little_endian, &status);
+    ser_write_little_endian(NULL, test_data.little_endian, &status);
     ck_assert_int_eq(status, NULL_SPTR);
-    ser_set_image_width(NULL, test_data.image_width, &status);
+    ser_write_image_width(NULL, test_data.image_width, &status);
     ck_assert_int_eq(status, NULL_SPTR);
-    ser_set_image_height(NULL, test_data.image_height, &status);
+    ser_write_image_height(NULL, test_data.image_height, &status);
     ck_assert_int_eq(status, NULL_SPTR);
-    ser_set_pixel_depth_per_plane(NULL, test_data.pixel_depth_per_plane, &status);
+    ser_write_pixel_depth_per_plane(NULL, test_data.pixel_depth_per_plane, &status);
     ck_assert_int_eq(status, NULL_SPTR);
-    ser_set_observer(NULL, test_data.observer, &status);
+    ser_write_observer(NULL, test_data.observer, &status);
     ck_assert_int_eq(status, NULL_SPTR);
-    ser_set_instrument(NULL, test_data.instrument, &status);
+    ser_write_instrument(NULL, test_data.instrument, &status);
     ck_assert_int_eq(status, NULL_SPTR);
-    ser_set_telescope(NULL, test_data.telescope, &status);
+    ser_write_telescope(NULL, test_data.telescope, &status);
     ck_assert_int_eq(status, NULL_SPTR);
-    ser_set_date_time(NULL, test_data.date_time, &status);
+    ser_write_date_time(NULL, test_data.date_time, &status);
     ck_assert_int_eq(status, NULL_SPTR);
-    ser_set_date_time_utc(NULL, test_data.date_time_utc, &status);
+    ser_write_date_time_utc(NULL, test_data.date_time_utc, &status);
     ck_assert_int_eq(status, NULL_SPTR);
 
 } END_TEST

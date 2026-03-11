@@ -106,7 +106,7 @@ START_TEST(create_file_null_ser) {
             filepath,
             &status
     );
-    ck_assert_int_eq(status, NULL_SPTR);
+    ck_assert_int_eq(status, NULL_SPTRPTR);
 
     struct stat st;
     if (stat(filepath, &st) == 0) {

@@ -67,7 +67,14 @@ START_TEST(open_file_success) {
 START_TEST(open_file_no_trailer) {
     char dir[] = "/tmp/cserio_testXXXXXX";
     char filepath[512];
-    create_temp_ser(filepath, dir, &test_data_3x50, sizeof(test_data_3x50) - sizeof(test_data_3x50.trlr));
+    SERTest3x50Structure test_data = test_data_3x50;
+    test_data.hdr.date_time = 0; /* disable trailer */
+    create_temp_ser(
+            filepath,
+            dir,
+            &test_data,
+            sizeof(test_data) - sizeof(test_data.trlr)
+    );
     /* <- Setup */
     
     int status = 0;
@@ -169,7 +176,7 @@ START_TEST(open_file_null_ser) {
             READONLY,
             &status
     );
-    ck_assert_int_eq(status, NULL_SPTR);
+    ck_assert_int_eq(status, NULL_SPTRPTR);
 
     /* Teardown -> */
     destroy_temp_ser(filepath, dir);

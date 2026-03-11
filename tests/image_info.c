@@ -24,49 +24,6 @@ void image_info_teardown() {
     ser_close_memory(test_ser_3x50, &status);
 }
 
-START_TEST(frame_count_success) {
-    int status = 0;
-    int frame_count = 0;
-
-    ser_get_frame_count(
-            test_ser_3x50,
-            &frame_count,
-            &status
-    );
-    ck_assert_int_eq(status, NO_ERROR);
-    ck_assert_int_eq(
-            frame_count,
-            test_data_3x50.hdr.frame_count
-    );
-
-} END_TEST
-
-START_TEST(frame_count_null_data) {
-    int status = 0;
-
-    ser_get_frame_count(
-            test_ser_3x50,
-            NULL,
-            &status
-    );
-    ck_assert_int_ne(status, NO_ERROR);
-
-} END_TEST
-
-START_TEST(frame_count_null_ser) {
-    int status = 0;
-    int frame_count = 0;
-
-    ser_get_frame_count(
-            NULL,
-            &frame_count,
-            &status
-    );
-    ck_assert_int_ne(status, NO_ERROR);
-    ck_assert_int_eq(frame_count, 0);
-
-} END_TEST
-
 START_TEST(number_of_planes_success) {
     int status = 0;
 
@@ -191,14 +148,6 @@ START_TEST(frame_byte_size_null_ser) {
 Suite* image_info_suite() {
     Suite* s;
     s = suite_create("Image Info");
-
-    TCase* tc_frame_count;
-    tc_frame_count = tcase_create("frame_count");
-    tcase_add_checked_fixture(tc_frame_count, image_info_setup, image_info_teardown);
-    tcase_add_test(tc_frame_count, frame_count_success);
-    tcase_add_test(tc_frame_count, frame_count_null_data);
-    tcase_add_test(tc_frame_count, frame_count_null_ser);
-    suite_add_tcase(s, tc_frame_count);
 
     TCase* tc_number_of_planes;
     tc_number_of_planes = tcase_create("number_of_planes");

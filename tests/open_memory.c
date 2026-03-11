@@ -47,10 +47,12 @@ START_TEST(open_memory_no_trailer) {
     serfile* test_ser = NULL;
     int status = 0;
 
+    SERTest3x50Structure test_data = test_data_3x50;
+    test_data.hdr.date_time = 0;
     ser_open_memory(
             &test_ser,
-            (uint8_t*)&test_data_3x50,
-            sizeof(test_data_3x50) - sizeof(test_data_3x50.trlr),
+            (uint8_t*)&test_data,
+            sizeof(test_data) - sizeof(test_data.trlr),
             READONLY,
             &status
     );
@@ -119,7 +121,7 @@ START_TEST(open_memory_null_ser) {
             READONLY,
             &status
     );
-    ck_assert_int_eq(status, NULL_SPTR);
+    ck_assert_int_eq(status, NULL_SPTRPTR);
 } END_TEST
 
 START_TEST(open_memory_null_data) {
