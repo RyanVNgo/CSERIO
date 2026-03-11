@@ -137,7 +137,7 @@ START_TEST(open_view_null_ser) {
             READONLY,
             &status
     );
-    ck_assert_int_eq(status, NULL_SPTR);
+    ck_assert_int_eq(status, NULL_SPTRPTR);
 
 } END_TEST
 

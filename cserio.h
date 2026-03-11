@@ -71,6 +71,7 @@ extern "C" {
 
 #define INVALID_SET_STATE                   321
 #define INVALID_SET_VALUE                   322
+#define INVALID_CHAR_STRING                 323
 
 /*-------------------- Image Routine Errors --------------------*/
 
@@ -599,6 +600,27 @@ typedef struct {
 
 /*-------------------- Internal Routines --------------------*/
 
+#define RETURN_IF_STATUS_IS_ERROR(status)       \
+    do {                                        \
+        if ( *status ) { return (*status); }    \
+    } while(0)                                  \
+
+#define RETURN_IF_NULL_SPTRPTR(sptr, status)                \
+    do {                                                    \
+        if ( !sptr ) { return (*status = NULL_SPTRPTR); }   \
+    } while(0)                                              \
+
+#define RETURN_IF_SPTR_OCCUPIED(sptr, status)               \
+    do {                                                    \
+        if ( *sptr ) { return (*status = SPTR_OCCUPIED); }  \
+    } while(0)                                              \
+
+#define RETURN_IF_NULL_SPTR(sptr, status)               \
+    do {                                                \
+        if ( !sptr ) { return (*status = NULL_SPTR); }  \
+    } while(0)                                          \
+
+
 static size_t ser_memory_read(void* io_context, void* buffer, size_t size, size_t offset) {
     serMem* memory_io = (serMem*)(io_context);
 
@@ -661,6 +683,22 @@ static size_t ser_file_write(void* io_context, const void* data, size_t size, si
     return fwrite(data, 1, size, file_io);
 }
 
+static void ser_header_initializations(serfile* sptr) {
+    memset(sptr->file_id,           0, FILEID_LEN);
+    sptr->lu_id =                   0;
+    sptr->color_id =                MONO;
+    sptr->little_endian =           LITTLEENDIAN_TRUE;
+    sptr->image_width =             0;
+    sptr->image_height =            0;
+    sptr->pixel_depth_per_plane =   8;
+    sptr->frame_count =             0;
+    memset(sptr->observer,          0, OBSERVER_LEN);
+    memset(sptr->instrument,        0, INSTRUMENT_LEN);
+    memset(sptr->telescope,         0, TELESCOPE_LEN);
+    sptr->date_time =               0;
+    sptr->date_time_utc =           0;
+}
+
 
 /*-------------------- Core Routines --------------------*/
 
@@ -681,17 +719,9 @@ void cserio_version_number(int* major, int* minor, int* micro) {
 /*-------------------- SER Access Routines --------------------*/
 
 int ser_create_file(serfile** sptr, const char* path, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTRPTR);
-    }
-
-    if ((*sptr)) {
-        return (*status = SPTR_OCCUPIED);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTRPTR(sptr, status);
+	RETURN_IF_SPTR_OCCUPIED(sptr, status);
 
     if (!path) {
         return (*status = NULL_PATH);
@@ -719,6 +749,8 @@ int ser_create_file(serfile** sptr, const char* path, int* status) {
     (*sptr)->writer = ser_file_write;
     (*sptr)->access_mode = READWRITE;
 
+    ser_header_initializations(*sptr);
+    /*
     memset((*sptr)->file_id, 0, FILEID_LEN);
     (*sptr)->lu_id = 0;
     (*sptr)->color_id = MONO;
@@ -732,6 +764,7 @@ int ser_create_file(serfile** sptr, const char* path, int* status) {
     memset((*sptr)->telescope, 0, TELESCOPE_LEN);
     (*sptr)->date_time = 0;
     (*sptr)->date_time_utc = 0;
+    */
 
     (*sptr)->has_trailer = (*sptr)->date_time <= 0 ? false : true;
     (*sptr)->timestamps = NULL;
@@ -741,17 +774,9 @@ int ser_create_file(serfile** sptr, const char* path, int* status) {
 }
 
 int ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTRPTR);
-    }
-
-    if ((*sptr)) {
-        return (*status = SPTR_OCCUPIED);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTRPTR(sptr, status);
+	RETURN_IF_SPTR_OCCUPIED(sptr, status);
 
     if (!path) {
         return (*status = NULL_PATH);
@@ -842,9 +867,7 @@ int ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
 }
 
 int ser_close_file(serfile* sptr, int* status) {
-    if (!sptr) { 
-        return (*status = NULL_SPTR); 
-    }
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (sptr->access_mode == READWRITE) {
         sptr->writer(sptr->io_context, sptr->file_id, FILEID_LEN, FILEID_KEY);
@@ -894,13 +917,8 @@ int ser_close_file(serfile* sptr, int* status) {
 /*-------------------- Header Routines --------------------*/
 
 int ser_read_rec_count(serfile* sptr, int* rec_count, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) { 
-        return (*status = NULL_SPTR); 
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (!rec_count) { 
         return (*status = NULL_PARAM); 
@@ -912,13 +930,8 @@ int ser_read_rec_count(serfile* sptr, int* rec_count, int* status) {
 }
 
 int ser_read_file_id(const serfile* sptr, char* file_id, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) { 
-        return (*status = NULL_SPTR); 
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (!file_id) { 
         return (*status = NULL_DEST_BUFF); 
@@ -930,13 +943,8 @@ int ser_read_file_id(const serfile* sptr, char* file_id, int* status) {
 }
 
 int ser_read_lu_id(const serfile* sptr, int32_t* lu_id, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (!lu_id) {
         return (*status = NULL_DEST_BUFF);
@@ -948,13 +956,8 @@ int ser_read_lu_id(const serfile* sptr, int32_t* lu_id, int* status) {
 }
 
 int ser_read_color_id(const serfile* sptr, int32_t* color_id, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (!color_id) {
         return (*status = NULL_DEST_BUFF);
@@ -966,13 +969,8 @@ int ser_read_color_id(const serfile* sptr, int32_t* color_id, int* status) {
 }
 
 int ser_read_little_endian(const serfile* sptr, int32_t* little_endian, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (!little_endian) {
         return (*status = NULL_DEST_BUFF);
@@ -984,13 +982,8 @@ int ser_read_little_endian(const serfile* sptr, int32_t* little_endian, int* sta
 }
 
 int ser_read_image_width(const serfile* sptr, int32_t* image_width, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (!image_width) {
         return (*status = NULL_DEST_BUFF);
@@ -1002,13 +995,8 @@ int ser_read_image_width(const serfile* sptr, int32_t* image_width, int* status)
 }
 
 int ser_read_image_height(const serfile* sptr, int32_t* image_height, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (!image_height) {
         return (*status = NULL_DEST_BUFF);
@@ -1020,13 +1008,8 @@ int ser_read_image_height(const serfile* sptr, int32_t* image_height, int* statu
 }
 
 int ser_read_pixel_depth_per_plane(const serfile* sptr, int32_t* pixel_depth_per_plane, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (!pixel_depth_per_plane) {
         return (*status = NULL_DEST_BUFF);
@@ -1038,13 +1021,8 @@ int ser_read_pixel_depth_per_plane(const serfile* sptr, int32_t* pixel_depth_per
 }
 
 int ser_read_frame_count(const serfile* sptr, int32_t* frame_count, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (!frame_count) {
         return (*status = NULL_DEST_BUFF);
@@ -1056,13 +1034,8 @@ int ser_read_frame_count(const serfile* sptr, int32_t* frame_count, int* status)
 }
 
 int ser_read_observer(const serfile* sptr, char* observer, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (!observer) {
         return (*status = NULL_DEST_BUFF);
@@ -1074,13 +1047,8 @@ int ser_read_observer(const serfile* sptr, char* observer, int* status) {
 }
 
 int ser_read_instrument(const serfile* sptr, char* instrument, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (!instrument) {
         return (*status = NULL_DEST_BUFF);
@@ -1092,13 +1060,8 @@ int ser_read_instrument(const serfile* sptr, char* instrument, int* status) {
 }
 
 int ser_read_telescope(const serfile* sptr, char* telescope, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (!telescope) {
         return (*status = NULL_DEST_BUFF);
@@ -1110,13 +1073,8 @@ int ser_read_telescope(const serfile* sptr, char* telescope, int* status) {
 }
 
 int ser_read_date_time(const serfile* sptr, int64_t* date_time, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (!date_time) {
         return (*status = NULL_DEST_BUFF);
@@ -1128,13 +1086,8 @@ int ser_read_date_time(const serfile* sptr, int64_t* date_time, int* status) {
 }
 
 int ser_read_date_time_utc(const serfile* sptr, int64_t* date_time_utc, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (!date_time_utc) {
         return (*status = NULL_DEST_BUFF);
@@ -1146,13 +1099,8 @@ int ser_read_date_time_utc(const serfile* sptr, int64_t* date_time_utc, int* sta
 }
 
 int ser_write_file_id(serfile* sptr, const char* file_id, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (!file_id) {
         return (*status = NULL_PARAM);
@@ -1169,13 +1117,8 @@ int ser_write_file_id(serfile* sptr, const char* file_id, int* status) {
 }
 
 int ser_write_lu_id(serfile* sptr, const int32_t lu_id, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (sptr->access_mode == READONLY) {
         return (*status = WRITE_ON_READONLY);
@@ -1188,13 +1131,8 @@ int ser_write_lu_id(serfile* sptr, const int32_t lu_id, int* status) {
 }
 
 int ser_write_color_id(serfile* sptr, const int32_t color_id, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (sptr->access_mode == READONLY) {
         return (*status = WRITE_ON_READONLY);
@@ -1233,13 +1171,8 @@ int ser_write_color_id(serfile* sptr, const int32_t color_id, int* status) {
 }
 
 int ser_write_little_endian(serfile* sptr, const int32_t little_endian, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
     
     if (sptr->access_mode == READONLY) {
         return (*status = WRITE_ON_READONLY);
@@ -1255,13 +1188,8 @@ int ser_write_little_endian(serfile* sptr, const int32_t little_endian, int* sta
 }
 
 int ser_write_image_width(serfile* sptr, const uint32_t image_width, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (sptr->access_mode == READONLY) {
         return (*status = WRITE_ON_READONLY);
@@ -1278,13 +1206,8 @@ int ser_write_image_width(serfile* sptr, const uint32_t image_width, int* status
 }
 
 int ser_write_image_height(serfile* sptr, const uint32_t image_height, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (sptr->access_mode == READONLY) {
         return (*status = WRITE_ON_READONLY);
@@ -1301,13 +1224,8 @@ int ser_write_image_height(serfile* sptr, const uint32_t image_height, int* stat
 }
 
 int ser_write_pixel_depth_per_plane(serfile* sptr, const int32_t pixel_depth_per_plane, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (sptr->access_mode == READONLY) {
         return (*status = WRITE_ON_READONLY);
@@ -1335,13 +1253,8 @@ int ser_write_pixel_depth_per_plane(serfile* sptr, const int32_t pixel_depth_per
 }
 
 int ser_write_observer(serfile* sptr, const char* observer, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (sptr->access_mode == READONLY) {
         return (*status = WRITE_ON_READONLY);
@@ -1358,13 +1271,8 @@ int ser_write_observer(serfile* sptr, const char* observer, int* status) {
 }
 
 int ser_write_instrument(serfile* sptr, const char* instrument, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (sptr->access_mode == READONLY) {
         return (*status = WRITE_ON_READONLY);
@@ -1381,13 +1289,8 @@ int ser_write_instrument(serfile* sptr, const char* instrument, int* status) {
 }
 
 int ser_write_telescope(serfile* sptr, const char* telescope, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (sptr->access_mode == READONLY) {
         return (*status = WRITE_ON_READONLY);
@@ -1404,13 +1307,8 @@ int ser_write_telescope(serfile* sptr, const char* telescope, int* status) {
 }
 
 int ser_write_date_time(serfile* sptr, const int64_t date_time, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (sptr->access_mode == READONLY) {
         return (*status = WRITE_ON_READONLY);
@@ -1436,13 +1334,8 @@ int ser_write_date_time(serfile* sptr, const int64_t date_time, int* status) {
 }
 
 int ser_write_date_time_utc(serfile* sptr, const int64_t date_time_utc, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (sptr->access_mode == READONLY) {
         return (*status = WRITE_ON_READONLY);
@@ -1458,13 +1351,8 @@ int ser_write_date_time_utc(serfile* sptr, const int64_t date_time_utc, int* sta
 /*-------------------- Image Routines --------------------*/
 
 int ser_get_number_of_planes(serfile* sptr, int* nop, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (!nop) {
         return (*status = NULL_PARAM);
@@ -1476,13 +1364,8 @@ int ser_get_number_of_planes(serfile* sptr, int* nop, int* status) {
 }
 
 int ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) { 
-        return (*status = NULL_SPTR); 
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (!bytes_per_pixel) { 
         return (*status = NULL_PARAM); 
@@ -1501,13 +1384,8 @@ int ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int* 
 }
 
 int ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) { 
-        return (*status = NULL_SPTR); 
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (!byte_size) { 
         return (*status = NULL_PARAM); 
@@ -1528,13 +1406,8 @@ int ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* status
 }
 
 int ser_read_frame(serfile* sptr, void* dest, size_t idx, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) { 
-        return (*status = NULL_SPTR); 
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (!dest) { 
         return (*status = NULL_DEST_BUFF); 
@@ -1561,13 +1434,8 @@ int ser_read_frame(serfile* sptr, void* dest, size_t idx, int* status) {
 }
 
 int ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) { 
-        return (*status = NULL_SPTR); 
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (sptr->access_mode == READONLY) {
         return (*status = WRITE_ON_READONLY);
@@ -1615,13 +1483,8 @@ int ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* s
 /*-------------------- Trailer Routines --------------------*/
 
 int ser_read_timestamp(serfile* sptr, int64_t* dest, size_t idx, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) { 
-        return (*status = NULL_SPTR); 
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (!dest) { 
         return (*status = NULL_DEST_BUFF); 
@@ -1643,17 +1506,9 @@ int ser_read_timestamp(serfile* sptr, int64_t* dest, size_t idx, int* status) {
 /*-------------------- Memory-Backed SER Access Routines --------------------*/
 
 int ser_create_memory(serfile** sptr, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTRPTR);
-    }
-
-    if ((*sptr)) {
-        return (*status = SPTR_OCCUPIED);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTRPTR(sptr, status);
+	RETURN_IF_SPTR_OCCUPIED(sptr, status);
 
     /* allocate memory for serfile */
     *sptr = (serfile*)malloc(sizeof(serfile));
@@ -1674,6 +1529,8 @@ int ser_create_memory(serfile** sptr, int* status) {
     (*sptr)->access_mode = READWRITE;
 
     /* intialize file metadata */
+    ser_header_initializations(*sptr);
+    /*
     memset((*sptr)->file_id, 0, FILEID_LEN);
     (*sptr)->lu_id = 0;
     (*sptr)->color_id = MONO;
@@ -1687,6 +1544,7 @@ int ser_create_memory(serfile** sptr, int* status) {
     memset((*sptr)->telescope, 0, TELESCOPE_LEN);
     (*sptr)->date_time = 0;
     (*sptr)->date_time_utc = 0;
+    */
 
     /* initialize trailer */
     (*sptr)->has_trailer = (*sptr)->date_time <= 0 ? false : true;
@@ -1697,17 +1555,9 @@ int ser_create_memory(serfile** sptr, int* status) {
 }
 
 int ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if ((*sptr)) {
-        return (*status = SPTR_OCCUPIED);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTRPTR(sptr, status);
+	RETURN_IF_SPTR_OCCUPIED(sptr, status);
 
     if (!data) {
         return (*status = NULL_PARAM);
@@ -1783,17 +1633,9 @@ int ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* sta
 }
 
 int ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTRPTR);
-    }
-
-    if ((*sptr)) {
-        return (*status = SPTR_OCCUPIED);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTRPTR(sptr, status);
+	RETURN_IF_SPTR_OCCUPIED(sptr, status);
 
     if (!data) {
         return (*status = NULL_PARAM);
@@ -1873,9 +1715,7 @@ int ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode, 
 }
 
 int ser_close_memory(serfile* sptr, int* status) {
-    if (!sptr) { 
-        return (*status = NULL_SPTR); 
-    }
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (sptr->access_mode == READWRITE) {
         sptr->writer(sptr->io_context, sptr->file_id, FILEID_LEN, FILEID_KEY);
