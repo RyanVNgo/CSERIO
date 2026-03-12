@@ -77,6 +77,8 @@ START_TEST(open_view_no_trailer_fail) {
             &status
     );
     ck_assert_int_eq(status, INVALID_STRUCTURE);
+    ck_assert_ptr_null(test_ser);
+
 } END_TEST
 
 START_TEST(open_view_with_trailer_fail) {
@@ -92,6 +94,8 @@ START_TEST(open_view_with_trailer_fail) {
             &status
     );
     ck_assert_int_eq(status, INVALID_STRUCTURE);
+    ck_assert_ptr_null(test_ser);
+    
 } END_TEST
 
 START_TEST(open_view_short_trailer) {
