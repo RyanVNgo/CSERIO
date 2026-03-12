@@ -10,6 +10,10 @@
 #ifndef CSERIO_H
 #define CSERIO_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -21,9 +25,9 @@
 /* CSERIO Version */ 
 /*------------------------------------------------------------------*/
 
-#define CSERIO_MAJOR                        3
+#define CSERIO_MAJOR                        4
 #define CSERIO_MINOR                        0
-#define CSERIO_MICRO                        1
+#define CSERIO_MICRO                        0
 
 
 /*------------------------------------------------------------------*/
@@ -38,9 +42,9 @@
 #define NULL_SPTR                           102
 #define NULL_DEST_BUFF                      103
 #define NULL_PARAM                          104
+#define NULL_SPTRPTR                        105
+#define SPTR_OCCUPIED                       106
 
-#define EOF_ERROR                           111
-#define FREAD_ERROR                         112
 #define READ_ERROR                          113
 
 #define WRITE_ON_READONLY                   131
@@ -58,17 +62,11 @@
 
 /*-------------------- Header Routine Errors --------------------*/
 
-#define INVALID_HDR_IDX                     301
-#define INVALID_HDR_KEY                     302
-
-#define HDR_WRITE_WARN                      311
-
 #define INVALID_SET_STATE                   321
 #define INVALID_SET_VALUE                   322
 
 /*-------------------- Image Routine Errors --------------------*/
 
-#define INVALID_DIM_IDX                     401
 #define INVALID_FRAME_IDX                   402
 #define INVALID_FRAME_SIZE                  403
 
@@ -78,7 +76,6 @@
 
 #define TRAILER_DNE                         501
 
-#define INVALID_TRAILER_ENABLE              511
 #define INVALID_TRAILER_IDX                 512
 
 #define TRAILER_CLOSE_WARN                  521
@@ -224,207 +221,207 @@ int ser_close_file(serfile* sptr, int* status);
  *  @param  status      (IO)  - Error status.
  *  @return Error Status.
  */
-int ser_get_rec_count(serfile* sptr, int* rec_count, int* status);
+int ser_read_rec_count(serfile* sptr, int* rec_count, int* status);
 
-/*  @brief  Get File ID
+/*  @brief  Read File ID
  *  @param  sptr        (I)     - Pointer to serfile.
  *  @param  file_id     (IO)    - Destination buffer.
  *  @param  status      (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_get_file_id(const serfile* sptr, char* file_id, int* status);
+int ser_read_file_id(serfile* sptr, char* file_id, int* status);
 
-/*  @brief  Get LU ID
+/*  @brief  Read LU ID
  *  @param  sptr        (I)     - Pointer to serfile.
  *  @param  lu_id       (IO)    - Destination buffer.
  *  @param  status      (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_get_lu_id(const serfile* sptr, int32_t* lu_id, int* status);
+int ser_read_lu_id(serfile* sptr, int32_t* lu_id, int* status);
 
-/*  @brief  Get Color ID
+/*  @brief  Read Color ID
  *  @param  sptr        (I)     - Pointer to serfile.
  *  @param  color_id    (IO)    - Destination buffer.
  *  @param  status      (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_get_color_id(const serfile* sptr, int32_t* color_id, int* status);
+int ser_read_color_id(serfile* sptr, int32_t* color_id, int* status);
 
-/*  @brief  Get Litte Endian
+/*  @brief  Read Litte Endian
  *  @param  sptr            (I)     - Pointer to serfile.
  *  @param  little_endian   (IO)    - Destination buffer.
  *  @param  status          (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_get_little_endian(const serfile* sptr, int32_t* little_endian, int* status);
+int ser_read_little_endian(serfile* sptr, int32_t* little_endian, int* status);
 
-/*  @brief  Get Image Width
+/*  @brief  Read Image Width
  *  @param  sptr            (I)     - Pointer to serfile.
  *  @param  image_width     (IO)    - Destination buffer.
  *  @param  status          (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_get_image_width(const serfile* sptr, int32_t* image_width, int* status);
+int ser_read_image_width(serfile* sptr, int32_t* image_width, int* status);
 
-/*  @brief  Get Image Height 
+/*  @brief  Read Image Height 
  *  @param  sptr            (I)     - Pointer to serfile.
  *  @param  image_height    (IO)    - Destination buffer.
  *  @param  status          (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_get_image_height(const serfile* sptr, int32_t* image_height, int* status);
+int ser_read_image_height(serfile* sptr, int32_t* image_height, int* status);
 
-/*  @brief  Get Pixel Depth Per Plane
+/*  @brief  Read Pixel Depth Per Plane
  *  @param  sptr                    (I)     - Pointer to serfile.
  *  @param  pixel_depth_per_plane   (IO)    - Destination buffer.
  *  @param  status                  (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_get_pixel_depth_per_plane(const serfile* sptr, int32_t* pixel_depth_per_plane, int* status);
+int ser_read_pixel_depth_per_plane(serfile* sptr, int32_t* pixel_depth_per_plane, int* status);
 
-/*  @brief  Get Frame Count
+/*  @brief  Read Frame Count
  *  @param  sptr        (I)     - Pointer to serfile.
  *  @param  frame_count (IO)    - Destination buffer.
  *  @param  status      (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_get_frame_count(const serfile* sptr, int32_t* frame_count, int* status);
+int ser_read_frame_count(serfile* sptr, int32_t* frame_count, int* status);
 
-/*  @brief  Get Observer
+/*  @brief  Read Observer
  *  @param  sptr        (I)     - Pointer to serfile.
  *  @param  observer    (IO)    - Destination buffer.
  *  @param  status      (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_get_observer(const serfile* sptr, char* observer, int* status);
+int ser_read_observer(serfile* sptr, char* observer, int* status);
 
-/*  @brief  Get Instrument 
+/*  @brief  Read Instrument 
  *  @param  sptr        (I)     - Pointer to serfile.
  *  @param  instrument  (IO)    - Destination buffer.
  *  @param  status      (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_get_instrument(const serfile* sptr, char* instrument, int* status);
+int ser_read_instrument(serfile* sptr, char* instrument, int* status);
 
-/*  @brief  Get Telescope
+/*  @brief  Read Telescope
  *  @param  sptr        (I)     - Pointer to serfile.
  *  @param  telescope   (IO)    - Destination buffer.
  *  @param  status      (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_get_telescope(const serfile* sptr, char* telescope, int* status);
+int ser_read_telescope(serfile* sptr, char* telescope, int* status);
 
-/*  @brief  Get Date Time
+/*  @brief  Read Date Time
  *  @param  sptr        (I)     - Pointer to serfile.
  *  @param  date_time   (IO)    - Destination buffer.
  *  @param  status      (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_get_date_time(const serfile* sptr, int64_t* date_time, int* status);
+int ser_read_date_time(serfile* sptr, int64_t* date_time, int* status);
 
-/*  @brief  Get Date Time UTC
+/*  @brief  Read Date Time UTC
  *  @param  sptr            (I)     - Pointer to serfile.
  *  @param  date_time_utc   (IO)    - Destination buffer.
  *  @param  status          (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_get_date_time_utc(const serfile* sptr, int64_t* date_time_utc, int* status);
+int ser_read_date_time_utc(serfile* sptr, int64_t* date_time_utc, int* status);
 
-/*  @brief  Set File ID.
+/*  @brief  Write File ID.
  *  @param  sptr                (I)     - Pointer to serfile.
  *  @param  file_id             (I)     - New File ID (char* string).
  *  @param  status              (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_set_file_id(serfile* sptr, const char* file_id, int* status);
+int ser_write_file_id(serfile* sptr, const char* file_id, int* status);
 
-/*  @brief  Set LU ID.
+/*  @brief  Write LU ID.
  *  @param  sptr                (I)     - Pointer to serfile.
  *  @param  lu_id               (I)     - New LU ID.
  *  @param  status              (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_set_lu_id(serfile* sptr, const int32_t lu_id, int* status);
+int ser_write_lu_id(serfile* sptr, const int32_t lu_id, int* status);
 
-/*  @brief  Set Color ID.
+/*  @brief  Write Color ID.
  *  @param  sptr                (I)     - Pointer to serfile.
  *  @param  color_id            (I)     - New Color ID
  *  @param  status              (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_set_color_id(serfile* sptr, const int32_t color_id, int* status);
+int ser_write_color_id(serfile* sptr, const int32_t color_id, int* status);
 
-/*  @brief  Set Little Endian.
+/*  @brief  Write Little Endian.
  *  @param  sptr                (I)     - Pointer to serfile.
  *  @param  little_endian       (I)     - New Little Endian
  *  @param  status              (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_set_little_endian(serfile* sptr, const int32_t little_endian, int* status);
+int ser_write_little_endian(serfile* sptr, const int32_t little_endian, int* status);
 
-/*  @brief  Set Image Width.
+/*  @brief  Write Image Width.
  *  @param  sptr                (I)     - Pointer to serfile.
  *  @param  image_width         (I)     - New Image Width.
  *  @param  status              (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_set_image_width(serfile* sptr, const uint32_t image_width, int* status);
+int ser_write_image_width(serfile* sptr, const uint32_t image_width, int* status);
 
-/*  @brief  Set Image Height. 
+/*  @brief  Write Image Height. 
  *  @param  sptr                (I)     - Pointer to serfile.
  *  @param  image_height        (I)     - New Image Height.
  *  @param  status              (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_set_image_height(serfile* sptr, const uint32_t image_height, int* status);
+int ser_write_image_height(serfile* sptr, const uint32_t image_height, int* status);
 
-/*  @brief  Set Pixel Depth Per Plane.  
+/*  @brief  Write Pixel Depth Per Plane.  
  *  @param  sptr                    (I)     - Pointer to serfile.
  *  @param  pixel_depth_per_plane   (I)     - New Pixel Depth Per Plane.  
  *  @param  status                  (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_set_pixel_depth_per_plane(serfile* sptr, const int32_t pixel_depth_per_plane, int* status);
+int ser_write_pixel_depth_per_plane(serfile* sptr, const int32_t pixel_depth_per_plane, int* status);
 
-/*  @brief  Set Observer.
+/*  @brief  Write Observer.
  *  @param  sptr                (I)     - Pointer to serfile.
  *  @param  observer            (I)     - New Observer (char* string).
  *  @param  status              (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_set_observer(serfile* sptr, const char* observer, int* status);
+int ser_write_observer(serfile* sptr, const char* observer, int* status);
 
-/*  @brief  Set Instrument. 
+/*  @brief  Write Instrument. 
  *  @param  sptr                (I)     - Pointer to serfile.
  *  @param  instrument          (I)     - New Instrument (char* string).
  *  @param  status              (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_set_instrument(serfile* sptr, const char* instrument, int* status);
+int ser_write_instrument(serfile* sptr, const char* instrument, int* status);
 
-/*  @brief  Set Telescope. 
+/*  @brief  Write Telescope. 
  *  @param  sptr                (I)     - Pointer to serfile.
  *  @param  telescope           (I)     - New Telescope (char* string).
  *  @param  status              (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_set_telescope(serfile* sptr, const char* telescope, int* status);
+int ser_write_telescope(serfile* sptr, const char* telescope, int* status);
 
-/*  @brief  Set Date Time. 
+/*  @brief  Write Date Time. 
  *  @param  sptr                (I)     - Pointer to serfile.
  *  @param  date_time           (I)     - New Date Time.
  *  @param  status              (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_set_date_time(serfile* sptr, const int64_t date_time, int* status);
+int ser_write_date_time(serfile* sptr, const int64_t date_time, int* status);
 
-/*  @brief  Set Date Time. 
+/*  @brief  Write Date Time. 
  *  @param  sptr                (I)     - Pointer to serfile.
  *  @param  date_time_utc       (I)     - New Date Time UTC.
  *  @param  status              (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_set_date_time_utc(serfile* sptr, const int64_t date_time_utc, int* status);
+int ser_write_date_time_utc(serfile* sptr, const int64_t date_time_utc, int* status);
 
 /*-------------------- Image Routines --------------------*/
 
@@ -487,19 +484,6 @@ int ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* s
 
 /*-------------------- Trailer Routines --------------------*/
 
-/*  @brief Enable the optional timestamp trailer.
- *
- *  Note that this may only be called in the case that there
- *  is no image data present in the SER. Attempts to call
- *  this method after data has been written with no associated
- *  timestamps will result in an error.
- *
- *  @param  sptr    (I)     - Pointer to serfile.
- *  @param  status  (IO)    - Error status.
- *  @return Error Status.
- */
-int ser_enable_trailer(serfile* sptr, int* status);
-
 /*  @brief  Read trailer time stamp at index.
  *  @param  sptr    (I)     - Pointer to serfile.
  *  @param  dest    (IO)    - Pointer to data buffer.
@@ -507,7 +491,7 @@ int ser_enable_trailer(serfile* sptr, int* status);
  *  @param  status  (IO)    - Error status.
  *  @return Error Status.
  */
-int ser_get_timestamp(serfile* sptr, int64_t* dest, size_t idx, int* status);
+int ser_read_timestamp(serfile* sptr, int64_t* dest, size_t idx, int* status);
 
 
 /*-------------------- Memory-Backed SER Access Routines --------------------*/
@@ -606,6 +590,44 @@ typedef struct {
 
 /*-------------------- Internal Routines --------------------*/
 
+#define RETURN_IF_STATUS_IS_ERROR(status)                       \
+    do {                                                        \
+        if ( *status ) { return (*status); }                    \
+    } while(0)                                                  \
+
+#define RETURN_IF_NULL_SPTRPTR(sptr, status)                    \
+    do {                                                        \
+        if ( !sptr ) { return (*status = NULL_SPTRPTR); }       \
+    } while(0)                                                  \
+
+#define RETURN_IF_SPTR_OCCUPIED(sptr, status)                   \
+    do {                                                        \
+        if ( *sptr ) { return (*status = SPTR_OCCUPIED); }      \
+    } while(0)                                                  \
+
+#define RETURN_IF_NULL_SPTR(sptr, status)                       \
+    do {                                                        \
+        if ( !sptr ) { return (*status = NULL_SPTR); }          \
+    } while(0)                                                  \
+
+#define RETURN_IF_NULL_DEST_BUFF(dest, status)                  \
+    do {                                                        \
+        if ( !dest ) { return (*status = NULL_DEST_BUFF); }     \
+    } while(0)                                                  \
+
+#define RETURN_IF_NULL_PARAM(param, status)                     \
+    do {                                                        \
+        if ( !param ) { return (*status = NULL_PARAM); }        \
+    } while(0)                                                  \
+
+#define RETURN_IF_WRITE_ON_READONLY(sptr, status)               \
+    do {                                                        \
+        if ( sptr->access_mode == READONLY ) {                  \
+            return (*status = WRITE_ON_READONLY);               \
+        }                                                       \
+    } while(0)                                                  \
+
+
 static size_t ser_memory_read(void* io_context, void* buffer, size_t size, size_t offset) {
     serMem* memory_io = (serMem*)(io_context);
 
@@ -668,6 +690,35 @@ static size_t ser_file_write(void* io_context, const void* data, size_t size, si
     return fwrite(data, 1, size, file_io);
 }
 
+static void ser_header_initializations(serfile* sptr) {
+    memset(sptr->file_id,           0, FILEID_LEN);
+    sptr->lu_id =                   0;
+    sptr->color_id =                MONO;
+    sptr->little_endian =           LITTLEENDIAN_TRUE;
+    sptr->image_width =             0;
+    sptr->image_height =            0;
+    sptr->pixel_depth_per_plane =   8;
+    sptr->frame_count =             0;
+    memset(sptr->observer,          0, OBSERVER_LEN);
+    memset(sptr->instrument,        0, INSTRUMENT_LEN);
+    memset(sptr->telescope,         0, TELESCOPE_LEN);
+    sptr->date_time =               0;
+    sptr->date_time_utc =           0;
+    sptr->writer(sptr->io_context, sptr->file_id, FILEID_LEN, FILEID_KEY);
+    sptr->writer(sptr->io_context, &sptr->lu_id, LUID_LEN, LUID_KEY);
+    sptr->writer(sptr->io_context, &sptr->color_id, COLORID_LEN, COLORID_KEY);
+    sptr->writer(sptr->io_context, &sptr->little_endian, LITTLEENDIAN_LEN, LITTLEENDIAN_KEY);
+    sptr->writer(sptr->io_context, &sptr->image_width, IMAGEWIDTH_LEN, IMAGEWIDTH_KEY);
+    sptr->writer(sptr->io_context, &sptr->image_height, IMAGEHEIGHT_LEN, IMAGEHEIGHT_KEY);
+    sptr->writer(sptr->io_context, &sptr->pixel_depth_per_plane, PIXELDEPTHPERPLANE_LEN, PIXELDEPTHPERPLANE_KEY);
+    sptr->writer(sptr->io_context, &sptr->frame_count, FRAMECOUNT_LEN, FRAMECOUNT_KEY);
+    sptr->writer(sptr->io_context, sptr->observer, OBSERVER_LEN, OBSERVER_KEY);
+    sptr->writer(sptr->io_context, sptr->instrument, INSTRUMENT_LEN, INSTRUMENT_KEY);
+    sptr->writer(sptr->io_context, sptr->telescope, TELESCOPE_LEN, TELESCOPE_KEY);
+    sptr->writer(sptr->io_context, &sptr->date_time, DATETIME_LEN, DATETIME_KEY);
+    sptr->writer(sptr->io_context, &sptr->date_time_utc, DATETIMEUTC_LEN, DATETIMEUTC_KEY);
+}
+
 
 /*-------------------- Core Routines --------------------*/
 
@@ -688,13 +739,9 @@ void cserio_version_number(int* major, int* minor, int* micro) {
 /*-------------------- SER Access Routines --------------------*/
 
 int ser_create_file(serfile** sptr, const char* path, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTRPTR(sptr, status);
+	RETURN_IF_SPTR_OCCUPIED(sptr, status);
 
     if (!path) {
         return (*status = NULL_PATH);
@@ -722,21 +769,9 @@ int ser_create_file(serfile** sptr, const char* path, int* status) {
     (*sptr)->writer = ser_file_write;
     (*sptr)->access_mode = READWRITE;
 
-    memset((*sptr)->file_id, 0, FILEID_LEN);
-    (*sptr)->lu_id = 0;
-    (*sptr)->color_id = MONO;
-    (*sptr)->little_endian = 1;
-    (*sptr)->image_width = 0;
-    (*sptr)->image_height = 0;
-    (*sptr)->pixel_depth_per_plane = 8;
-    (*sptr)->frame_count = 0;
-    memset((*sptr)->observer, 0, OBSERVER_LEN);
-    memset((*sptr)->instrument, 0, INSTRUMENT_LEN);
-    memset((*sptr)->telescope, 0, TELESCOPE_LEN);
-    (*sptr)->date_time = 0;
-    (*sptr)->date_time_utc = 0;
+    ser_header_initializations(*sptr);
 
-    (*sptr)->has_trailer = false;
+    (*sptr)->has_trailer = (*sptr)->date_time <= 0 ? false : true;
     (*sptr)->timestamps = NULL;
     (*sptr)->timestamp_count = 0;
 
@@ -744,13 +779,9 @@ int ser_create_file(serfile** sptr, const char* path, int* status) {
 }
 
 int ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTRPTR(sptr, status);
+	RETURN_IF_SPTR_OCCUPIED(sptr, status);
 
     if (!path) {
         return (*status = NULL_PATH);
@@ -806,32 +837,31 @@ int ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
     (*sptr)->reader(file, (*sptr)->telescope, TELESCOPE_LEN, TELESCOPE_KEY);
     (*sptr)->reader(file, &(*sptr)->date_time, DATETIME_LEN, DATETIME_KEY);
     (*sptr)->reader(file, &(*sptr)->date_time_utc, DATETIMEUTC_LEN, DATETIMEUTC_KEY);
-    (*sptr)->has_trailer = false;
+    (*sptr)->has_trailer = (*sptr)->date_time <= 0 ? false : true;
     (*sptr)->timestamps = NULL;
     (*sptr)->timestamp_count = 0;
 
     /* determine if valid hdr + data or hdr + data + trailer */
     size_t frame_byte_size = 0;
     ser_get_frame_byte_size(*sptr, &frame_byte_size, status);
-    size_t hdr_data_size = HDR_SIZE + (*sptr)->frame_count * frame_byte_size;
+    size_t trailer_offset = HDR_SIZE + (*sptr)->frame_count * frame_byte_size;
 
-    /* hdr + data */
-    if (file_size == hdr_data_size) {
-        return (*status);
-    }
-
-    /* hdr + data + trailer */
-    if ((file_size - hdr_data_size) == (*sptr)->frame_count * sizeof(uint64_t)) {
-        (*sptr)->has_trailer = true;
-        (*sptr)->timestamps = (int64_t*)realloc((*sptr)->timestamps, (*sptr)->frame_count * sizeof(uint64_t));
-        (*sptr)->timestamp_count = (*sptr)->frame_count;
-        (*sptr)->reader(
-                (*sptr)->io_context,
-                (*sptr)->timestamps,
-                (*sptr)->frame_count * sizeof(uint64_t),
-                hdr_data_size
-        );
-        return (*status);
+    if ((*sptr)->has_trailer) {
+        if (file_size == trailer_offset + (*sptr)->frame_count * sizeof(uint64_t)) {
+            (*sptr)->timestamps = (int64_t*)realloc((*sptr)->timestamps, (*sptr)->frame_count * sizeof(uint64_t));
+            (*sptr)->timestamp_count = (*sptr)->frame_count;
+            (*sptr)->reader(
+                    (*sptr)->io_context,
+                    (*sptr)->timestamps,
+                    (*sptr)->frame_count * sizeof(uint64_t),
+                    trailer_offset
+            );
+            return (*status);
+        }
+    } else {
+        if (file_size == trailer_offset) {
+            return (*status);
+        }
     }
 
     /* if reached, invalid structure */
@@ -842,25 +872,7 @@ int ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
 }
 
 int ser_close_file(serfile* sptr, int* status) {
-    if (!sptr) { 
-        return (*status = NULL_SPTR); 
-    }
-
-    if (sptr->access_mode == READWRITE) {
-        sptr->writer(sptr->io_context, sptr->file_id, FILEID_LEN, FILEID_KEY);
-        sptr->writer(sptr->io_context, &sptr->lu_id, LUID_LEN, LUID_KEY);
-        sptr->writer(sptr->io_context, &sptr->color_id, COLORID_LEN, COLORID_KEY);
-        sptr->writer(sptr->io_context, &sptr->little_endian, LITTLEENDIAN_LEN, LITTLEENDIAN_KEY);
-        sptr->writer(sptr->io_context, &sptr->image_width, IMAGEWIDTH_LEN, IMAGEWIDTH_KEY);
-        sptr->writer(sptr->io_context, &sptr->image_height, IMAGEHEIGHT_LEN, IMAGEHEIGHT_KEY);
-        sptr->writer(sptr->io_context, &sptr->pixel_depth_per_plane, PIXELDEPTHPERPLANE_LEN, PIXELDEPTHPERPLANE_KEY);
-        sptr->writer(sptr->io_context, &sptr->frame_count, FRAMECOUNT_LEN, FRAMECOUNT_KEY);
-        sptr->writer(sptr->io_context, sptr->observer, OBSERVER_LEN, OBSERVER_KEY);
-        sptr->writer(sptr->io_context, sptr->instrument, INSTRUMENT_LEN, INSTRUMENT_KEY);
-        sptr->writer(sptr->io_context, sptr->telescope, TELESCOPE_LEN, TELESCOPE_KEY);
-        sptr->writer(sptr->io_context, &sptr->date_time, DATETIME_LEN, DATETIME_KEY);
-        sptr->writer(sptr->io_context, &sptr->date_time_utc, DATETIMEUTC_LEN, DATETIMEUTC_KEY);
-    }
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (sptr->timestamps && sptr->access_mode == READWRITE) {
         size_t image_frame_byte_size = 0;
@@ -893,310 +905,154 @@ int ser_close_file(serfile* sptr, int* status) {
 
 /*-------------------- Header Routines --------------------*/
 
-int ser_get_rec_count(serfile* sptr, int* rec_count, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) { 
-        return (*status = NULL_SPTR); 
-    }
-
-    if (!rec_count) { 
-        return (*status = NULL_PARAM); 
-    }
-
+int ser_read_rec_count(serfile* sptr, int* rec_count, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+    RETURN_IF_NULL_PARAM(rec_count, status);
     *rec_count = HDR_UNIT_COUNT;
-    
     return (*status);
 }
 
-int ser_get_file_id(const serfile* sptr, char* file_id, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) { 
-        return (*status = NULL_SPTR); 
-    }
-
-    if (!file_id) { 
-        return (*status = NULL_DEST_BUFF); 
-    }
-
+int ser_read_file_id(serfile* sptr, char* file_id, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+    RETURN_IF_NULL_DEST_BUFF(file_id, status);
+    sptr->reader(sptr->io_context, sptr->file_id, FILEID_LEN, FILEID_KEY);
     memcpy(file_id, sptr->file_id, FILEID_LEN);
-
     return (*status);
 }
 
-int ser_get_lu_id(const serfile* sptr, int32_t* lu_id, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (!lu_id) {
-        return (*status = NULL_DEST_BUFF);
-    }
-
+int ser_read_lu_id(serfile* sptr, int32_t* lu_id, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+    RETURN_IF_NULL_DEST_BUFF(lu_id, status);
+    sptr->reader(sptr->io_context, &sptr->lu_id, LUID_LEN, LUID_KEY); 
     *lu_id = sptr->lu_id;
-
     return (*status);
 }
 
-int ser_get_color_id(const serfile* sptr, int32_t* color_id, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (!color_id) {
-        return (*status = NULL_DEST_BUFF);
-    }
-
+int ser_read_color_id(serfile* sptr, int32_t* color_id, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+    RETURN_IF_NULL_DEST_BUFF(color_id, status);
+    sptr->reader(sptr->io_context, &sptr->color_id, COLORID_LEN, COLORID_KEY); 
     *color_id = sptr->color_id;
-
     return (*status);
 }
 
-int ser_get_little_endian(const serfile* sptr, int32_t* little_endian, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (!little_endian) {
-        return (*status = NULL_DEST_BUFF);
-    }
-
+int ser_read_little_endian(serfile* sptr, int32_t* little_endian, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+    RETURN_IF_NULL_DEST_BUFF(little_endian, status);
+    sptr->reader(sptr->io_context, &sptr->little_endian, LITTLEENDIAN_LEN, LITTLEENDIAN_KEY); 
     *little_endian = sptr->little_endian;
-
     return (*status);
 }
 
-int ser_get_image_width(const serfile* sptr, int32_t* image_width, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (!image_width) {
-        return (*status = NULL_DEST_BUFF);
-    }
-
+int ser_read_image_width(serfile* sptr, int32_t* image_width, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+    RETURN_IF_NULL_DEST_BUFF(image_width, status);
+    sptr->reader(sptr->io_context, &sptr->image_width, IMAGEWIDTH_LEN, IMAGEWIDTH_KEY); 
     *image_width = sptr->image_width;
-
     return (*status);
 }
 
-int ser_get_image_height(const serfile* sptr, int32_t* image_height, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (!image_height) {
-        return (*status = NULL_DEST_BUFF);
-    }
-
-    *image_height= sptr->image_height;
-
+int ser_read_image_height(serfile* sptr, int32_t* image_height, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+    RETURN_IF_NULL_DEST_BUFF(image_height, status);
+    sptr->reader(sptr->io_context, &sptr->image_height, IMAGEHEIGHT_LEN, IMAGEHEIGHT_KEY); 
+    *image_height = sptr->image_height;
     return (*status);
 }
 
-int ser_get_pixel_depth_per_plane(const serfile* sptr, int32_t* pixel_depth_per_plane, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (!pixel_depth_per_plane) {
-        return (*status = NULL_DEST_BUFF);
-    }
-
+int ser_read_pixel_depth_per_plane(serfile* sptr, int32_t* pixel_depth_per_plane, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+    RETURN_IF_NULL_DEST_BUFF(pixel_depth_per_plane, status);
+    sptr->reader(sptr->io_context, &sptr->pixel_depth_per_plane, PIXELDEPTHPERPLANE_LEN, PIXELDEPTHPERPLANE_KEY); 
     *pixel_depth_per_plane = sptr->pixel_depth_per_plane;
-
     return (*status);
 }
 
-int ser_get_frame_count(const serfile* sptr, int32_t* frame_count, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (!frame_count) {
-        return (*status = NULL_DEST_BUFF);
-    }
-
+int ser_read_frame_count(serfile* sptr, int32_t* frame_count, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+    RETURN_IF_NULL_DEST_BUFF(frame_count, status);
+    sptr->reader(sptr->io_context, &sptr->frame_count, FRAMECOUNT_LEN, FRAMECOUNT_KEY); 
     *frame_count = sptr->frame_count;
-
     return (*status);
 }
 
-int ser_get_observer(const serfile* sptr, char* observer, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (!observer) {
-        return (*status = NULL_DEST_BUFF);
-    }
-
+int ser_read_observer(serfile* sptr, char* observer, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+    RETURN_IF_NULL_DEST_BUFF(observer, status);
+    sptr->reader(sptr->io_context, sptr->observer, OBSERVER_LEN, OBSERVER_KEY); 
     memcpy(observer, sptr->observer, OBSERVER_LEN);
-
     return (*status);
 }
 
-int ser_get_instrument(const serfile* sptr, char* instrument, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (!instrument) {
-        return (*status = NULL_DEST_BUFF);
-    }
-
+int ser_read_instrument(serfile* sptr, char* instrument, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+    RETURN_IF_NULL_DEST_BUFF(instrument, status);
+    sptr->reader(sptr->io_context, sptr->instrument, INSTRUMENT_LEN, INSTRUMENT_KEY); 
     memcpy(instrument, sptr->instrument, INSTRUMENT_LEN);
-
     return (*status);
 }
 
-int ser_get_telescope(const serfile* sptr, char* telescope, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (!telescope) {
-        return (*status = NULL_DEST_BUFF);
-    }
-
+int ser_read_telescope(serfile* sptr, char* telescope, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+    RETURN_IF_NULL_DEST_BUFF(telescope, status);
+    sptr->reader(sptr->io_context, sptr->telescope, TELESCOPE_LEN, TELESCOPE_KEY); 
     memcpy(telescope, sptr->telescope, TELESCOPE_LEN);
-
     return (*status);
 }
 
-int ser_get_date_time(const serfile* sptr, int64_t* date_time, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (!date_time) {
-        return (*status = NULL_DEST_BUFF);
-    }
-
+int ser_read_date_time(serfile* sptr, int64_t* date_time, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+    RETURN_IF_NULL_DEST_BUFF(date_time, status);
+    sptr->reader(sptr->io_context, &sptr->date_time, DATETIME_LEN, DATETIME_KEY); 
     *date_time = sptr->date_time;
-
     return (*status);
 }
 
-int ser_get_date_time_utc(const serfile* sptr, int64_t* date_time_utc, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (!date_time_utc) {
-        return (*status = NULL_DEST_BUFF);
-    }
-
+int ser_read_date_time_utc(serfile* sptr, int64_t* date_time_utc, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+    RETURN_IF_NULL_DEST_BUFF(date_time_utc, status);
+    sptr->reader(sptr->io_context, &sptr->date_time_utc, DATETIMEUTC_LEN, DATETIMEUTC_KEY); 
     *date_time_utc = sptr->date_time_utc;
-
     return (*status);
 }
 
-int ser_set_file_id(serfile* sptr, const char* file_id, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (!file_id) {
-        return (*status = NULL_PARAM);
-    }
-
-    if (sptr->access_mode == READONLY) {
-        return (*status = WRITE_ON_READONLY);
-    }
-
+int ser_write_file_id(serfile* sptr, const char* file_id, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+    RETURN_IF_NULL_PARAM(file_id, status);
+	RETURN_IF_WRITE_ON_READONLY(sptr, status);
     memcpy(sptr->file_id, file_id, FILEID_LEN);
-
+    sptr->writer(sptr->io_context, sptr->file_id, FILEID_LEN, FILEID_KEY);
     return (*status);
 }
 
-int ser_set_lu_id(serfile* sptr, const int32_t lu_id, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (sptr->access_mode == READONLY) {
-        return (*status = WRITE_ON_READONLY);
-    }
-
+int ser_write_lu_id(serfile* sptr, const int32_t lu_id, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+	RETURN_IF_WRITE_ON_READONLY(sptr, status);
     sptr->lu_id = lu_id;
-
+    sptr->writer(sptr->io_context, &sptr->lu_id, LUID_LEN, LUID_KEY);
     return (*status);
 }
 
-int ser_set_color_id(serfile* sptr, const int32_t color_id, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (sptr->access_mode == READONLY) {
-        return (*status = WRITE_ON_READONLY);
-    }
+int ser_write_color_id(serfile* sptr, const int32_t color_id, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+	RETURN_IF_WRITE_ON_READONLY(sptr, status);
 
     /* valid color id value */
     switch (color_id) {
@@ -1225,87 +1081,59 @@ int ser_set_color_id(serfile* sptr, const int32_t color_id, int* status) {
     }
 
     sptr->color_id = color_id;
+    sptr->writer(sptr->io_context, &sptr->color_id, COLORID_LEN, COLORID_KEY);
 
     return (*status);
 }
 
-int ser_set_little_endian(serfile* sptr, const int32_t little_endian, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-    
-    if (sptr->access_mode == READONLY) {
-        return (*status = WRITE_ON_READONLY);
-    }
+int ser_write_little_endian(serfile* sptr, const int32_t little_endian, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+	RETURN_IF_WRITE_ON_READONLY(sptr, status);
 
     if (little_endian == LITTLEENDIAN_TRUE || little_endian == LITTLEENDIAN_FALSE) {
         sptr->little_endian = little_endian;
+        sptr->writer(sptr->io_context, &sptr->little_endian, LITTLEENDIAN_LEN, LITTLEENDIAN_KEY);
         return (*status);
     }
 
     return (*status = INVALID_SET_VALUE);
 }
 
-int ser_set_image_width(serfile* sptr, const uint32_t image_width, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (sptr->access_mode == READONLY) {
-        return (*status = WRITE_ON_READONLY);
-    }
+int ser_write_image_width(serfile* sptr, const uint32_t image_width, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+	RETURN_IF_WRITE_ON_READONLY(sptr, status);
 
     if (sptr->frame_count > 0) {
         return (*status = INVALID_SET_STATE);
     }
 
     sptr->image_width = image_width;
+    sptr->writer(sptr->io_context, &sptr->image_width, IMAGEWIDTH_LEN, IMAGEWIDTH_KEY);
 
     return (*status);
 }
 
-int ser_set_image_height(serfile* sptr, const uint32_t image_height, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (sptr->access_mode == READONLY) {
-        return (*status = WRITE_ON_READONLY);
-    }
+int ser_write_image_height(serfile* sptr, const uint32_t image_height, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+	RETURN_IF_WRITE_ON_READONLY(sptr, status);
 
     if (sptr->frame_count > 0) {
         return (*status = INVALID_SET_STATE);
     }
 
     sptr->image_height = image_height;
+    sptr->writer(sptr->io_context, &sptr->image_height, IMAGEHEIGHT_LEN, IMAGEHEIGHT_KEY);
 
     return (*status);
 }
 
-int ser_set_pixel_depth_per_plane(serfile* sptr, const int32_t pixel_depth_per_plane, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (sptr->access_mode == READONLY) {
-        return (*status = WRITE_ON_READONLY);
-    }
+int ser_write_pixel_depth_per_plane(serfile* sptr, const int32_t pixel_depth_per_plane, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+	RETURN_IF_WRITE_ON_READONLY(sptr, status);
 
     /* pdpp must between a value from 1 - 16 */
     if (16 < pixel_depth_per_plane || pixel_depth_per_plane <= 0) {
@@ -1323,147 +1151,89 @@ int ser_set_pixel_depth_per_plane(serfile* sptr, const int32_t pixel_depth_per_p
     }
 
     sptr->pixel_depth_per_plane = pixel_depth_per_plane;
+    sptr->writer(sptr->io_context, &sptr->pixel_depth_per_plane, PIXELDEPTHPERPLANE_LEN, PIXELDEPTHPERPLANE_KEY);
 
     return (*status);
 }
 
-int ser_set_observer(serfile* sptr, const char* observer, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (sptr->access_mode == READONLY) {
-        return (*status = WRITE_ON_READONLY);
-    }
-
-    if (!observer) {
-        return (*status = NULL_PARAM);
-    }
-
+int ser_write_observer(serfile* sptr, const char* observer, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+	RETURN_IF_WRITE_ON_READONLY(sptr, status);
+    RETURN_IF_NULL_PARAM(observer, status);
     memcpy(sptr->observer, observer, OBSERVER_LEN);
-
+    sptr->writer(sptr->io_context, sptr->observer, OBSERVER_LEN, OBSERVER_KEY);
     return (*status);
 }
 
-int ser_set_instrument(serfile* sptr, const char* instrument, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (sptr->access_mode == READONLY) {
-        return (*status = WRITE_ON_READONLY);
-    }
-
-    if (!instrument) {
-        return (*status = NULL_PARAM);
-    }
-
+int ser_write_instrument(serfile* sptr, const char* instrument, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+	RETURN_IF_WRITE_ON_READONLY(sptr, status);
+    RETURN_IF_NULL_PARAM(instrument, status);
     memcpy(sptr->instrument, instrument, INSTRUMENT_LEN);
-
+    sptr->writer(sptr->io_context, sptr->instrument, INSTRUMENT_LEN, INSTRUMENT_KEY);
     return (*status);
 }
 
-int ser_set_telescope(serfile* sptr, const char* telescope, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (sptr->access_mode == READONLY) {
-        return (*status = WRITE_ON_READONLY);
-    }
-
-    if (!telescope) {
-        return (*status = NULL_PARAM);
-    }
-
+int ser_write_telescope(serfile* sptr, const char* telescope, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+	RETURN_IF_WRITE_ON_READONLY(sptr, status);
+    RETURN_IF_NULL_PARAM(telescope, status);
     memcpy(sptr->telescope, telescope, TELESCOPE_LEN);
-
+    sptr->writer(sptr->io_context, sptr->telescope, TELESCOPE_LEN, TELESCOPE_KEY);
     return (*status);
 }
 
-int ser_set_date_time(serfile* sptr, const int64_t date_time, int* status) {
-    if (*status) {
-        return (*status);
-    }
+int ser_write_date_time(serfile* sptr, const int64_t date_time, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+	RETURN_IF_WRITE_ON_READONLY(sptr, status);
 
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (sptr->access_mode == READONLY) {
-        return (*status = WRITE_ON_READONLY);
+    /* if frames are present and the new data_time would change trailer state, fail */
+    if (sptr->frame_count > 0) {
+        /* has trailer -> no trailer */
+        if (sptr->date_time > 0 && date_time <= 0) {
+            return (*status = INVALID_SET_STATE);
+        }
+        /* no trailer -> has trailer */
+        if (sptr->date_time <= 0 && date_time > 0) {
+            return (*status = INVALID_SET_STATE);
+        }
     }
 
     sptr->date_time = date_time;
+    sptr->has_trailer = sptr->date_time <= 0 ? false : true;
+    sptr->writer(sptr->io_context, &sptr->date_time, DATETIME_LEN, DATETIME_KEY);
 
     return (*status);
 }
 
-int ser_set_date_time_utc(serfile* sptr, const int64_t date_time_utc, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (sptr->access_mode == READONLY) {
-        return (*status = WRITE_ON_READONLY);
-    }
-
+int ser_write_date_time_utc(serfile* sptr, const int64_t date_time_utc, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+	RETURN_IF_WRITE_ON_READONLY(sptr, status);
     sptr->date_time_utc = date_time_utc;
-
+    sptr->writer(sptr->io_context, &sptr->date_time_utc, DATETIMEUTC_LEN, DATETIMEUTC_KEY);
     return (*status);
 }
 
 
 /*-------------------- Image Routines --------------------*/
 
-#define DATA_START_SET      178
-
 int ser_get_number_of_planes(serfile* sptr, int* nop, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (!nop) {
-        return (*status = NULL_PARAM);
-    }
-
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+    RETURN_IF_NULL_PARAM(nop, status);
     *nop = sptr->color_id < 100 ? 1 : 3;
-
     return (*status);
 }
 
 int ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) { 
-        return (*status = NULL_SPTR); 
-    }
-
-    if (!bytes_per_pixel) { 
-        return (*status = NULL_PARAM); 
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+    RETURN_IF_NULL_PARAM(bytes_per_pixel, status);
 
     int number_of_planes = sptr->color_id < 100 ? 1 : 3;
     int pixel_depth = sptr->pixel_depth_per_plane;
@@ -1478,17 +1248,9 @@ int ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int* 
 }
 
 int ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) { 
-        return (*status = NULL_SPTR); 
-    }
-
-    if (!byte_size) { 
-        return (*status = NULL_PARAM); 
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+    RETURN_IF_NULL_PARAM(byte_size, status);
 
     unsigned long bytes_per_pixel = 0;
     ser_get_bytes_per_pixel(sptr, &bytes_per_pixel, status);
@@ -1505,17 +1267,9 @@ int ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* status
 }
 
 int ser_read_frame(serfile* sptr, void* dest, size_t idx, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) { 
-        return (*status = NULL_SPTR); 
-    }
-
-    if (!dest) { 
-        return (*status = NULL_DEST_BUFF); 
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+    RETURN_IF_NULL_DEST_BUFF(dest, status);
 
     if (idx >= sptr->frame_count) {
         return (*status = INVALID_FRAME_IDX); 
@@ -1527,7 +1281,7 @@ int ser_read_frame(serfile* sptr, void* dest, size_t idx, int* status) {
         return (*status); 
     }
 
-    unsigned long frame_offset = DATA_START_SET + (frame_byte_size * idx);
+    unsigned long frame_offset = HDR_SIZE + (frame_byte_size * idx);
 
     size_t bytes_read = sptr->reader(sptr->io_context, dest, frame_byte_size, frame_offset);
     if (bytes_read < frame_byte_size) {
@@ -1538,23 +1292,10 @@ int ser_read_frame(serfile* sptr, void* dest, size_t idx, int* status) {
 }
 
 int ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) { 
-        return (*status = NULL_SPTR); 
-    }
-
-    if (sptr->access_mode == READONLY) {
-        return (*status = WRITE_ON_READONLY);
-    }
-
-    if (!data) { 
-        return (*status = NULL_PARAM); 
-    }
-
-    size_t frame_count = sptr->frame_count;
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+	RETURN_IF_WRITE_ON_READONLY(sptr, status);
+    RETURN_IF_NULL_PARAM(data, status);
 
     size_t frame_byte_size = 0;
     ser_get_frame_byte_size(sptr, &frame_byte_size, status);
@@ -1566,7 +1307,8 @@ int ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* s
         return (*status = INVALID_FRAME_SIZE);
     }
 
-    unsigned long frame_offset = DATA_START_SET + (frame_byte_size * frame_count);
+    size_t frame_count = sptr->frame_count;
+    unsigned long frame_offset = HDR_SIZE + (frame_byte_size * frame_count);
 
     size_t bytes_written = sptr->writer(
             sptr->io_context,
@@ -1578,6 +1320,7 @@ int ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* s
         return (*status = IMAGE_WRITE_WARN);
     }
     sptr->frame_count += 1;
+    sptr->writer(sptr->io_context, &sptr->frame_count, FRAMECOUNT_LEN, FRAMECOUNT_KEY);
 
     if (sptr->has_trailer) {
         sptr->timestamp_count += 1;
@@ -1591,36 +1334,10 @@ int ser_append_frame(serfile* sptr, const void* data, uint64_t timestamp, int* s
 
 /*-------------------- Trailer Routines --------------------*/
 
-int ser_enable_trailer(serfile* sptr, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (sptr->frame_count != 0 && !sptr->has_trailer) {
-        return (*status = INVALID_TRAILER_ENABLE);
-    }
-
-    sptr->has_trailer = true;
-
-    return (*status);
-}
-
-int ser_get_timestamp(serfile* sptr, int64_t* dest, size_t idx, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) { 
-        return (*status = NULL_SPTR); 
-    }
-
-    if (!dest) { 
-        return (*status = NULL_DEST_BUFF); 
-    }
+int ser_read_timestamp(serfile* sptr, int64_t* dest, size_t idx, int* status) {
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTR(sptr, status);
+    RETURN_IF_NULL_DEST_BUFF(dest, status);
 
     if (!sptr->has_trailer) {
         return (*status = TRAILER_DNE);
@@ -1638,13 +1355,9 @@ int ser_get_timestamp(serfile* sptr, int64_t* dest, size_t idx, int* status) {
 /*-------------------- Memory-Backed SER Access Routines --------------------*/
 
 int ser_create_memory(serfile** sptr, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTRPTR(sptr, status);
+	RETURN_IF_SPTR_OCCUPIED(sptr, status);
 
     /* allocate memory for serfile */
     *sptr = (serfile*)malloc(sizeof(serfile));
@@ -1665,22 +1378,10 @@ int ser_create_memory(serfile** sptr, int* status) {
     (*sptr)->access_mode = READWRITE;
 
     /* intialize file metadata */
-    memset((*sptr)->file_id, 0, FILEID_LEN);
-    (*sptr)->lu_id = 0;
-    (*sptr)->color_id = MONO;
-    (*sptr)->little_endian = 1;
-    (*sptr)->image_width = 0;
-    (*sptr)->image_height = 0;
-    (*sptr)->pixel_depth_per_plane = 8;
-    (*sptr)->frame_count = 0;
-    memset((*sptr)->observer, 0, OBSERVER_LEN);
-    memset((*sptr)->instrument, 0, INSTRUMENT_LEN);
-    memset((*sptr)->telescope, 0, TELESCOPE_LEN);
-    (*sptr)->date_time = 0;
-    (*sptr)->date_time_utc = 0;
+    ser_header_initializations(*sptr);
 
     /* initialize trailer */
-    (*sptr)->has_trailer = false;
+    (*sptr)->has_trailer = (*sptr)->date_time <= 0 ? false : true;
     (*sptr)->timestamps = NULL;
     (*sptr)->timestamp_count = 0;
 
@@ -1688,17 +1389,10 @@ int ser_create_memory(serfile** sptr, int* status) {
 }
 
 int ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (!data) {
-        return (*status = NULL_PARAM);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTRPTR(sptr, status);
+	RETURN_IF_SPTR_OCCUPIED(sptr, status);
+    RETURN_IF_NULL_PARAM(data, status);
 
     /* determine validity of header */
     if (size < HDR_SIZE) {
@@ -1735,32 +1429,31 @@ int ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* sta
     (*sptr)->reader(ser_data, (*sptr)->telescope, TELESCOPE_LEN, TELESCOPE_KEY);
     (*sptr)->reader(ser_data, &(*sptr)->date_time, DATETIME_LEN, DATETIME_KEY);
     (*sptr)->reader(ser_data, &(*sptr)->date_time_utc, DATETIMEUTC_LEN, DATETIMEUTC_KEY);
-    (*sptr)->has_trailer = false;
+    (*sptr)->has_trailer = (*sptr)->date_time <= 0 ? false : true;
     (*sptr)->timestamps = NULL;
     (*sptr)->timestamp_count = 0;
 
     /* determine if valid hdr + data or hdr + data + trailer */
     size_t frame_byte_size = 0;
     ser_get_frame_byte_size(*sptr, &frame_byte_size, status);
-    size_t hdr_data_size = HDR_SIZE + (*sptr)->frame_count * frame_byte_size;
+    size_t trailer_offset = HDR_SIZE + (*sptr)->frame_count * frame_byte_size;
 
-    /* hdr + data */
-    if (size == hdr_data_size) {
-        return (*status);
-    }
-
-    /* hdr + data + trailer */
-    if ((size - hdr_data_size) == (*sptr)->frame_count * sizeof(uint64_t)) {
-        (*sptr)->has_trailer = true;
-        (*sptr)->timestamps = (int64_t*)realloc((*sptr)->timestamps, (*sptr)->frame_count * sizeof(uint64_t));
-        (*sptr)->timestamp_count = (*sptr)->frame_count;
-        (*sptr)->reader(
-                (*sptr)->io_context,
-                (*sptr)->timestamps,
-                (*sptr)->frame_count * sizeof(uint64_t),
-                hdr_data_size
-        );
-        return (*status);
+    if ((*sptr)->has_trailer) {
+        if (size == trailer_offset + (*sptr)->frame_count * sizeof(uint64_t)) {
+            (*sptr)->timestamps = (int64_t*)realloc((*sptr)->timestamps, (*sptr)->frame_count * sizeof(uint64_t));
+            (*sptr)->timestamp_count = (*sptr)->frame_count;
+            (*sptr)->reader(
+                    (*sptr)->io_context,
+                    (*sptr)->timestamps,
+                    (*sptr)->frame_count * sizeof(uint64_t),
+                    trailer_offset
+            );
+            return (*status);
+        }
+    } else {
+        if (size == trailer_offset) {
+            return (*status);
+        }
     }
 
     /* if reached, invalid structure */
@@ -1771,17 +1464,10 @@ int ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* sta
 }
 
 int ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode, int* status) {
-    if (*status) {
-        return (*status);
-    }
-
-    if (!sptr) {
-        return (*status = NULL_SPTR);
-    }
-
-    if (!data) {
-        return (*status = NULL_PARAM);
-    }
+	RETURN_IF_STATUS_IS_ERROR(status);
+	RETURN_IF_NULL_SPTRPTR(sptr, status);
+	RETURN_IF_SPTR_OCCUPIED(sptr, status);
+    RETURN_IF_NULL_PARAM(data, status);
 
     /* determine validity of header */
     if (size < HDR_SIZE) {
@@ -1821,32 +1507,31 @@ int ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode, 
     (*sptr)->reader(ser_data, (*sptr)->telescope, TELESCOPE_LEN, TELESCOPE_KEY);
     (*sptr)->reader(ser_data, &(*sptr)->date_time, DATETIME_LEN, DATETIME_KEY);
     (*sptr)->reader(ser_data, &(*sptr)->date_time_utc, DATETIMEUTC_LEN, DATETIMEUTC_KEY);
-    (*sptr)->has_trailer = false;
+    (*sptr)->has_trailer = (*sptr)->date_time <= 0 ? false : true;
     (*sptr)->timestamps = NULL;
     (*sptr)->timestamp_count = 0;
 
     /* determine if valid hdr + data or hdr + data + trailer */
     size_t frame_byte_size = 0;
     ser_get_frame_byte_size(*sptr, &frame_byte_size, status);
-    size_t hdr_data_size = HDR_SIZE + (*sptr)->frame_count * frame_byte_size;
+    size_t trailer_offset = HDR_SIZE + (*sptr)->frame_count * frame_byte_size;
 
-    /* hdr + data */
-    if (size == hdr_data_size) {
-        return (*status);
-    }
-
-    /* hdr + data + trailer */
-    if ((size - hdr_data_size) == (*sptr)->frame_count * sizeof(uint64_t)) {
-        (*sptr)->has_trailer = true;
-        (*sptr)->timestamps = (int64_t*)realloc((*sptr)->timestamps, (*sptr)->frame_count * sizeof(uint64_t));
-        (*sptr)->timestamp_count = (*sptr)->frame_count;
-        (*sptr)->reader(
-                (*sptr)->io_context,
-                (*sptr)->timestamps,
-                (*sptr)->frame_count * sizeof(uint64_t),
-                hdr_data_size
-        );
-        return (*status);
+    if ((*sptr)->has_trailer) {
+        if (size == trailer_offset + (*sptr)->frame_count * sizeof(uint64_t)) {
+            (*sptr)->timestamps = (int64_t*)realloc((*sptr)->timestamps, (*sptr)->frame_count * sizeof(uint64_t));
+            (*sptr)->timestamp_count = (*sptr)->frame_count;
+            (*sptr)->reader(
+                    (*sptr)->io_context,
+                    (*sptr)->timestamps,
+                    (*sptr)->frame_count * sizeof(uint64_t),
+                    trailer_offset
+            );
+            return (*status);
+        }
+    } else {
+        if (size == trailer_offset) {
+            return (*status);
+        }
     }
 
     /* if reached, invalid structure */
@@ -1858,25 +1543,7 @@ int ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode, 
 }
 
 int ser_close_memory(serfile* sptr, int* status) {
-    if (!sptr) { 
-        return (*status = NULL_SPTR); 
-    }
-
-    if (sptr->access_mode == READWRITE) {
-        sptr->writer(sptr->io_context, sptr->file_id, FILEID_LEN, FILEID_KEY);
-        sptr->writer(sptr->io_context, &sptr->lu_id, LUID_LEN, LUID_KEY);
-        sptr->writer(sptr->io_context, &sptr->color_id, COLORID_LEN, COLORID_KEY);
-        sptr->writer(sptr->io_context, &sptr->little_endian, LITTLEENDIAN_LEN, LITTLEENDIAN_KEY);
-        sptr->writer(sptr->io_context, &sptr->image_width, IMAGEWIDTH_LEN, IMAGEWIDTH_KEY);
-        sptr->writer(sptr->io_context, &sptr->image_height, IMAGEHEIGHT_LEN, IMAGEHEIGHT_KEY);
-        sptr->writer(sptr->io_context, &sptr->pixel_depth_per_plane, PIXELDEPTHPERPLANE_LEN, PIXELDEPTHPERPLANE_KEY);
-        sptr->writer(sptr->io_context, &sptr->frame_count, FRAMECOUNT_LEN, FRAMECOUNT_KEY);
-        sptr->writer(sptr->io_context, sptr->observer, OBSERVER_LEN, OBSERVER_KEY);
-        sptr->writer(sptr->io_context, sptr->instrument, INSTRUMENT_LEN, INSTRUMENT_KEY);
-        sptr->writer(sptr->io_context, sptr->telescope, TELESCOPE_LEN, TELESCOPE_KEY);
-        sptr->writer(sptr->io_context, &sptr->date_time, DATETIME_LEN, DATETIME_KEY);
-        sptr->writer(sptr->io_context, &sptr->date_time_utc, DATETIMEUTC_LEN, DATETIMEUTC_KEY);
-    }
+	RETURN_IF_NULL_SPTR(sptr, status);
 
     if (sptr->timestamps && sptr->access_mode == READWRITE) {
         size_t image_frame_byte_size = 0;
@@ -1909,8 +1576,11 @@ int ser_close_memory(serfile* sptr, int* status) {
     return (*status);
 }
 
-
 #endif /* CSERIO_IMPLEMENTATION */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* CSERIO_H */
 

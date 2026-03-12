@@ -43,11 +43,13 @@ static void destroy_temp_ser(char* filepath, char* dir) {
 START_TEST(append_frame_success_no_trailer) {
     char dir[] = "/tmp/cserio_testXXXXXX";
     char filepath[512];
-    size_t init_file_size = sizeof(test_data_3x50) - sizeof(test_data_3x50.trlr);
+    SERTest3x50Structure test_data = test_data_3x50;
+    test_data.hdr.date_time = 0; /* disable trailer */
+    size_t init_file_size = sizeof(test_data) - sizeof(test_data.trlr);
     create_temp_ser(
             filepath,
             dir,
-            &test_data_3x50, 
+            &test_data, 
             init_file_size
     );
     /* <- File Setup */
@@ -63,11 +65,11 @@ START_TEST(append_frame_success_no_trailer) {
     ck_assert_int_eq(status, NO_ERROR);
 
     /* TEST */
-    uint8_t test_data[50 * 50] = {0};
-    memset(test_data, 0xA0, sizeof(test_data));
+    uint8_t image_data[50 * 50] = {0};
+    memset(image_data, 0xA0, sizeof(image_data));
     ser_append_frame(
             test_ser,
-            test_data,
+            image_data,
             TEST_TIMESTAMP_VALUE,
             &status
     );
@@ -90,23 +92,23 @@ START_TEST(append_frame_success_no_trailer) {
     fclose(test_file);
 
     /* file size check */
-    ck_assert_int_eq(file_size, init_file_size + sizeof(test_data));
+    ck_assert_int_eq(file_size, init_file_size + sizeof(image_data));
 
     /* was data written as desired location */
-    size_t exp_frame_offset = HDR_SIZE + sizeof(test_data_3x50.data);
+    size_t exp_frame_offset = HDR_SIZE + sizeof(test_data.data);
     ck_assert_mem_eq(
             check_buff + exp_frame_offset,
-            test_data,
-            sizeof(test_data)
+            image_data,
+            sizeof(image_data)
     );
 
     /* is data before frame (hdr) intact */
-    SERHdrStructure new_hdr = test_data_3x50.hdr;
+    SERHdrStructure new_hdr = test_data.hdr;
     new_hdr.frame_count += 1;
     ck_assert_mem_eq(
             check_buff,
             &new_hdr,
-            sizeof(test_data_3x50.hdr)
+            sizeof(test_data.hdr)
     );
 
     /* Teardown -> */
@@ -137,11 +139,11 @@ START_TEST(append_frame_success_with_trailer) {
     ck_assert_int_eq(status, NO_ERROR);
 
     /* TEST */
-    uint8_t test_data[50 * 50] = {0};
-    memset(test_data, 0xA0, sizeof(test_data));
+    uint8_t image_data[50 * 50] = {0};
+    memset(image_data, 0xA0, sizeof(image_data));
     ser_append_frame(
             test_ser,
-            test_data,
+            image_data,
             TEST_TIMESTAMP_VALUE,
             &status
     );
@@ -164,14 +166,14 @@ START_TEST(append_frame_success_with_trailer) {
     fclose(test_file);
 
     /* file size check */
-    ck_assert_int_eq(file_size, init_file_size + sizeof(test_data) + sizeof(int64_t));
+    ck_assert_int_eq(file_size, init_file_size + sizeof(image_data) + sizeof(int64_t));
 
     /* was data written as desired location */
     size_t exp_frame_offset = HDR_SIZE + sizeof(test_data_3x50.data);
     ck_assert_mem_eq(
             check_buff + exp_frame_offset,
-            test_data,
-            sizeof(test_data)
+            image_data,
+            sizeof(image_data)
     );
 
     /* is data before frame (hdr) intact */
@@ -200,7 +202,8 @@ START_TEST(append_frame_success_empty_no_trailer) {
         .image_width = 10,
         .image_height = 10,
         .pixel_depth_per_plane = 8,
-        .frame_count = 0
+        .frame_count = 0,
+        .date_time = 0
     };
     char dir[] = "/tmp/cserio_testXXXXXX";
     char filepath[512];
@@ -218,11 +221,11 @@ START_TEST(append_frame_success_empty_no_trailer) {
     ck_assert_int_eq(status, NO_ERROR);
 
     /* TEST */
-    uint8_t test_data[10 * 10] = {0};
-    memset(test_data, 0xA0, sizeof(test_data));
+    uint8_t image_data[10 * 10] = {0};
+    memset(image_data, 0xA0, sizeof(image_data));
     ser_append_frame(
             test_ser,
-            test_data,
+            image_data,
             TEST_TIMESTAMP_VALUE,
             &status
     );
@@ -246,13 +249,13 @@ START_TEST(append_frame_success_empty_no_trailer) {
     fclose(test_file);
 
     /* file size check */
-    ck_assert_int_eq(file_size, sizeof(test_hdr) + sizeof(test_data));
+    ck_assert_int_eq(file_size, sizeof(test_hdr) + sizeof(image_data));
 
     /* was data written as desired location */
     ck_assert_mem_eq(
             check_buff + HDR_SIZE,
-            test_data,
-            sizeof(test_data)
+            image_data,
+            sizeof(image_data)
     );
 
     /* is data before frame (hdr) intact */
@@ -275,7 +278,8 @@ START_TEST(append_frame_success_empty_with_trailer) {
         .image_width = 10,
         .image_height = 10,
         .pixel_depth_per_plane = 8,
-        .frame_count = 0
+        .frame_count = 0,
+        .date_time = TEST_TIMESTAMP_VALUE
     };
     char dir[] = "/tmp/cserio_testXXXXXX";
     char filepath[512];
@@ -291,15 +295,13 @@ START_TEST(append_frame_success_empty_with_trailer) {
             &status
     );
     ck_assert_int_eq(status, NO_ERROR);
-    ser_enable_trailer(test_ser, &status);
-    ck_assert_int_eq(status, NO_ERROR);
 
     /* TEST */
-    uint8_t test_data[10 * 10] = {0};
-    memset(test_data, 0xA0, sizeof(test_data));
+    uint8_t image_data[10 * 10] = {0};
+    memset(image_data, 0xA0, sizeof(image_data));
     ser_append_frame(
             test_ser,
-            test_data,
+            image_data,
             TEST_TIMESTAMP_VALUE,
             &status
     );
@@ -322,13 +324,13 @@ START_TEST(append_frame_success_empty_with_trailer) {
     fclose(test_file);
 
     /* file size check */
-    ck_assert_int_eq(file_size, sizeof(test_hdr) + sizeof(test_data) + sizeof(int64_t));
+    ck_assert_int_eq(file_size, sizeof(test_hdr) + sizeof(image_data) + sizeof(int64_t));
 
     /* was data written as desired location */
     ck_assert_mem_eq(
             check_buff + HDR_SIZE,
-            test_data,
-            sizeof(test_data)
+            image_data,
+            sizeof(image_data)
     );
 
     /* is data before frame (hdr) intact */
@@ -375,11 +377,11 @@ START_TEST(append_frame_invalid_size) {
     ck_assert_int_eq(status, NO_ERROR);
 
     /* TEST */
-    uint8_t test_data[10 * 10] = {0};
-    memset(test_data, 0xA0, sizeof(test_data));
+    uint8_t image_data[10 * 10] = {0};
+    memset(image_data, 0xA0, sizeof(image_data));
     ser_append_frame(
             test_ser,
-            test_data,
+            image_data,
             TEST_TIMESTAMP_VALUE,
             &status
     );
@@ -417,6 +419,71 @@ START_TEST(append_frame_invalid_size) {
     free(check_buff);
     destroy_temp_ser(filepath, dir);
 }
+
+START_TEST(append_frame_readonly) {
+    SERHdrStructure test_hdr = {
+        .color_id = MONO,
+        .image_width = 10,
+        .image_height = 10,
+        .pixel_depth_per_plane = 8,
+        .frame_count = 0
+    };
+    char dir[] = "/tmp/cserio_testXXXXXX";
+    char filepath[512];
+    create_temp_ser(filepath, dir, &test_hdr, sizeof(test_hdr));
+    /* <- File Setup */
+
+    int status = 0;
+    serfile* test_ser = NULL;
+    ser_open_file(
+            &test_ser,
+            filepath,
+            READONLY,
+            &status
+    );
+    ck_assert_int_eq(status, NO_ERROR);
+
+    /* TEST */
+    ser_append_frame(
+            test_ser,
+            NULL,
+            TEST_TIMESTAMP_VALUE,
+            &status
+    );
+    ck_assert_int_eq(status, WRITE_ON_READONLY);
+
+    status = 0;
+    ser_close_file(test_ser, &status);
+    ck_assert_int_eq(status, NO_ERROR);
+
+    /* retrieve file details */
+    FILE* test_file = fopen(filepath, "rb");
+    if (!test_file) {
+        ck_abort_msg("Failed to open test SER");
+    }
+    fseek(test_file, 0, SEEK_END);
+    size_t file_size = ftell(test_file);
+
+    uint8_t* check_buff = malloc(file_size);
+    fseek(test_file, 0, SEEK_SET);
+    fread(check_buff, 1, file_size, test_file);
+
+    fclose(test_file);
+
+    /* file size check */
+    ck_assert_int_eq(file_size, sizeof(test_hdr));
+
+    /* is data before frame (hdr) intact */
+    ck_assert_mem_eq(
+            check_buff,
+            &test_hdr,
+            sizeof(test_hdr)
+    );
+
+    /* Teardown -> */
+    free(check_buff);
+    destroy_temp_ser(filepath, dir);
+} END_TEST
 
 START_TEST(append_frame_null_data) {
     SERHdrStructure test_hdr = {
@@ -486,11 +553,11 @@ START_TEST(append_frame_null_data) {
 START_TEST(append_frame_null_ser) {
     int status = 0;
 
-    uint8_t test_data[10 * 10] = {0};
-    memset(test_data, 0xA0, sizeof(test_data));
+    uint8_t image_data[10 * 10] = {0};
+    memset(image_data, 0xA0, sizeof(image_data));
     ser_append_frame(
             NULL,
-            test_data,
+            image_data,
             TEST_TIMESTAMP_VALUE,
             &status
     );
@@ -508,6 +575,7 @@ Suite* image_write_suite() {
     tcase_add_test(tc_append_frame, append_frame_success_with_trailer);
     tcase_add_test(tc_append_frame, append_frame_success_empty_no_trailer);
     tcase_add_test(tc_append_frame, append_frame_success_empty_with_trailer);
+    tcase_add_test(tc_append_frame, append_frame_readonly);
     tcase_add_test(tc_append_frame, append_frame_invalid_size);
     tcase_add_test(tc_append_frame, append_frame_null_data);
     tcase_add_test(tc_append_frame, append_frame_null_ser);

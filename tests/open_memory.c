@@ -47,10 +47,12 @@ START_TEST(open_memory_no_trailer) {
     serfile* test_ser = NULL;
     int status = 0;
 
+    SERTest3x50Structure test_data = test_data_3x50;
+    test_data.hdr.date_time = 0;
     ser_open_memory(
             &test_ser,
-            (uint8_t*)&test_data_3x50,
-            sizeof(test_data_3x50) - sizeof(test_data_3x50.trlr),
+            (uint8_t*)&test_data,
+            sizeof(test_data) - sizeof(test_data.trlr),
             READONLY,
             &status
     );
@@ -58,6 +60,41 @@ START_TEST(open_memory_no_trailer) {
 
     ser_close_memory(test_ser, &status);
     ck_assert_int_eq(status, NO_ERROR);
+
+} END_TEST
+
+START_TEST(open_memory_no_trailer_fail) {
+    serfile* test_ser = NULL;
+    int status = 0;
+
+    SERTest3x50Structure test_data = test_data_3x50;
+    test_data.hdr.date_time = 0;
+    ser_open_memory(
+            &test_ser,
+            (uint8_t*)&test_data,
+            sizeof(test_data),
+            READONLY,
+            &status
+    );
+    ck_assert_int_eq(status, INVALID_STRUCTURE);
+    ck_assert_ptr_null(test_ser);
+
+} END_TEST
+
+START_TEST(open_memory_with_trailer_fail) {
+    serfile* test_ser = NULL;
+    int status = 0;
+
+    SERTest3x50Structure test_data = test_data_3x50;
+    ser_open_memory(
+            &test_ser,
+            (uint8_t*)&test_data,
+            sizeof(test_data) - sizeof(test_data.trlr),
+            READONLY,
+            &status
+    );
+    ck_assert_int_eq(status, INVALID_STRUCTURE);
+    ck_assert_ptr_null(test_ser);
 
 } END_TEST
 
@@ -109,6 +146,21 @@ START_TEST(open_memory_short_header) {
     ck_assert_ptr_null(test_ser);
 } END_TEST
 
+START_TEST(open_memory_ser_occupied) {
+    int status = 0;
+
+    int ptr_provide = 0;
+    serfile* test_ser = (serfile*)&ptr_provide;
+    ser_open_memory(
+            &test_ser,
+            (uint8_t*)&test_data_3x50,
+            sizeof(test_data_3x50),
+            READONLY,
+            &status
+    );
+    ck_assert_int_eq(status, SPTR_OCCUPIED);
+} END_TEST
+
 START_TEST(open_memory_null_ser) {
     int status = 0;
 
@@ -119,7 +171,7 @@ START_TEST(open_memory_null_ser) {
             READONLY,
             &status
     );
-    ck_assert_int_eq(status, NULL_SPTR);
+    ck_assert_int_eq(status, NULL_SPTRPTR);
 } END_TEST
 
 START_TEST(open_memory_null_data) {
@@ -145,9 +197,12 @@ Suite* open_memory_suite() {
     tcase_add_test(tc_open_memory, open_memory_success);
     tcase_add_test(tc_open_memory, open_memory_hdr_only);
     tcase_add_test(tc_open_memory, open_memory_no_trailer);
+    tcase_add_test(tc_open_memory, open_memory_no_trailer_fail);
+    tcase_add_test(tc_open_memory, open_memory_with_trailer_fail);
     tcase_add_test(tc_open_memory, open_memory_short_trailer);
     tcase_add_test(tc_open_memory, open_memory_short_data_section);
     tcase_add_test(tc_open_memory, open_memory_short_header);
+    tcase_add_test(tc_open_memory, open_memory_ser_occupied);
     tcase_add_test(tc_open_memory, open_memory_null_ser);
     tcase_add_test(tc_open_memory, open_memory_null_data);
     suite_add_tcase(s, tc_open_memory);

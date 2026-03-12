@@ -67,7 +67,14 @@ START_TEST(open_file_success) {
 START_TEST(open_file_no_trailer) {
     char dir[] = "/tmp/cserio_testXXXXXX";
     char filepath[512];
-    create_temp_ser(filepath, dir, &test_data_3x50, sizeof(test_data_3x50) - sizeof(test_data_3x50.trlr));
+    SERTest3x50Structure test_data = test_data_3x50;
+    test_data.hdr.date_time = 0; /* disable trailer */
+    create_temp_ser(
+            filepath,
+            dir,
+            &test_data,
+            sizeof(test_data) - sizeof(test_data.trlr)
+    );
     /* <- Setup */
     
     int status = 0;
@@ -83,6 +90,61 @@ START_TEST(open_file_no_trailer) {
     status = 0;
     ser_close_file(test_ser, &status);
     ck_assert_int_eq(status, NO_ERROR);
+
+    /* Teardown -> */
+    destroy_temp_ser(filepath, dir);
+} END_TEST
+
+START_TEST(open_file_no_trailer_fail) {
+    char dir[] = "/tmp/cserio_testXXXXXX";
+    char filepath[512];
+    SERTest3x50Structure test_data = test_data_3x50;
+    test_data.hdr.date_time = 0; /* disable trailer */
+    create_temp_ser(
+            filepath,
+            dir,
+            &test_data,
+            sizeof(test_data)
+    );
+    /* <- Setup */
+    
+    int status = 0;
+    serfile* test_ser = NULL;
+    ser_open_file(
+            &test_ser,
+            filepath,
+            READONLY,
+            &status
+    );
+    ck_assert_int_eq(status, INVALID_STRUCTURE);
+    ck_assert_ptr_null(test_ser);
+
+    /* Teardown -> */
+    destroy_temp_ser(filepath, dir);
+} END_TEST
+
+START_TEST(open_file_with_trailer_fail) {
+    char dir[] = "/tmp/cserio_testXXXXXX";
+    char filepath[512];
+    SERTest3x50Structure test_data = test_data_3x50;
+    create_temp_ser(
+            filepath,
+            dir,
+            &test_data,
+            sizeof(test_data) - sizeof(test_data.trlr)
+    );
+    /* <- Setup */
+    
+    int status = 0;
+    serfile* test_ser = NULL;
+    ser_open_file(
+            &test_ser,
+            filepath,
+            READONLY,
+            &status
+    );
+    ck_assert_int_eq(status, INVALID_STRUCTURE);
+    ck_assert_ptr_null(test_ser);
 
     /* Teardown -> */
     destroy_temp_ser(filepath, dir);
@@ -156,6 +218,27 @@ START_TEST(open_file_short_header) {
     destroy_temp_ser(filepath, dir);
 } END_TEST
 
+START_TEST(open_file_ser_occupied) {
+    char dir[] = "/tmp/cserio_testXXXXXX";
+    char filepath[512];
+    create_temp_ser(filepath, dir, &test_data_3x50, HDR_SIZE - 1);
+    /* <- Setup */
+    
+    int status = 0;
+    int ptr_provide = 0;
+    serfile* test_ser = (serfile*)&ptr_provide;
+    ser_open_file(
+            &test_ser,
+            filepath,
+            READONLY,
+            &status
+    );
+    ck_assert_int_eq(status, SPTR_OCCUPIED);
+
+    /* Teardown -> */
+    destroy_temp_ser(filepath, dir);
+}
+
 START_TEST(open_file_null_ser) {
     char dir[] = "/tmp/cserio_testXXXXXX";
     char filepath[512];
@@ -169,7 +252,7 @@ START_TEST(open_file_null_ser) {
             READONLY,
             &status
     );
-    ck_assert_int_eq(status, NULL_SPTR);
+    ck_assert_int_eq(status, NULL_SPTRPTR);
 
     /* Teardown -> */
     destroy_temp_ser(filepath, dir);
@@ -225,9 +308,12 @@ Suite* open_file_suite() {
     TCase* tc_open_file = tcase_create("open_file");
     tcase_add_test(tc_open_file, open_file_success);
     tcase_add_test(tc_open_file, open_file_no_trailer);
+    tcase_add_test(tc_open_file, open_file_no_trailer_fail);
+    tcase_add_test(tc_open_file, open_file_with_trailer_fail);
     tcase_add_test(tc_open_file, open_file_short_trailer);
     tcase_add_test(tc_open_file, open_file_short_data_section);
     tcase_add_test(tc_open_file, open_file_short_header);
+    tcase_add_test(tc_open_file, open_file_ser_occupied);
     tcase_add_test(tc_open_file, open_file_null_ser);
     tcase_add_test(tc_open_file, open_file_null_path);
     tcase_add_test(tc_open_file, open_file_invalid_path);

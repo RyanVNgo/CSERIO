@@ -69,38 +69,5 @@ static SERTest3x50Structure test_data_3x50 = {
 
 static serfile* test_ser_3x50;
 
-static const int key_map[HDR_UNIT_COUNT] = {
-    FILEID_KEY              ,
-    LUID_KEY                ,
-    COLORID_KEY             ,
-    LITTLEENDIAN_KEY        ,
-    IMAGEWIDTH_KEY          ,
-    IMAGEHEIGHT_KEY         ,
-    PIXELDEPTHPERPLANE_KEY  ,
-    FRAMECOUNT_KEY          ,
-    OBSERVER_KEY            , 
-    INSTRUMENT_KEY          , 
-    TELESCOPE_KEY           , 
-    DATETIME_KEY            ,
-    DATETIMEUTC_KEY         
-};
-
-static const int len_map[HDR_UNIT_COUNT] = {
-    FILEID_LEN              ,
-    LUID_LEN                ,
-    COLORID_LEN             ,
-    LITTLEENDIAN_LEN        ,
-    IMAGEWIDTH_LEN          ,
-    IMAGEHEIGHT_LEN         ,
-    PIXELDEPTHPERPLANE_LEN  ,
-    FRAMECOUNT_LEN          ,
-    OBSERVER_LEN            , 
-    INSTRUMENT_LEN          , 
-    TELESCOPE_LEN           , 
-    DATETIME_LEN            ,
-    DATETIMEUTC_LEN         
-};
-
-
 #endif
 
