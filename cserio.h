@@ -45,8 +45,6 @@ extern "C" {
 #define NULL_SPTRPTR                        105
 #define SPTR_OCCUPIED                       106
 
-#define EOF_ERROR                           111
-#define FREAD_ERROR                         112
 #define READ_ERROR                          113
 
 #define WRITE_ON_READONLY                   131
@@ -64,18 +62,11 @@ extern "C" {
 
 /*-------------------- Header Routine Errors --------------------*/
 
-#define INVALID_HDR_IDX                     301
-#define INVALID_HDR_KEY                     302
-
-#define HDR_WRITE_WARN                      311
-
 #define INVALID_SET_STATE                   321
 #define INVALID_SET_VALUE                   322
-#define INVALID_CHAR_STRING                 323
 
 /*-------------------- Image Routine Errors --------------------*/
 
-#define INVALID_DIM_IDX                     401
 #define INVALID_FRAME_IDX                   402
 #define INVALID_FRAME_SIZE                  403
 
@@ -85,7 +76,6 @@ extern "C" {
 
 #define TRAILER_DNE                         501
 
-#define INVALID_TRAILER_ENABLE              511
 #define INVALID_TRAILER_IDX                 512
 
 #define TRAILER_CLOSE_WARN                  521

@@ -63,6 +63,41 @@ START_TEST(open_memory_no_trailer) {
 
 } END_TEST
 
+START_TEST(open_memory_no_trailer_fail) {
+    serfile* test_ser = NULL;
+    int status = 0;
+
+    SERTest3x50Structure test_data = test_data_3x50;
+    test_data.hdr.date_time = 0;
+    ser_open_memory(
+            &test_ser,
+            (uint8_t*)&test_data,
+            sizeof(test_data),
+            READONLY,
+            &status
+    );
+    ck_assert_int_eq(status, INVALID_STRUCTURE);
+    ck_assert_ptr_null(test_ser);
+
+} END_TEST
+
+START_TEST(open_memory_with_trailer_fail) {
+    serfile* test_ser = NULL;
+    int status = 0;
+
+    SERTest3x50Structure test_data = test_data_3x50;
+    ser_open_memory(
+            &test_ser,
+            (uint8_t*)&test_data,
+            sizeof(test_data) - sizeof(test_data.trlr),
+            READONLY,
+            &status
+    );
+    ck_assert_int_eq(status, INVALID_STRUCTURE);
+    ck_assert_ptr_null(test_ser);
+
+} END_TEST
+
 START_TEST(open_memory_short_trailer) {
     serfile* test_ser = NULL;
     int status = 0;
@@ -162,6 +197,8 @@ Suite* open_memory_suite() {
     tcase_add_test(tc_open_memory, open_memory_success);
     tcase_add_test(tc_open_memory, open_memory_hdr_only);
     tcase_add_test(tc_open_memory, open_memory_no_trailer);
+    tcase_add_test(tc_open_memory, open_memory_no_trailer_fail);
+    tcase_add_test(tc_open_memory, open_memory_with_trailer_fail);
     tcase_add_test(tc_open_memory, open_memory_short_trailer);
     tcase_add_test(tc_open_memory, open_memory_short_data_section);
     tcase_add_test(tc_open_memory, open_memory_short_header);
