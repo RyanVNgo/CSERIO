@@ -70,26 +70,43 @@ START_TEST(header_write_success) {
 
     ser_write_file_id(test_ser, test_data.file_id, &status);
     ck_assert_int_eq(status, NO_ERROR);
+
     ser_write_lu_id(test_ser, test_data.lu_id, &status);
+    ck_assert_int_eq(status, NO_ERROR);
+
+    ser_write_color_id(test_ser, RGB, &status);
     ck_assert_int_eq(status, NO_ERROR);
     ser_write_color_id(test_ser, test_data.color_id, &status);
     ck_assert_int_eq(status, NO_ERROR);
+
     ser_write_little_endian(test_ser, test_data.little_endian, &status);
     ck_assert_int_eq(status, NO_ERROR);
+    
     ser_write_image_width(test_ser, test_data.image_width, &status);
     ck_assert_int_eq(status, NO_ERROR);
+
     ser_write_image_height(test_ser, test_data.image_height, &status);
+    ck_assert_int_eq(status, NO_ERROR);
+
+    ser_write_pixel_depth_per_plane(test_ser, 16, &status);
     ck_assert_int_eq(status, NO_ERROR);
     ser_write_pixel_depth_per_plane(test_ser, test_data.pixel_depth_per_plane, &status);
     ck_assert_int_eq(status, NO_ERROR);
+
     ser_write_observer(test_ser, test_data.observer, &status);
     ck_assert_int_eq(status, NO_ERROR);
+
     ser_write_instrument(test_ser, test_data.instrument, &status);
     ck_assert_int_eq(status, NO_ERROR);
+
     ser_write_telescope(test_ser, test_data.telescope, &status);
+    ck_assert_int_eq(status, NO_ERROR);
+
+    ser_write_date_time(test_ser, 0, &status);
     ck_assert_int_eq(status, NO_ERROR);
     ser_write_date_time(test_ser, test_data.date_time, &status);
     ck_assert_int_eq(status, NO_ERROR);
+
     ser_write_date_time_utc(test_ser, test_data.date_time_utc, &status);
     ck_assert_int_eq(status, NO_ERROR);
 
