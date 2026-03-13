@@ -27,7 +27,7 @@ extern "C" {
 
 #define CSERIO_MAJOR                        4
 #define CSERIO_MINOR                        0
-#define CSERIO_MICRO                        0
+#define CSERIO_MICRO                        1
 
 
 /*------------------------------------------------------------------*/
@@ -1073,11 +1073,13 @@ int ser_write_color_id(serfile* sptr, const int32_t color_id, int* status) {
     }
 
     /* check for switch between 1 byte and 3 byte color ids */
-    if (sptr->color_id < 100 && color_id >= 100) {
+    if (sptr->frame_count > 0) {
+        if (sptr->color_id < 100 && color_id >= 100) {
             return (*status = INVALID_SET_STATE);
-    }
-    if (sptr->color_id >= 100 && color_id < 100) {
+        }
+        if (sptr->color_id >= 100 && color_id < 100) {
             return (*status = INVALID_SET_STATE);
+        }
     }
 
     sptr->color_id = color_id;
