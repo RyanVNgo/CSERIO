@@ -747,6 +747,7 @@ int ser_create_file(serfile** sptr, const char* path, int* status) {
         return (*status = NULL_PATH);
     }
 
+    /* TOCTOU problem here */
     FILE* file;
     if ((file = fopen(path, "r"))) {
         fclose(file);
@@ -846,29 +847,40 @@ int ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
     ser_get_frame_byte_size(*sptr, &frame_byte_size, status);
     size_t trailer_offset = HDR_SIZE + (*sptr)->frame_count * frame_byte_size;
 
-    if ((*sptr)->has_trailer) {
-        if (file_size == trailer_offset + (*sptr)->frame_count * sizeof(uint64_t)) {
-            (*sptr)->timestamps = (int64_t*)realloc((*sptr)->timestamps, (*sptr)->frame_count * sizeof(uint64_t));
-            (*sptr)->timestamp_count = (*sptr)->frame_count;
-            (*sptr)->reader(
-                    (*sptr)->io_context,
-                    (*sptr)->timestamps,
-                    (*sptr)->frame_count * sizeof(uint64_t),
-                    trailer_offset
-            );
-            return (*status);
-        }
-    } else {
-        if (file_size == trailer_offset) {
-            return (*status);
-        }
+    if (!(*sptr)->has_trailer && file_size != trailer_offset) {
+        fclose(file);
+        free((*sptr));
+        *sptr = NULL;
+        return (*status = INVALID_STRUCTURE);
     }
 
-    /* if reached, invalid structure */
-    fclose(file);
-    free((*sptr));
-    *sptr = NULL;
-    return (*status = INVALID_STRUCTURE);
+    size_t expected_size = trailer_offset + (*sptr)->frame_count * sizeof(uint64_t);
+    if ((*sptr)->has_trailer && file_size != expected_size) {
+        fclose(file);
+        free((*sptr));
+        *sptr = NULL;
+        return (*status = INVALID_STRUCTURE);
+    } 
+
+    if ((*sptr)->has_trailer) {
+        (*sptr)->timestamps = (int64_t*)malloc((*sptr)->frame_count * sizeof(uint64_t));
+        if (!(*sptr)->timestamps) {
+            fclose(file);
+            free((*sptr));
+            *sptr = NULL;
+            return (*status = MEM_ALLOC);
+        }
+
+        (*sptr)->timestamp_count = (*sptr)->frame_count;
+        (*sptr)->reader(
+                (*sptr)->io_context,
+                (*sptr)->timestamps,
+                (*sptr)->frame_count * sizeof(uint64_t),
+                trailer_offset
+        );
+    }
+
+    return (*status);
 }
 
 int ser_close_file(serfile* sptr, int* status) {
@@ -899,7 +911,6 @@ int ser_close_file(serfile* sptr, int* status) {
     }
 
     free(sptr);
-    sptr = NULL;
     return (*status);
 }
 
@@ -1518,30 +1529,43 @@ int ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode, 
     ser_get_frame_byte_size(*sptr, &frame_byte_size, status);
     size_t trailer_offset = HDR_SIZE + (*sptr)->frame_count * frame_byte_size;
 
-    if ((*sptr)->has_trailer) {
-        if (size == trailer_offset + (*sptr)->frame_count * sizeof(uint64_t)) {
-            (*sptr)->timestamps = (int64_t*)realloc((*sptr)->timestamps, (*sptr)->frame_count * sizeof(uint64_t));
-            (*sptr)->timestamp_count = (*sptr)->frame_count;
-            (*sptr)->reader(
-                    (*sptr)->io_context,
-                    (*sptr)->timestamps,
-                    (*sptr)->frame_count * sizeof(uint64_t),
-                    trailer_offset
-            );
-            return (*status);
-        }
-    } else {
-        if (size == trailer_offset) {
-            return (*status);
-        }
+    if (!(*sptr)->has_trailer && size != trailer_offset) {
+        free(((serMem*)(*sptr)->io_context)->data);
+        free(((serMem*)(*sptr)->io_context));
+        free((*sptr));
+        *sptr = NULL;
+        return (*status = INVALID_STRUCTURE);
     }
 
-    /* if reached, invalid structure */
-    free(((serMem*)(*sptr)->io_context)->data);
-    free(((serMem*)(*sptr)->io_context));
-    free((*sptr));
-    *sptr = NULL;
-    return (*status = INVALID_STRUCTURE);
+    size_t expected_size = trailer_offset + (*sptr)->frame_count * sizeof(uint64_t);
+    if ((*sptr)->has_trailer && size != expected_size) {
+        free(((serMem*)(*sptr)->io_context)->data);
+        free(((serMem*)(*sptr)->io_context));
+        free((*sptr));
+        *sptr = NULL;
+        return (*status = INVALID_STRUCTURE);
+    } 
+
+    if ((*sptr)->has_trailer) {
+        (*sptr)->timestamps = (int64_t*)malloc((*sptr)->frame_count * sizeof(uint64_t));
+        if (!(*sptr)->timestamps) {
+            free(((serMem*)(*sptr)->io_context)->data);
+            free(((serMem*)(*sptr)->io_context));
+            free((*sptr));
+            *sptr = NULL;
+            return (*status = MEM_ALLOC);
+        }
+
+        (*sptr)->timestamp_count = (*sptr)->frame_count;
+        (*sptr)->reader(
+                (*sptr)->io_context,
+                (*sptr)->timestamps,
+                (*sptr)->frame_count * sizeof(uint64_t),
+                trailer_offset
+        );
+    }
+
+    return (*status);
 }
 
 int ser_close_memory(serfile* sptr, int* status) {
@@ -1574,7 +1598,6 @@ int ser_close_memory(serfile* sptr, int* status) {
 
     free(sptr->io_context);
     free(sptr);
-    sptr = NULL;
     return (*status);
 }
 
