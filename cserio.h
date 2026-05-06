@@ -560,19 +560,13 @@ typedef struct serfile {
     size_t      (*writer)(void* io_context, const void* data, size_t size, size_t offset);
     int         access_mode;
 
-	char		file_id[FILEID_LEN];
-	int32_t		lu_id;
 	int32_t		color_id;
 	int32_t		little_endian;
 	int32_t		image_width;
 	int32_t		image_height;
 	int32_t		pixel_depth_per_plane;
 	int32_t		frame_count;
-	char		observer[OBSERVER_LEN];
-	char		instrument[INSTRUMENT_LEN];
-	char		telescope[TELESCOPE_LEN];
 	int64_t		date_time;
-	int64_t		date_time_utc;
 
     bool        has_trailer;
     int64_t*    timestamps;
@@ -689,32 +683,32 @@ static size_t ser_file_write(void* io_context, const void* data, size_t size, si
 }
 
 static void ser_header_initializations(serfile* sptr) {
-    memset(sptr->file_id,           0, FILEID_LEN);
-    sptr->lu_id =                   0;
-    sptr->color_id =                MONO;
-    sptr->little_endian =           LITTLEENDIAN_TRUE;
-    sptr->image_width =             0;
-    sptr->image_height =            0;
-    sptr->pixel_depth_per_plane =   8;
-    sptr->frame_count =             0;
-    memset(sptr->observer,          0, OBSERVER_LEN);
-    memset(sptr->instrument,        0, INSTRUMENT_LEN);
-    memset(sptr->telescope,         0, TELESCOPE_LEN);
-    sptr->date_time =               0;
-    sptr->date_time_utc =           0;
-    sptr->writer(sptr->io_context, sptr->file_id, FILEID_LEN, FILEID_KEY);
-    sptr->writer(sptr->io_context, &sptr->lu_id, LUID_LEN, LUID_KEY);
+    char file_id[FILEID_LEN] =          {0};
+    int32_t lu_id =                     0;
+    sptr->color_id =                    MONO;
+    sptr->little_endian =               LITTLEENDIAN_TRUE;
+    sptr->image_width =                 0;
+    sptr->image_height =                0;
+    sptr->pixel_depth_per_plane =       8;
+    sptr->frame_count =                 0;
+    char observer[OBSERVER_LEN] =       {0};
+    char instrument[INSTRUMENT_LEN] =   {0};
+    char telescope[TELESCOPE_LEN] =     {0};
+    sptr->date_time =                   0;
+    int64_t date_time_utc =             0;
+    sptr->writer(sptr->io_context, file_id, FILEID_LEN, FILEID_KEY);
+    sptr->writer(sptr->io_context, &lu_id, LUID_LEN, LUID_KEY);
     sptr->writer(sptr->io_context, &sptr->color_id, COLORID_LEN, COLORID_KEY);
     sptr->writer(sptr->io_context, &sptr->little_endian, LITTLEENDIAN_LEN, LITTLEENDIAN_KEY);
     sptr->writer(sptr->io_context, &sptr->image_width, IMAGEWIDTH_LEN, IMAGEWIDTH_KEY);
     sptr->writer(sptr->io_context, &sptr->image_height, IMAGEHEIGHT_LEN, IMAGEHEIGHT_KEY);
     sptr->writer(sptr->io_context, &sptr->pixel_depth_per_plane, PIXELDEPTHPERPLANE_LEN, PIXELDEPTHPERPLANE_KEY);
     sptr->writer(sptr->io_context, &sptr->frame_count, FRAMECOUNT_LEN, FRAMECOUNT_KEY);
-    sptr->writer(sptr->io_context, sptr->observer, OBSERVER_LEN, OBSERVER_KEY);
-    sptr->writer(sptr->io_context, sptr->instrument, INSTRUMENT_LEN, INSTRUMENT_KEY);
-    sptr->writer(sptr->io_context, sptr->telescope, TELESCOPE_LEN, TELESCOPE_KEY);
+    sptr->writer(sptr->io_context, observer, OBSERVER_LEN, OBSERVER_KEY);
+    sptr->writer(sptr->io_context, instrument, INSTRUMENT_LEN, INSTRUMENT_KEY);
+    sptr->writer(sptr->io_context, telescope, TELESCOPE_LEN, TELESCOPE_KEY);
     sptr->writer(sptr->io_context, &sptr->date_time, DATETIME_LEN, DATETIME_KEY);
-    sptr->writer(sptr->io_context, &sptr->date_time_utc, DATETIMEUTC_LEN, DATETIMEUTC_KEY);
+    sptr->writer(sptr->io_context, &date_time_utc, DATETIMEUTC_LEN, DATETIMEUTC_KEY);
 }
 
 
@@ -831,19 +825,13 @@ int ser_open_file(serfile** sptr, const char* path, int mode, int* status) {
     new_serfile->reader = ser_file_read;
     new_serfile->writer = ser_file_write;
     new_serfile->access_mode = mode == READWRITE ? READWRITE : READONLY;
-    new_serfile->reader(file, new_serfile->file_id, FILEID_LEN, FILEID_KEY);
-    new_serfile->reader(file, &new_serfile->lu_id, LUID_LEN, LUID_KEY);
     new_serfile->reader(file, &new_serfile->color_id, COLORID_LEN, COLORID_KEY);
     new_serfile->reader(file, &new_serfile->little_endian, LITTLEENDIAN_LEN, LITTLEENDIAN_KEY);
     new_serfile->reader(file, &new_serfile->image_width, IMAGEWIDTH_LEN, IMAGEWIDTH_KEY);
     new_serfile->reader(file, &new_serfile->image_height, IMAGEHEIGHT_LEN, IMAGEHEIGHT_KEY);
     new_serfile->reader(file, &new_serfile->pixel_depth_per_plane, PIXELDEPTHPERPLANE_LEN, PIXELDEPTHPERPLANE_KEY);
     new_serfile->reader(file, &new_serfile->frame_count, FRAMECOUNT_LEN, FRAMECOUNT_KEY);
-    new_serfile->reader(file, new_serfile->observer, OBSERVER_LEN, OBSERVER_KEY);
-    new_serfile->reader(file, new_serfile->instrument, INSTRUMENT_LEN, INSTRUMENT_KEY);
-    new_serfile->reader(file, new_serfile->telescope, TELESCOPE_LEN, TELESCOPE_KEY);
     new_serfile->reader(file, &new_serfile->date_time, DATETIME_LEN, DATETIME_KEY);
-    new_serfile->reader(file, &new_serfile->date_time_utc, DATETIMEUTC_LEN, DATETIMEUTC_KEY);
     new_serfile->has_trailer = new_serfile->date_time <= 0 ? false : true;
     new_serfile->timestamps = NULL;
     new_serfile->timestamp_count = 0;
@@ -933,8 +921,7 @@ int ser_read_file_id(serfile* sptr, char* file_id, int* status) {
 	RETURN_IF_STATUS_IS_ERROR(status);
 	RETURN_IF_NULL_SPTR(sptr, status);
     RETURN_IF_NULL_DEST_BUFF(file_id, status);
-    sptr->reader(sptr->io_context, sptr->file_id, FILEID_LEN, FILEID_KEY);
-    memcpy(file_id, sptr->file_id, FILEID_LEN);
+    sptr->reader(sptr->io_context, file_id, FILEID_LEN, FILEID_KEY);
     return (*status);
 }
 
@@ -942,8 +929,7 @@ int ser_read_lu_id(serfile* sptr, int32_t* lu_id, int* status) {
 	RETURN_IF_STATUS_IS_ERROR(status);
 	RETURN_IF_NULL_SPTR(sptr, status);
     RETURN_IF_NULL_DEST_BUFF(lu_id, status);
-    sptr->reader(sptr->io_context, &sptr->lu_id, LUID_LEN, LUID_KEY); 
-    *lu_id = sptr->lu_id;
+    sptr->reader(sptr->io_context, lu_id, LUID_LEN, LUID_KEY); 
     return (*status);
 }
 
@@ -1005,8 +991,7 @@ int ser_read_observer(serfile* sptr, char* observer, int* status) {
 	RETURN_IF_STATUS_IS_ERROR(status);
 	RETURN_IF_NULL_SPTR(sptr, status);
     RETURN_IF_NULL_DEST_BUFF(observer, status);
-    sptr->reader(sptr->io_context, sptr->observer, OBSERVER_LEN, OBSERVER_KEY); 
-    memcpy(observer, sptr->observer, OBSERVER_LEN);
+    sptr->reader(sptr->io_context, observer, OBSERVER_LEN, OBSERVER_KEY); 
     return (*status);
 }
 
@@ -1014,8 +999,7 @@ int ser_read_instrument(serfile* sptr, char* instrument, int* status) {
 	RETURN_IF_STATUS_IS_ERROR(status);
 	RETURN_IF_NULL_SPTR(sptr, status);
     RETURN_IF_NULL_DEST_BUFF(instrument, status);
-    sptr->reader(sptr->io_context, sptr->instrument, INSTRUMENT_LEN, INSTRUMENT_KEY); 
-    memcpy(instrument, sptr->instrument, INSTRUMENT_LEN);
+    sptr->reader(sptr->io_context, instrument, INSTRUMENT_LEN, INSTRUMENT_KEY); 
     return (*status);
 }
 
@@ -1023,8 +1007,7 @@ int ser_read_telescope(serfile* sptr, char* telescope, int* status) {
 	RETURN_IF_STATUS_IS_ERROR(status);
 	RETURN_IF_NULL_SPTR(sptr, status);
     RETURN_IF_NULL_DEST_BUFF(telescope, status);
-    sptr->reader(sptr->io_context, sptr->telescope, TELESCOPE_LEN, TELESCOPE_KEY); 
-    memcpy(telescope, sptr->telescope, TELESCOPE_LEN);
+    sptr->reader(sptr->io_context, telescope, TELESCOPE_LEN, TELESCOPE_KEY); 
     return (*status);
 }
 
@@ -1041,8 +1024,7 @@ int ser_read_date_time_utc(serfile* sptr, int64_t* date_time_utc, int* status) {
 	RETURN_IF_STATUS_IS_ERROR(status);
 	RETURN_IF_NULL_SPTR(sptr, status);
     RETURN_IF_NULL_DEST_BUFF(date_time_utc, status);
-    sptr->reader(sptr->io_context, &sptr->date_time_utc, DATETIMEUTC_LEN, DATETIMEUTC_KEY); 
-    *date_time_utc = sptr->date_time_utc;
+    sptr->reader(sptr->io_context, date_time_utc, DATETIMEUTC_LEN, DATETIMEUTC_KEY); 
     return (*status);
 }
 
@@ -1051,8 +1033,7 @@ int ser_write_file_id(serfile* sptr, const char* file_id, int* status) {
 	RETURN_IF_NULL_SPTR(sptr, status);
     RETURN_IF_NULL_PARAM(file_id, status);
 	RETURN_IF_WRITE_ON_READONLY(sptr, status);
-    memcpy(sptr->file_id, file_id, FILEID_LEN);
-    sptr->writer(sptr->io_context, sptr->file_id, FILEID_LEN, FILEID_KEY);
+    sptr->writer(sptr->io_context, file_id, FILEID_LEN, FILEID_KEY);
     return (*status);
 }
 
@@ -1060,8 +1041,7 @@ int ser_write_lu_id(serfile* sptr, const int32_t lu_id, int* status) {
 	RETURN_IF_STATUS_IS_ERROR(status);
 	RETURN_IF_NULL_SPTR(sptr, status);
 	RETURN_IF_WRITE_ON_READONLY(sptr, status);
-    sptr->lu_id = lu_id;
-    sptr->writer(sptr->io_context, &sptr->lu_id, LUID_LEN, LUID_KEY);
+    sptr->writer(sptr->io_context, &lu_id, LUID_LEN, LUID_KEY);
     return (*status);
 }
 
@@ -1179,8 +1159,7 @@ int ser_write_observer(serfile* sptr, const char* observer, int* status) {
 	RETURN_IF_NULL_SPTR(sptr, status);
 	RETURN_IF_WRITE_ON_READONLY(sptr, status);
     RETURN_IF_NULL_PARAM(observer, status);
-    memcpy(sptr->observer, observer, OBSERVER_LEN);
-    sptr->writer(sptr->io_context, sptr->observer, OBSERVER_LEN, OBSERVER_KEY);
+    sptr->writer(sptr->io_context, observer, OBSERVER_LEN, OBSERVER_KEY);
     return (*status);
 }
 
@@ -1189,8 +1168,7 @@ int ser_write_instrument(serfile* sptr, const char* instrument, int* status) {
 	RETURN_IF_NULL_SPTR(sptr, status);
 	RETURN_IF_WRITE_ON_READONLY(sptr, status);
     RETURN_IF_NULL_PARAM(instrument, status);
-    memcpy(sptr->instrument, instrument, INSTRUMENT_LEN);
-    sptr->writer(sptr->io_context, sptr->instrument, INSTRUMENT_LEN, INSTRUMENT_KEY);
+    sptr->writer(sptr->io_context, instrument, INSTRUMENT_LEN, INSTRUMENT_KEY);
     return (*status);
 }
 
@@ -1199,8 +1177,7 @@ int ser_write_telescope(serfile* sptr, const char* telescope, int* status) {
 	RETURN_IF_NULL_SPTR(sptr, status);
 	RETURN_IF_WRITE_ON_READONLY(sptr, status);
     RETURN_IF_NULL_PARAM(telescope, status);
-    memcpy(sptr->telescope, telescope, TELESCOPE_LEN);
-    sptr->writer(sptr->io_context, sptr->telescope, TELESCOPE_LEN, TELESCOPE_KEY);
+    sptr->writer(sptr->io_context, telescope, TELESCOPE_LEN, TELESCOPE_KEY);
     return (*status);
 }
 
@@ -1232,8 +1209,7 @@ int ser_write_date_time_utc(serfile* sptr, const int64_t date_time_utc, int* sta
 	RETURN_IF_STATUS_IS_ERROR(status);
 	RETURN_IF_NULL_SPTR(sptr, status);
 	RETURN_IF_WRITE_ON_READONLY(sptr, status);
-    sptr->date_time_utc = date_time_utc;
-    sptr->writer(sptr->io_context, &sptr->date_time_utc, DATETIMEUTC_LEN, DATETIMEUTC_KEY);
+    sptr->writer(sptr->io_context, &date_time_utc, DATETIMEUTC_LEN, DATETIMEUTC_KEY);
     return (*status);
 }
 
@@ -1439,19 +1415,13 @@ int ser_open_view(serfile** sptr, uint8_t* data, size_t size, int mode, int* sta
     new_serfile->reader = ser_memory_read;
     new_serfile->writer = ser_memory_write;
     new_serfile->access_mode = mode == READWRITE ? READWRITE : READONLY;
-    new_serfile->reader(ser_data, new_serfile->file_id, FILEID_LEN, FILEID_KEY);
-    new_serfile->reader(ser_data, &new_serfile->lu_id, LUID_LEN, LUID_KEY);
     new_serfile->reader(ser_data, &new_serfile->color_id, COLORID_LEN, COLORID_KEY);
     new_serfile->reader(ser_data, &new_serfile->little_endian, LITTLEENDIAN_LEN, LITTLEENDIAN_KEY);
     new_serfile->reader(ser_data, &new_serfile->image_width, IMAGEWIDTH_LEN, IMAGEWIDTH_KEY);
     new_serfile->reader(ser_data, &new_serfile->image_height, IMAGEHEIGHT_LEN, IMAGEHEIGHT_KEY);
     new_serfile->reader(ser_data, &new_serfile->pixel_depth_per_plane, PIXELDEPTHPERPLANE_LEN, PIXELDEPTHPERPLANE_KEY);
     new_serfile->reader(ser_data, &new_serfile->frame_count, FRAMECOUNT_LEN, FRAMECOUNT_KEY);
-    new_serfile->reader(ser_data, new_serfile->observer, OBSERVER_LEN, OBSERVER_KEY);
-    new_serfile->reader(ser_data, new_serfile->instrument, INSTRUMENT_LEN, INSTRUMENT_KEY);
-    new_serfile->reader(ser_data, new_serfile->telescope, TELESCOPE_LEN, TELESCOPE_KEY);
     new_serfile->reader(ser_data, &new_serfile->date_time, DATETIME_LEN, DATETIME_KEY);
-    new_serfile->reader(ser_data, &new_serfile->date_time_utc, DATETIMEUTC_LEN, DATETIMEUTC_KEY);
     new_serfile->has_trailer = new_serfile->date_time <= 0 ? false : true;
     new_serfile->timestamps = NULL;
     new_serfile->timestamp_count = 0;
@@ -1535,19 +1505,13 @@ int ser_open_memory(serfile** sptr, const uint8_t* data, size_t size, int mode, 
     new_serfile->reader = ser_memory_read;
     new_serfile->writer = ser_memory_write;
     new_serfile->access_mode = mode == READWRITE ? READWRITE : READONLY;
-    new_serfile->reader(ser_data, new_serfile->file_id, FILEID_LEN, FILEID_KEY);
-    new_serfile->reader(ser_data, &new_serfile->lu_id, LUID_LEN, LUID_KEY);
     new_serfile->reader(ser_data, &new_serfile->color_id, COLORID_LEN, COLORID_KEY);
     new_serfile->reader(ser_data, &new_serfile->little_endian, LITTLEENDIAN_LEN, LITTLEENDIAN_KEY);
     new_serfile->reader(ser_data, &new_serfile->image_width, IMAGEWIDTH_LEN, IMAGEWIDTH_KEY);
     new_serfile->reader(ser_data, &new_serfile->image_height, IMAGEHEIGHT_LEN, IMAGEHEIGHT_KEY);
     new_serfile->reader(ser_data, &new_serfile->pixel_depth_per_plane, PIXELDEPTHPERPLANE_LEN, PIXELDEPTHPERPLANE_KEY);
     new_serfile->reader(ser_data, &new_serfile->frame_count, FRAMECOUNT_LEN, FRAMECOUNT_KEY);
-    new_serfile->reader(ser_data, new_serfile->observer, OBSERVER_LEN, OBSERVER_KEY);
-    new_serfile->reader(ser_data, new_serfile->instrument, INSTRUMENT_LEN, INSTRUMENT_KEY);
-    new_serfile->reader(ser_data, new_serfile->telescope, TELESCOPE_LEN, TELESCOPE_KEY);
     new_serfile->reader(ser_data, &new_serfile->date_time, DATETIME_LEN, DATETIME_KEY);
-    new_serfile->reader(ser_data, &new_serfile->date_time_utc, DATETIMEUTC_LEN, DATETIMEUTC_KEY);
     new_serfile->has_trailer = new_serfile->date_time <= 0 ? false : true;
     new_serfile->timestamps = NULL;
     new_serfile->timestamp_count = 0;
