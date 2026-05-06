@@ -27,7 +27,7 @@ extern "C" {
 
 #define CSERIO_MAJOR                        4
 #define CSERIO_MINOR                        0
-#define CSERIO_MICRO                        1
+#define CSERIO_MICRO                        2
 
 
 /*------------------------------------------------------------------*/
