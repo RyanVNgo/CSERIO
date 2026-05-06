@@ -1253,13 +1253,9 @@ int ser_get_bytes_per_pixel(serfile* sptr, unsigned long* bytes_per_pixel, int* 
 	RETURN_IF_NULL_SPTR(sptr, status);
     RETURN_IF_NULL_PARAM(bytes_per_pixel, status);
 
-    int number_of_planes = sptr->color_id < 100 ? 1 : 3;
-    int pixel_depth = sptr->pixel_depth_per_plane;
-
-    if (pixel_depth <= 8) {
-        *bytes_per_pixel = number_of_planes; /* 1 byte per pixel */
-    } else {
-        *bytes_per_pixel = number_of_planes * 2; /* 2 bytes per pixel */
+    *bytes_per_pixel = sptr->color_id < 100 ? 1 : 3;
+    if (sptr->pixel_depth_per_plane > 8) {
+        *bytes_per_pixel *= 2;
     }
 
     return (*status);
@@ -1270,16 +1266,12 @@ int ser_get_frame_byte_size(serfile* sptr, unsigned long* byte_size, int* status
 	RETURN_IF_NULL_SPTR(sptr, status);
     RETURN_IF_NULL_PARAM(byte_size, status);
 
-    unsigned long bytes_per_pixel = 0;
-    ser_get_bytes_per_pixel(sptr, &bytes_per_pixel, status);
-    if (*status) { 
-        return (*status);
+    unsigned long bytes_per_pixel = sptr->color_id < 100 ? 1 : 3;
+    if (sptr->pixel_depth_per_plane > 8) {
+        bytes_per_pixel *= 2;
     }
 
-    int32_t width = sptr->image_width;
-    int32_t height = sptr->image_height;
-
-    *byte_size = bytes_per_pixel * width * height;
+    *byte_size = bytes_per_pixel * sptr->image_width * sptr->image_height;
 
     return (*status);
 }
