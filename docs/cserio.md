@@ -255,8 +255,7 @@ fail, close the file, and exit.
 ```C
 /*  @brief  Close SER file
  *
- *  Closes the serfile and frees the structure. Parameter sptr will
- *  be set to NULL.
+ *  Closes the serfile and frees the structure.
  *
  *  @param  sptr      (IO)  - Pointer to a serfile.
  *  @param  status    (IO)  - Error status.
